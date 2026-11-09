@@ -1,0 +1,13 @@
+<div style="background:#F5ECD7;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#3B2314">
+  <div style="max-width:480px;margin:0 auto;background:#FFFAF0;border-radius:20px;padding:32px 28px">
+    <p style="font-family:Georgia,serif;font-size:24px;font-weight:bold;margin:0 0 24px">fitw<span style="color:#C17F3A">_</span>cindy</p>
+    <p style="font-size:17px;margin:0 0 16px">Coucou 💛</p>
+    <p style="font-size:16px;line-height:1.55;margin:0 0 24px">Voici ton code pour ouvrir ton espace coaching&nbsp;:</p>
+    <p style="font-size:34px;letter-spacing:8px;font-weight:bold;text-align:center;background:#F8D3DF;border-radius:14px;padding:16px 8px;margin:0 0 24px">{{ .Token }}</p>
+    <p style="font-size:15px;line-height:1.55;margin:0 0 24px">Tape-le dans l’app, ou touche simplement ce bouton&nbsp;:</p>
+    <p style="text-align:center;margin:0 0 28px">
+      <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email" style="display:inline-block;background:#D6336C;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;padding:14px 28px;border-radius:999px">Ouvrir mon espace</a>
+    </p>
+    <p style="font-size:13px;line-height:1.5;color:#6E5440;margin:0">Ce code est valable 1&nbsp;heure et ne sert qu’une fois. Si tu n’as rien demandé, ignore simplement cet email.</p>
+  </div>
+</div>

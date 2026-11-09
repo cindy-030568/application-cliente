@@ -1,6 +1,6 @@
 # Plan d'architecture — App clientes fitw_cindy
 
-> Document de référence. Version 1 (proposition, en attente de validation).
+> Document de référence. Version 1 — **validée par Cindy le 09/11/2026**.
 
 ## 1. Décisions issues des réponses de Cindy
 
@@ -21,6 +21,7 @@
 | Exclusions | Deux niveaux : catégories (viande, poisson, lactose, gluten, porc, fruits à coque…) + aliments précis. |
 | Portions | Sélecteur « pour N portions ». |
 | Mode inspiration | Oui : parcourir toutes les recettes, puis « Adapter à mon repas ». |
+| Fruits | Quantité ajustée par le moteur pour atteindre les cibles, dans la fourchette min/max saisie. |
 | Recettes de départ | ~50 recettes générées par Claude, chargées via un **fichier d'import**. |
 | Mesures | La cliente modifie ses saisies ; la coach peut saisir à sa place ; vue avant/après des photos ; export CSV (compatible Excel). |
 | Rappels | Message dans l'app + notification push (si l'app est installée et autorisée) + email Brevo. Calés sur la date de début, fréquence par cliente (14 j par défaut). |
@@ -117,7 +118,7 @@ reglages (1 ligne) lien_formation · tolerance_pct (10) · tolerance_g (3) · ho
 
 **Entrées** : la recette (ingrédients, rôles, bornes, pas), les cibles du repas (P, G, L), les réglages de tolérance.
 
-1. **Variables** : la quantité de chaque ingrédient non `fixe`, bornée par [min, max]. Le `fruit` est une variable à fourchette étroite (si min = max, il est fixe).
+1. **Variables** : la quantité de chaque ingrédient non `fixe`, bornée par [min, max]. Le `fruit` est ajusté comme les autres ingrédients pour coller aux cibles, dans sa fourchette [min, max] (si min = max, il est fixe).
 2. **Optimisation** (moindres carrés bornés) : on minimise l'écart relatif sur P, G et L, plus un petit terme qui garde les quantités proches des proportions de la recette d'origine (pour éviter 0 g de pâtes et 400 g de poulet). Tous les ingrédients comptent dans toutes les macros.
 3. **Arrondis** au pas de chaque ingrédient (5 g, 1 œuf…), puis une recherche locale (±1 pas par ingrédient) pour corriger l'écart créé par l'arrondi.
 4. **Recalcul** des macros réelles après arrondi.

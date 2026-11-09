@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+import { IconeDeconnexion } from "@/components/icones";
+import { Logo } from "@/components/ui";
+import { exigerCoach } from "@/lib/auth";
+import { NavigationCoach } from "./navigation";
+
+export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Dashboard" } };
+
+export default async function LayoutCoach({ children }: { children: React.ReactNode }) {
+  const { profil } = await exigerCoach();
+  return (
+    <div className="min-h-dvh md:flex">
+      <aside className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
+        <div className="flex flex-col gap-0.5 md:px-3">
+          <Logo className="text-xl" />
+          <span className="hidden font-main text-[19px] text-caramel md:block">Espace coach</span>
+        </div>
+        <NavigationCoach />
+        <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
+          <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>
+          <form action="/auth/deconnexion" method="post">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 text-[14px] text-texte-2 hover:text-chocolat"
+            >
+              <IconeDeconnexion className="size-4" /> Déconnexion
+            </button>
+          </form>
+        </div>
+      </aside>
+      <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
+        <div className="mx-auto max-w-5xl">{children}</div>
+      </main>
+    </div>
+  );
+}
