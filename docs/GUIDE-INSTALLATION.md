@@ -58,16 +58,18 @@ Dans Supabase → **Project Settings** (roue crantée) :
 
 1. Va sur **vercel.com** → **Sign Up** → **Continue with GitHub** → plan **Hobby** (gratuit, suffisant pour les tests).
 2. **Add New… → Project** → choisis le dépôt **application-cliente** → **Import**.
-3. Ouvre **Environment Variables** et ajoute ces 4 lignes :
+3. Déplie **Environment Variables**. Pour chaque ligne du tableau : écris le nom dans **Key**, la valeur dans **Value**, puis clique **+ Add More** pour passer à la suivante. Laisse **Environments** sur « Production and Preview ».
 
-   | Name | Value |
+   | Key | Value |
    |---|---|
    | `NEXT_PUBLIC_SUPABASE_URL` | la Project URL |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | la Publishable key |
-   | `SUPABASE_SECRET_KEY` | la Secret key |
-   | `NEXT_PUBLIC_SITE_URL` | laisse `https://example.com` pour l'instant |
+   | `SUPABASE_SECRET_KEY` | la Secret key → active aussi l'interrupteur 🔒 (*Sensitive*) à droite du champ |
+   | `NEXT_PUBLIC_SITE_URL` | `https://example.com` pour l'instant |
 
-4. Clique **Deploy** et patiente 2 minutes. Vercel t'affiche l'adresse de ton app, du type `https://application-cliente-xxxx.vercel.app`.
+   Vérifie qu'aucune valeur ne commence ou ne finit par un espace.
+
+4. Clique **Create Project** et patiente 1 à 2 minutes. Vercel t'affiche l'adresse de ton app, du type `https://application-cliente-xxxx.vercel.app`.
 5. Corrige l'adresse : **Settings → Environment Variables** → modifie `NEXT_PUBLIC_SITE_URL` avec cette adresse (sans `/` à la fin), puis **Deployments** → les 3 petits points du dernier déploiement → **Redeploy**.
 6. Région des serveurs : **Settings → Functions → Function Region** → **Paris, France (cdg1)** → Save.
 
