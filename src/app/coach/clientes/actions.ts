@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { lireSession } from "@/lib/auth";
+import { SESSION_PERDUE, UUID, sessionCoach, verifierCliente } from "./verification";
 import { SITE_URL } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createEmailClient } from "@/lib/supabase/server";
@@ -10,16 +10,6 @@ import type { StatutCliente } from "@/lib/types";
 
 export type EtatAction = { erreur?: string; succes?: string; lien?: string };
 
-const SESSION_PERDUE =
-  "Action annulée : ce navigateur n’est plus connecté à ton espace coach (une connexion cliente l’a sans doute remplacé). Recharge la page et reconnecte-toi avec ton email. Rien n’a été modifié.";
-
-/** Session coach, ou null (au lieu de rediriger : on affiche un message clair). */
-async function sessionCoach() {
-  const session = await lireSession();
-  return session && session.profil.role === "coach" ? session : null;
-}
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -54,20 +44,6 @@ function lireInfos(formData: FormData) {
     profil: { prenom, nom, email },
     fiche: { date_debut, date_fin, frequence_bilan_jours: frequence, acces_formation, masquer_graph_poids },
   };
-}
-
-/** Vérifie la session coach et que l'identifiant désigne bien une cliente (jamais le compte coach). */
-async function verifierCliente(id: string) {
-  const session = await sessionCoach();
-  if (!session) return { erreur: SESSION_PERDUE } as const;
-  if (!UUID.test(id)) return { erreur: "Cliente introuvable." } as const;
-  const { data } = await session.supabase
-    .from("clientes")
-    .select("id, profils!inner(email, prenom)")
-    .eq("id", id)
-    .maybeSingle<{ id: string; profils: { email: string; prenom: string } }>();
-  if (!data) return { erreur: "Cliente introuvable." } as const;
-  return { ...session, email: data.profils.email, prenom: data.profils.prenom, erreur: undefined };
 }
 
 async function envoyerEmail(email: string) {
@@ -231,8 +207,16 @@ export async function supprimerCliente(
   if (saisie.toLowerCase() !== (prenom || "supprimer").toLowerCase()) {
     return { erreur: `Tape « ${prenom || "supprimer"} » pour confirmer.` };
   }
-  // Supprime le compte : profil, fiche, notes et consentements partent en cascade.
-  const { error } = await createAdminClient().auth.admin.deleteUser(id);
+  const admin = createAdminClient();
+  // 1. Fichiers privés de la cliente (plans PDF…)
+  for (const dossier of ["nutrition", "sport"]) {
+    const { data: fichiers } = await admin.storage.from("plans").list(`${id}/${dossier}`, { limit: 1000 });
+    if (fichiers?.length) {
+      await admin.storage.from("plans").remove(fichiers.map((f) => `${id}/${dossier}/${f.name}`));
+    }
+  }
+  // 2. Le compte : profil, fiche, plans, notes et consentements partent en cascade.
+  const { error } = await admin.auth.admin.deleteUser(id);
   if (error) return { erreur: "La suppression a échoué. Réessaie dans un instant." };
   revalidatePath("/coach", "layout");
   redirect("/coach/clientes?supprimee=1");

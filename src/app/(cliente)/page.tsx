@@ -18,7 +18,13 @@ import { aujourdhuiParis, formaterDate, joursEntre, prochainBilan } from "@/lib/
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
-  const { profil, fiche, reglages } = await exigerCliente();
+  const { supabase, profil, fiche, reglages } = await exigerCliente();
+  const { data: nonVus } = await supabase
+    .from("plans")
+    .select("type")
+    .eq("actif", true)
+    .is("vu_le", null);
+  const nouveau = (type: string) => (nonVus ?? []).some((p) => p.type === type);
   const auj = aujourdhuiParis();
   const bilan =
     fiche.statut === "active" ? prochainBilan(fiche.date_debut, fiche.frequence_bilan_jours, auj) : null;
@@ -63,8 +69,18 @@ export default async function PageAccueil() {
         )}
 
         <div className="grid grid-cols-2 gap-3">
-          <Tuile href="/nutrition" icone={<IconeNutrition className="size-6" />} titre="Mon plan alimentaire" />
-          <Tuile href="/sport" icone={<IconeSport className="size-6" />} titre="Mon programme sportif" />
+          <Tuile
+            href="/nutrition"
+            icone={<IconeNutrition className="size-6" />}
+            titre="Mon plan alimentaire"
+            nouveau={nouveau("nutrition")}
+          />
+          <Tuile
+            href="/sport"
+            icone={<IconeSport className="size-6" />}
+            titre="Mon programme sportif"
+            nouveau={nouveau("sport")}
+          />
         </div>
 
         <Link
@@ -139,7 +155,17 @@ export default async function PageAccueil() {
   );
 }
 
-function Tuile({ href, icone, titre }: { href: string; icone: ReactNode; titre: string }) {
+function Tuile({
+  href,
+  icone,
+  titre,
+  nouveau,
+}: {
+  href: string;
+  icone: ReactNode;
+  titre: string;
+  nouveau?: boolean;
+}) {
   return (
     <Link
       href={href}
@@ -148,8 +174,15 @@ function Tuile({ href, icone, titre }: { href: string; icone: ReactNode; titre: 
         "transition-transform active:scale-[0.98]",
       )}
     >
-      <span className="flex size-11 items-center justify-center rounded-full bg-accent-pale text-chocolat">
-        {icone}
+      <span className="flex items-start justify-between gap-2">
+        <span className="flex size-11 items-center justify-center rounded-full bg-accent-pale text-chocolat">
+          {icone}
+        </span>
+        {nouveau && (
+          <span className="rounded-full bg-accent px-2.5 py-1 text-[11.5px] font-medium text-white">
+            Nouveau
+          </span>
+        )}
       </span>
       <span className="font-titre text-[17px] font-bold leading-snug">{titre}</span>
     </Link>

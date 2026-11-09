@@ -11,13 +11,14 @@ import { BadgeStatut } from "../../badge-statut";
 import { modifierCliente } from "../actions";
 import { FormulaireInfos } from "../formulaire-infos";
 import { BlocConnexion, BlocNotes, BlocStatut, BlocSuppression } from "./blocs";
+import { BlocPlan, type PlanAffiche } from "./bloc-plans";
+import { COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const A_VENIR = [
-  { titre: "Plans alimentaire et sportif", phase: 2 },
   { titre: "Mesures et photos", phase: 3 },
   { titre: "Repas et cibles", phase: 5 },
   { titre: "Aliments exclus", phase: 5 },
@@ -36,7 +37,7 @@ export default async function PageFicheCliente({
   if (!UUID.test(id)) notFound();
 
   const { supabase } = await exigerCoach();
-  const [{ data: c }, { data: notes }] = await Promise.all([
+  const [{ data: c }, { data: notes }, { data: plans }] = await Promise.all([
     supabase
       .from("clientes")
       .select(
@@ -49,11 +50,34 @@ export default async function PageFicheCliente({
       .select("id, contenu, created_at")
       .eq("cliente_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("plans")
+      .select(COLONNES_PLAN)
+      .eq("cliente_id", id)
+      .order("created_at", { ascending: false })
+      .returns<Plan[]>(),
   ]);
   if (!c) notFound();
 
   const bilan =
     c.statut === "active" ? prochainBilan(c.date_debut, c.frequence_bilan_jours, aujourdhuiParis()) : null;
+  const dateCourte = new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Europe/Paris",
+  });
+  const plansAffiches = (type: Plan["type"]): PlanAffiche[] =>
+    (plans ?? [])
+      .filter((p) => p.type === type)
+      .map((p) => ({
+        id: p.id,
+        titre: p.titre,
+        source: p.source,
+        actif: p.actif,
+        date: dateCourte.format(new Date(p.created_at)),
+        vu: p.vu_le ? dateCourte.format(new Date(p.vu_le)) : null,
+      }));
   const dateNote = new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "long",
     timeStyle: "short",
@@ -97,6 +121,11 @@ export default async function PageFicheCliente({
               action={modifierCliente.bind(null, c.id)}
               valeurs={{ ...c.profils, ...c }}
             />
+          </Section>
+          <Section titre="Plans" sousTitre="PDF dans l’app, lien Drive ou Nutrium. Les anciennes versions restent consultables.">
+            <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />
+            <hr className="border-ligne" />
+            <BlocPlan clienteId={c.id} type="sport" plans={plansAffiches("sport")} />
           </Section>
           <Section titre="Notes privées" sousTitre="Jamais visibles par la cliente.">
             <BlocNotes

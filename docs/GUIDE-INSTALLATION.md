@@ -108,3 +108,41 @@ Supabase → **Authentication → URL Configuration** :
 - **Android (Chrome)** : menu ⋮ → **Ajouter à l'écran d'accueil**.
 
 (L'icône et l'installation complète arrivent en phase 8.)
+
+---
+
+# Phase 2 — Plans et ressources
+
+## Mettre à jour la base de données (5 minutes, une seule fois)
+
+1. Supabase → **SQL Editor** → **New query**.
+2. Ouvre le fichier [`supabase/migrations/0002_plans_ressources.sql`](../supabase/migrations/0002_plans_ressources.sql) sur GitHub → icône **Copy raw file** → colle dans l'éditeur → **Run**.
+   Tu dois voir « Success. No rows returned ».
+3. Vérifie : menu **Storage** → un espace **plans** existe, marqué *Private*. C'est là que seront rangés les PDF, invisibles sans autorisation.
+
+L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready**).
+
+## Tester la phase 2
+
+**Côté coach (ton navigateur habituel)**
+
+1. Ouvre la fiche de ta cliente test → section **Plans**.
+2. **Plan alimentaire** → **Ajouter** → « PDF dans l'app » → choisis ton PDF → **Publier**.
+3. **Programme sportif** → **Ajouter** → « Lien Google Drive » → colle un lien Drive → **Publier**.
+4. Refais une **Nouvelle version** du plan alimentaire (un autre PDF, ou le lien Nutrium) : l'ancienne passe dans « Versions précédentes ».
+5. Clique **Voir** sur un plan : il s'ouvre dans un nouvel onglet.
+6. Menu **Ressources** → **Nouvelle ressource** → titre, lien Drive, catégorie → « Toutes les clientes » → **Ajouter**. Puis une deuxième en « Certaines clientes » en cochant ta cliente test.
+
+**Côté cliente (fenêtre privée ou téléphone)**
+
+7. Accueil : le badge **Nouveau** apparaît sur « Mon plan alimentaire ».
+8. Onglet **Nutrition** : le PDF s'affiche page par page. Teste **Télécharger le PDF** et **Ouvrir en plein écran pour zoomer**.
+   Reviens à l'accueil : le badge « Nouveau » a disparu. Côté coach, la fiche affiche « Vu le … ».
+9. En bas de **Nutrition** : « Mes versions précédentes » → ouvre l'ancienne version.
+10. Onglet **Sport** : le bouton « Ouvrir mon plan » mène au lien Drive.
+11. Accueil → **Ressources** : les ressources apparaissent rangées par catégorie.
+12. Côté coach, décoche ta cliente test d'une ressource « Certaines clientes » → côté cliente, recharge : elle disparaît.
+
+> **Liens Drive** : pour qu'une cliente puisse ouvrir un fichier ou un dossier Drive, il doit être partagé en
+> « Tous les utilisateurs disposant du lien ». Pour un plan personnel, préfère le **PDF dans l'app** :
+> il est privé et ne s'ouvre qu'avec un lien temporaire de 5 minutes.

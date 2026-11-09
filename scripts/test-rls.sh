@@ -15,5 +15,5 @@ $RUN "$PGBIN/pg_ctl" -D "$DIR/data" -o "-p $PORT -k $DIR -c listen_addresses=''"
 PSQL=("$PGBIN/psql" -h "$DIR" -p "$PORT" -U postgres -d postgres -v ON_ERROR_STOP=1 -q)
 "${PSQL[@]}" -f "$ROOT/supabase/tests/00_simulation_supabase.sql"
 for f in "$ROOT"/supabase/migrations/*.sql; do echo "→ migration $(basename "$f")"; "${PSQL[@]}" -f "$f"; done
-for f in "$ROOT"/supabase/tests/[0-9]*_rls_*.sql; do echo "→ tests $(basename "$f")"; "${PSQL[@]}" -f "$f" 2>&1 | sed -n 's/.*NOTICE:  //p'; done
+for f in "$ROOT"/supabase/tests/[0-9]*_rls_*.sql; do echo "→ tests $(basename "$f")"; "${PSQL[@]}" -f "$f" 2>&1 | sed -n -e 's/.*NOTICE:  //p' -e '/ERROR/p'; done
 echo "✅ Tous les tests de sécurité sont passés."
