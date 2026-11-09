@@ -52,7 +52,8 @@ export function BlocConnexion({ id, prenom }: { id: string; prenom: string }) {
         <div className="flex flex-col gap-3 rounded-xl bg-creme/70 p-4">
           <p className="text-[13.5px] text-texte-2">
             Lien personnel, <strong>valable 1 heure et utilisable une seule fois</strong>. Ne
-            l’envoie qu’à {prenom}.
+            l’envoie qu’à {prenom}. Pour tester toi-même, ouvre-le dans une fenêtre de navigation
+            privée, sinon il remplace ta connexion coach.
           </p>
           <code className="break-all rounded-lg bg-white p-3 text-[12px]">{etat.lien}</code>
           <div className="flex flex-wrap gap-3">
@@ -120,6 +121,7 @@ export function BlocNotes({
   notes: { id: string; contenu: string; date: string }[];
 }) {
   const [etat, envoyer] = useActionState(ajouterNote.bind(null, id), {});
+  const [erreurSuppression, setErreurSuppression] = useState<string>();
   const [, demarrer] = useTransition();
   return (
     <div className="flex flex-col gap-4">
@@ -130,6 +132,7 @@ export function BlocNotes({
           <BoutonEnvoi variante="sombre">Ajouter la note</BoutonEnvoi>
         </div>
       </form>
+      {erreurSuppression && <Message ton="erreur">{erreurSuppression}</Message>}
       {notes.length > 0 && (
         <ul className="flex flex-col gap-3">
           {notes.map((n) => (
@@ -140,7 +143,8 @@ export function BlocNotes({
                   type="button"
                   className="underline underline-offset-2 hover:text-erreur"
                   onClick={() => {
-                    if (confirm("Supprimer cette note ?")) demarrer(() => supprimerNote(id, n.id));
+                    if (confirm("Supprimer cette note ?"))
+                      demarrer(async () => setErreurSuppression((await supprimerNote(id, n.id)).erreur));
                   }}
                 >
                   Supprimer

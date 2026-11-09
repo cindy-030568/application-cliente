@@ -89,10 +89,11 @@ Supabase → **Authentication → URL Configuration** :
 2. **Réglages** : colle le lien de ta formation Notion, ton lien WhatsApp (`https://wa.me/33…`) et le lien de ta politique de confidentialité → Enregistrer.
 3. **Clientes → Nouvelle cliente** : crée une cliente test avec **une autre de tes adresses email** (décoche « envoyer l'email », voir l'encadré ci-dessous).
 4. Dans sa fiche, clique **Créer un lien à partager** → **Copier le lien**.
-5. Ouvre une **fenêtre de navigation privée** (ou ton téléphone), colle le lien → **Me connecter**.
+5. Ouvre une **fenêtre de navigation privée** (Chrome : `Ctrl+Maj+N` · Safari : `Cmd+Maj+N`) ou ton téléphone, colle le lien → **Me connecter**.
+   ⚠️ Pas dans ton navigateur habituel : une seule connexion par navigateur, le lien remplacerait ta connexion coach.
    → Tu vois l'écran de consentement, puis l'**accueil cliente** avec son prénom et les 5 onglets.
 6. Vérifie la sécurité : dans cette fenêtre cliente, tape l'adresse `…/coach` → tu es renvoyée sur l'accueil cliente.
-7. Retourne côté coach : décoche/coche **Accès à la formation** et regarde la carte changer côté cliente (recharge la page).
+7. Dans ta fenêtre coach (navigateur habituel) : décoche **Accès à la formation** → **Enregistrer** (message vert « Modifications enregistrées »). Dans la fenêtre privée de la cliente, recharge la page : la carte Formation est verrouillée.
 8. Passe la cliente test en **Accès fermé** → dans la fenêtre cliente, recharge : l'accès est coupé.
 9. Teste **Supprimer définitivement** sur la cliente test.
 

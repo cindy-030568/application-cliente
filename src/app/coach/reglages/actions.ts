@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { exigerCoach } from "@/lib/auth";
+import { lireSession } from "@/lib/auth";
 
 export type EtatReglages = { erreur?: string; succes?: string };
 
@@ -20,7 +20,14 @@ export async function enregistrerReglages(
   _e: EtatReglages,
   formData: FormData,
 ): Promise<EtatReglages> {
-  const { supabase } = await exigerCoach();
+  const session = await lireSession();
+  if (!session || session.profil.role !== "coach") {
+    return {
+      erreur:
+        "Action annulée : ce navigateur n’est plus connecté à ton espace coach. Recharge la page et reconnecte-toi. Rien n’a été modifié.",
+    };
+  }
+  const { supabase } = session;
   const lien_formation = lienOuNull(formData.get("lien_formation"));
   const lien_politique = lienOuNull(formData.get("lien_politique"));
   const lien_contact = lienOuNull(formData.get("lien_contact"));

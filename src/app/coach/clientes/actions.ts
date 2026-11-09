@@ -2,13 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { exigerCoach } from "@/lib/auth";
+import { lireSession } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createEmailClient } from "@/lib/supabase/server";
 import type { StatutCliente } from "@/lib/types";
 
 export type EtatAction = { erreur?: string; succes?: string; lien?: string };
+
+const SESSION_PERDUE =
+  "Action annulée : ce navigateur n’est plus connecté à ton espace coach (une connexion cliente l’a sans doute remplacé). Recharge la page et reconnecte-toi avec ton email. Rien n’a été modifié.";
+
+/** Session coach, ou null (au lieu de rediriger : on affiche un message clair). */
+async function sessionCoach() {
+  const session = await lireSession();
+  return session && session.profil.role === "coach" ? session : null;
+}
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,17 +56,18 @@ function lireInfos(formData: FormData) {
   };
 }
 
-/** Vérifie que l'identifiant désigne bien une cliente (jamais le compte coach). */
+/** Vérifie la session coach et que l'identifiant désigne bien une cliente (jamais le compte coach). */
 async function verifierCliente(id: string) {
-  const session = await exigerCoach();
-  if (!UUID.test(id)) throw new Error("Identifiant invalide");
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE } as const;
+  if (!UUID.test(id)) return { erreur: "Cliente introuvable." } as const;
   const { data } = await session.supabase
     .from("clientes")
     .select("id, profils!inner(email, prenom)")
     .eq("id", id)
     .maybeSingle<{ id: string; profils: { email: string; prenom: string } }>();
-  if (!data) throw new Error("Cliente introuvable");
-  return { ...session, email: data.profils.email, prenom: data.profils.prenom };
+  if (!data) return { erreur: "Cliente introuvable." } as const;
+  return { ...session, email: data.profils.email, prenom: data.profils.prenom, erreur: undefined };
 }
 
 async function envoyerEmail(email: string) {
@@ -68,7 +78,9 @@ async function envoyerEmail(email: string) {
 }
 
 export async function creerCliente(_e: EtatAction, formData: FormData): Promise<EtatAction> {
-  const { supabase } = await exigerCoach();
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE };
+  const { supabase } = session;
   const { erreur, profil, fiche } = lireInfos(formData);
   if (erreur) return { erreur };
 
@@ -108,7 +120,9 @@ export async function modifierCliente(
   _e: EtatAction,
   formData: FormData,
 ): Promise<EtatAction> {
-  const { supabase, email: emailActuel } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { supabase, email: emailActuel } = v;
   const { erreur, profil, fiche } = lireInfos(formData);
   if (erreur) return { erreur };
 
@@ -129,7 +143,9 @@ export async function modifierCliente(
 }
 
 export async function changerStatut(id: string, statut: StatutCliente): Promise<EtatAction> {
-  const { supabase } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { supabase } = v;
   if (!["active", "terminee", "fermee"].includes(statut)) return { erreur: "Statut inconnu." };
 
   const { error } = await supabase
@@ -151,7 +167,9 @@ export async function changerStatut(id: string, statut: StatutCliente): Promise<
 }
 
 export async function envoyerEmailConnexion(id: string): Promise<EtatAction> {
-  const { email } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { email } = v;
   const { error } = await envoyerEmail(email);
   if (error) {
     return {
@@ -165,7 +183,9 @@ export async function envoyerEmailConnexion(id: string): Promise<EtatAction> {
 }
 
 export async function genererLienConnexion(id: string): Promise<EtatAction> {
-  const { email } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { email } = v;
   const { data, error } = await createAdminClient().auth.admin.generateLink({
     type: "magiclink",
     email,
@@ -178,7 +198,9 @@ export async function genererLienConnexion(id: string): Promise<EtatAction> {
 }
 
 export async function ajouterNote(id: string, _e: EtatAction, formData: FormData): Promise<EtatAction> {
-  const { supabase } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { supabase } = v;
   const contenu = String(formData.get("contenu") ?? "").trim().slice(0, 10000);
   if (!contenu) return { erreur: "La note est vide." };
   const { error } = await supabase.from("notes_coach").insert({ cliente_id: id, contenu });
@@ -187,11 +209,14 @@ export async function ajouterNote(id: string, _e: EtatAction, formData: FormData
   return { succes: "Note ajoutée." };
 }
 
-export async function supprimerNote(id: string, noteId: string) {
-  const { supabase } = await verifierCliente(id);
-  if (!UUID.test(noteId)) return;
-  await supabase.from("notes_coach").delete().eq("id", noteId).eq("cliente_id", id);
+export async function supprimerNote(id: string, noteId: string): Promise<EtatAction> {
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  if (!UUID.test(noteId)) return { erreur: "Note introuvable." };
+  const { error } = await v.supabase.from("notes_coach").delete().eq("id", noteId).eq("cliente_id", id);
+  if (error) return { erreur: "La note n’a pas pu être supprimée." };
   revalidatePath(`/coach/clientes/${id}`);
+  return {};
 }
 
 export async function supprimerCliente(
@@ -199,7 +224,9 @@ export async function supprimerCliente(
   _e: EtatAction,
   formData: FormData,
 ): Promise<EtatAction> {
-  const { prenom } = await verifierCliente(id);
+  const v = await verifierCliente(id);
+  if (v.erreur) return { erreur: v.erreur };
+  const { prenom } = v;
   const saisie = String(formData.get("confirmation") ?? "").trim();
   if (saisie.toLowerCase() !== (prenom || "supprimer").toLowerCase()) {
     return { erreur: `Tape « ${prenom || "supprimer"} » pour confirmer.` };

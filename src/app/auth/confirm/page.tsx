@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
-import { Logo, Message } from "@/components/ui";
+import { LienBouton, Logo, Message } from "@/components/ui";
+import { lireSession } from "@/lib/auth";
 import { confirmerConnexion } from "./actions";
 
 export const metadata: Metadata = { title: "Connexion" };
@@ -18,6 +19,8 @@ export default async function PageConfirmation({
   searchParams: Promise<{ token_hash?: string; type?: string; erreur?: string }>;
 }) {
   const { token_hash, type, erreur } = await searchParams;
+  const session = await lireSession();
+  const coachConnectee = session?.profil.role === "coach";
   const valide =
     typeof token_hash === "string" &&
     token_hash.length > 10 &&
@@ -32,10 +35,39 @@ export default async function PageConfirmation({
             <input type="hidden" name="token_hash" value={token_hash} />
             <input type="hidden" name="type" value={type} />
             <h1 className="font-titre text-[30px] font-bold leading-tight">Bienvenue 💛</h1>
-            <p className="text-texte-2">Touche le bouton pour ouvrir ton espace.</p>
-            <BoutonEnvoi pleineLargeur enCours="Connexion…">
-              Me connecter
-            </BoutonEnvoi>
+            {coachConnectee ? (
+              <>
+                <Message ton="erreur">
+                  Attention {session?.profil.prenom} : tu es connectée à ton espace coach dans ce
+                  navigateur. Si tu continues, il sera remplacé par l’espace de la cliente (tu
+                  devras te reconnecter ensuite).
+                </Message>
+                <p className="text-[14px] text-texte-2">
+                  Pour tester l’espace d’une cliente, colle plutôt ce lien dans une{" "}
+                  <strong className="font-medium text-chocolat">fenêtre de navigation privée</strong>{" "}
+                  ou sur ton téléphone.
+                </p>
+                <LienBouton href="/coach" pleineLargeur>
+                  Revenir à mon espace coach
+                </LienBouton>
+                <BoutonEnvoi variante="contour" pleineLargeur enCours="Connexion…">
+                  Continuer quand même
+                </BoutonEnvoi>
+              </>
+            ) : (
+              <>
+                {session && (
+                  <Message ton="info">
+                    Tu es déjà connectée en tant que {session.profil.prenom || session.profil.email}.
+                    Continuer ouvrira l’espace lié à ce lien.
+                  </Message>
+                )}
+                <p className="text-texte-2">Touche le bouton pour ouvrir ton espace.</p>
+                <BoutonEnvoi pleineLargeur enCours="Connexion…">
+                  Me connecter
+                </BoutonEnvoi>
+              </>
+            )}
           </form>
         ) : (
           <div className="flex flex-col gap-5">
