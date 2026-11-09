@@ -64,14 +64,14 @@ Dans Supabase → **Project Settings** (roue crantée) :
    |---|---|
    | `NEXT_PUBLIC_SUPABASE_URL` | la Project URL |
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | la Publishable key |
-   | `SUPABASE_SECRET_KEY` | la Secret key → active aussi l'interrupteur 🔒 (*Sensitive*) à droite du champ |
-   | `NEXT_PUBLIC_SITE_URL` | `https://example.com` pour l'instant |
+   | `SUPABASE_SECRET_KEY` | la Secret key → type **Secret** (ou interrupteur 🔒 *Sensitive*) |
+
+   Les deux variables qui commencent par `NEXT_PUBLIC_` doivent être en type **Config** (pas Secret). L'adresse de l'app est détectée automatiquement : pas besoin d'autre variable.
 
    Vérifie qu'aucune valeur ne commence ou ne finit par un espace.
 
 4. Clique **Create Project** et patiente 1 à 2 minutes. Vercel t'affiche l'adresse de ton app, du type `https://application-cliente-xxxx.vercel.app`.
-5. Corrige l'adresse : **Settings → Environment Variables** → modifie `NEXT_PUBLIC_SITE_URL` avec cette adresse (sans `/` à la fin), puis **Deployments** → les 3 petits points du dernier déploiement → **Redeploy**.
-6. Région des serveurs : **Settings → Functions → Function Region** → **Paris, France (cdg1)** → Save.
+5. Région des serveurs : **Settings → Functions → Function Region** → **Paris, France (cdg1)** → Save.
 
 ## Étape 7 — Relier Supabase à l'adresse de l'app
 

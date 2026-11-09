@@ -12,5 +12,15 @@ export const SUPABASE_PUBLISHABLE_KEY = () =>
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
-export const SITE_URL = () =>
-  (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+/**
+ * Adresse publique de l'app, utilisée dans les liens de connexion.
+ * Ordre : variable SITE_URL (ou NEXT_PUBLIC_SITE_URL) si renseignée,
+ * sinon l'adresse de production fournie automatiquement par Vercel,
+ * sinon le serveur local.
+ */
+export const SITE_URL = () => {
+  const explicite = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const url = explicite || (vercel ? `https://${vercel}` : "http://localhost:3000");
+  return url.trim().replace(/\/+$/, "");
+};
