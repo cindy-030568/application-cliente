@@ -1,6 +1,6 @@
 import "server-only";
 import { exigerCoach } from "@/lib/auth";
-import type { FicheCliente, Profil } from "@/lib/types";
+import { COLONNES_FICHE, type FicheCliente, type Profil } from "@/lib/types";
 
 export type ClienteListe = FicheCliente & { profils: Pick<Profil, "prenom" | "nom" | "email"> };
 
@@ -9,7 +9,7 @@ export async function listerClientes() {
   const { data, error } = await supabase
     .from("clientes")
     .select(
-      "id, statut, date_debut, date_fin, acces_formation, masquer_graph_poids, frequence_bilan_jours, ferme_le, created_at, profils!inner(prenom, nom, email)",
+      `${COLONNES_FICHE}, profils!inner(prenom, nom, email)`,
     )
     .order("created_at", { ascending: false })
     .returns<ClienteListe[]>();

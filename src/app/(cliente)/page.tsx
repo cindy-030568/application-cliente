@@ -14,7 +14,7 @@ import {
 } from "@/components/icones";
 import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis, formaterDate, joursEntre, prochainBilan } from "@/lib/bilan";
+import { aujourdhuiParis, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -26,9 +26,27 @@ export default async function PageAccueil() {
     .is("vu_le", null);
   const nouveau = (type: string) => (nonVus ?? []).some((p) => p.type === type);
   const auj = aujourdhuiParis();
-  const bilan =
-    fiche.statut === "active" ? prochainBilan(fiche.date_debut, fiche.frequence_bilan_jours, auj) : null;
-  const joursAvantBilan = bilan ? joursEntre(auj, bilan) : null;
+  const ouverte =
+    fiche.statut === "active"
+      ? echeanceOuverte(fiche.date_debut, fiche.frequence_bilan_jours, reglages.fenetre_bilan_jours, auj)
+      : null;
+  const [{ data: dejaEnvoye }, { data: retoursNonLus }] = await Promise.all([
+    ouverte
+      ? supabase.from("bilans").select("id").eq("echeance", ouverte.echeance).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase.from("retours_bilan").select("bilan_id").is("lu_le", null).limit(1),
+  ]);
+  const bilanAFaire = ouverte && !dejaEnvoye ? ouverte : null;
+  const retourNonLu = retoursNonLus?.[0]?.bilan_id as string | undefined;
+  const rdv = rdvAVenir(fiche.prochain_rdv);
+  const formatRdv = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Paris",
+  });
   const formationOuverte = fiche.acces_formation && Boolean(reglages.lien_formation);
 
   return (
@@ -47,25 +65,61 @@ export default async function PageAccueil() {
       />
 
       <div className="flex flex-col gap-4 px-5 pt-4">
-        {joursAvantBilan !== null && joursAvantBilan <= 3 && (
+        {retourNonLu && (
           <Link
-            href="/suivi"
-            className="flex items-center gap-4 rounded-carte bg-accent-pale p-4 apparition"
+            href={`/suivi/${retourNonLu}`}
+            className="flex items-center gap-4 rounded-carte bg-chocolat p-4 text-creme apparition"
           >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-carte-sombre font-main text-xl text-caramel-clair">
+              C
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">Cindy a répondu à ton bilan</span>
+              <span className="text-[14px] text-texte-clair">Touche pour lire son message 💛</span>
+            </span>
+            <IconeFleche className="size-5 shrink-0" />
+          </Link>
+        )}
+
+        {bilanAFaire && (
+          <Link href="/suivi/bilan" className="flex items-center gap-4 rounded-carte bg-accent-pale p-4 apparition">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-blanc-casse">
               <IconeCalendrier className="size-5" />
             </span>
-            <span className="flex flex-col">
+            <span className="flex flex-1 flex-col">
               <span className="font-medium">
-                {joursAvantBilan === 0 ? "C’est le jour de ton bilan !" : "Ton bilan approche"}
+                {bilanAFaire.statut === "ouverte" ? "Ton bilan est ouvert" : "Ton bilan t’attend"}
               </span>
               <span className="text-[14px] text-texte-2">
-                {joursAvantBilan === 0
-                  ? "Pense à noter tes mesures aujourd’hui."
-                  : `Le ${formaterDate(bilan, { year: undefined })} : pense à noter tes mesures.`}
+                {bilanAFaire.statut === "ouverte"
+                  ? `Pour le ${formaterDate(bilanAFaire.echeance, { year: undefined })} · quelques minutes suffisent.`
+                  : "Il est encore temps de l’envoyer."}
               </span>
             </span>
+            <IconeFleche className="size-5 shrink-0" />
           </Link>
+        )}
+
+        {rdv && (
+          <div className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce apparition">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sable">
+              <IconeCalendrier className="size-5" />
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="text-[13px] text-texte-2">Prochain rendez-vous</span>
+              <span className="font-medium first-letter:uppercase">{formatRdv.format(new Date(rdv))}</span>
+            </span>
+            {fiche.lien_rdv && (
+              <a
+                href={fiche.lien_rdv}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 rounded-full bg-chocolat px-4 py-2 text-[14px] font-medium text-creme"
+              >
+                Rejoindre
+              </a>
+            )}
+          </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">

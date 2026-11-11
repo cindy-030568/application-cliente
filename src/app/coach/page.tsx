@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { IconePlus } from "@/components/icones";
-import { Carte, LienBouton, Surtitre } from "@/components/ui";
+import { Carte, Etiquette, LienBouton, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, formaterDate, joursEntre, prochainBilan } from "@/lib/bilan";
-import { listerClientes } from "./donnees";
+import { aujourdhuiParis, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
+import { chargerFile } from "./bilans/donnees";
 
 export default async function TableauDeBord() {
   const { profil } = await exigerCoach();
-  const clientes = await listerClientes();
+  const { clientes, aTraiter, alertes } = await chargerFile();
   const auj = aujourdhuiParis();
 
   const actives = clientes.filter((c) => c.statut === "active");
@@ -16,6 +16,20 @@ export default async function TableauDeBord() {
     .filter((b): b is { c: (typeof actives)[number]; date: string } => b.date !== null)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 8);
+
+  // Une ligne par cliente ; « 2 bilans manqués » remplace « bilan manquant ».
+  const parCliente = clientes
+    .map((cliente) => {
+      const toutes = alertes.filter((a) => a.cliente.id === cliente.id).map((a) => a.alerte);
+      const manquant = toutes.find((a) => a.type === "bilan_manquant");
+      const deux = toutes.some((a) => a.type === "decrochage_bilans");
+      return {
+        cliente,
+        liste: deux ? toutes.filter((a) => a.type !== "bilan_manquant") : toutes,
+        retard: manquant?.type === "bilan_manquant" ? manquant.retard : null,
+      };
+    })
+    .filter((x) => x.liste.length > 0);
 
   return (
     <div className="flex flex-col gap-8">
@@ -67,16 +81,92 @@ export default async function TableauDeBord() {
             </ul>
           )}
         </Carte>
-        <Carte className="flex flex-col gap-3 border border-dashed border-caramel-clair bg-blanc-casse/60 shadow-none">
-          <h2 className="font-titre text-xl font-bold">Dernières mesures</h2>
-          <p className="text-[14px] text-texte-2">
-            Les dernières saisies de tes clientes s’afficheront ici avec le suivi des mesures
-            (phase 3).
-          </p>
+        <Carte className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-titre text-xl font-bold">Bilans à traiter</h2>
+            {aTraiter.length > 0 && <Etiquette>{aTraiter.length}</Etiquette>}
+          </div>
+          {aTraiter.length === 0 ? (
+            <p className="text-[14px] text-texte-2">Tout est traité. 💛</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-ligne">
+              {aTraiter.slice(0, 6).map((b) => (
+                <li key={b.id}>
+                  <Link href={`/coach/bilans/${b.id}`} className="flex items-center justify-between gap-3 py-3 hover:text-accent">
+                    <span className="font-medium">{b.nom}</span>
+                    <span className="text-[14px] text-texte-2">{formaterDate(b.date_mesure, { year: undefined })}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link href="/coach/bilans" className="text-[14px] underline underline-offset-4">
+            Ouvrir la file des bilans
+          </Link>
         </Carte>
       </div>
+
+      <Carte className="flex flex-col gap-4">
+        <h2 className="font-titre text-xl font-bold">À surveiller</h2>
+        {parCliente.length === 0 ? (
+          <p className="text-[14px] text-texte-2">Rien à signaler : toutes tes clientes sont à jour.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-ligne">
+            {parCliente.map(({ cliente, liste, retard }) => (
+              <li key={cliente.id}>
+                <Link
+                  href={
+                    liste.every((a) => a.type === "fin_suivi")
+                      ? `/coach/clientes/${cliente.id}`
+                      : `/coach/clientes/${cliente.id}/suivi`
+                  }
+                  className="flex flex-wrap items-center justify-between gap-3 py-3 hover:text-accent"
+                >
+                  <span className="font-medium">
+                    {cliente.profils.prenom} {cliente.profils.nom}
+                  </span>
+                  <span className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 text-[14px] text-texte-2">
+                    {liste.map((a) => (
+                      <span key={a.type} className="inline-flex items-center gap-2">
+                        <Etiquette ton={a.type === "fin_suivi" ? "sable" : "rose"}>{titreAlerte(a)}</Etiquette>
+                        {a.type === "decrochage_bilans" && retard !== null ? `dernier : ${retard} j de retard` : detailAlerte(a)}
+                      </span>
+                    ))}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Carte>
     </div>
   );
+}
+
+function titreAlerte(a: Alerte): string {
+  switch (a.type) {
+    case "bilan_manquant":
+      return "Bilan manquant";
+    case "decrochage_bilans":
+      return "2 bilans manqués";
+    case "decrochage_visite":
+      return "Ne se connecte plus";
+    case "fin_suivi":
+      return "Fin de suivi proche";
+  }
+}
+
+function detailAlerte(a: Alerte): string {
+  switch (a.type) {
+    case "bilan_manquant":
+      return `${a.retard} j de retard`;
+    case "decrochage_bilans":
+      return "d’affilée";
+    case "decrochage_visite":
+      return a.jours === null ? "jamais connectée" : `depuis ${a.jours} jours`;
+    case "fin_suivi":
+      return a.jours === 0 ? "aujourd’hui" : `dans ${a.jours} j · proposer la suite ?`;
+  }
 }
 
 function Chiffre({ valeur, label }: { valeur: number; label: string }) {

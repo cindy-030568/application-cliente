@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconeClientes, IconeReglages, IconeRessources, IconeTableau } from "@/components/icones";
+import { IconeClientes, IconeReglages, IconeRessources, IconeSuivi, IconeTableau } from "@/components/icones";
 import { cx } from "@/components/ui";
 
 const LIENS = [
   { href: "/coach", label: "Tableau de bord", Icone: IconeTableau },
+  { href: "/coach/bilans", label: "Bilans", Icone: IconeSuivi },
   { href: "/coach/clientes", label: "Clientes", Icone: IconeClientes },
   { href: "/coach/ressources", label: "Ressources", Icone: IconeRessources },
   { href: "/coach/reglages", label: "Réglages", Icone: IconeReglages },
@@ -14,7 +15,7 @@ const LIENS = [
 
 const A_VENIR = ["Recettes", "Aliments", "Vidéos"];
 
-export function NavigationCoach() {
+export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
   const chemin = usePathname();
   return (
     <nav aria-label="Navigation coach" className="flex gap-1 md:flex-col">
@@ -32,6 +33,14 @@ export function NavigationCoach() {
           >
             <Icone className="size-5 shrink-0" />
             <span className="hidden sm:inline">{label}</span>
+            {href === "/coach/bilans" && aTraiter > 0 && (
+              <span
+                aria-label={`${aTraiter} à traiter`}
+                className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[11.5px] font-medium text-white"
+              >
+                {aTraiter}
+              </span>
+            )}
           </Link>
         );
       })}

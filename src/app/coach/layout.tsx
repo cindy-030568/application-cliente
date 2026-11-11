@@ -7,7 +7,18 @@ import { NavigationCoach } from "./navigation";
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Dashboard" } };
 
 export default async function LayoutCoach({ children }: { children: React.ReactNode }) {
-  const { profil } = await exigerCoach();
+  const { supabase, profil } = await exigerCoach();
+  const { data: recents } = await supabase
+    .from("bilans")
+    .select("saisi_par, retours_bilan(bilan_id), clientes!inner(statut)")
+    .neq("clientes.statut", "fermee")
+    .not("echeance", "is", null)
+    .order("envoye_le", { ascending: false })
+    .limit(300);
+  const aTraiter = (recents ?? []).filter((b) => {
+    const r = b.retours_bilan as unknown;
+    return (Array.isArray(r) ? r.length === 0 : !r) && b.saisi_par !== profil.id;
+  }).length;
   return (
     <div className="min-h-dvh md:flex">
       <aside className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
@@ -15,7 +26,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
           <Logo className="text-xl" />
           <span className="hidden font-main text-[19px] text-caramel md:block">Espace coach</span>
         </div>
-        <NavigationCoach />
+        <NavigationCoach aTraiter={aTraiter} />
         <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
           <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>
           <form action="/auth/deconnexion" method="post">

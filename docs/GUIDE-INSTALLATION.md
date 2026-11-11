@@ -146,3 +146,52 @@ L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready*
 > **Liens Drive** : pour qu'une cliente puisse ouvrir un fichier ou un dossier Drive, il doit être partagé en
 > « Tous les utilisateurs disposant du lien ». Pour un plan personnel, préfère le **PDF dans l'app** :
 > il est privé et ne s'ouvre qu'avec un lien temporaire de 5 minutes.
+
+---
+
+# Phase 3 — Suivi et bilans
+
+## Mettre à jour la base de données (une seule fois)
+
+> Si tu n'as pas encore fait l'étape de la phase 2, fais-la d'abord : les migrations s'exécutent **dans l'ordre** (0002 puis 0003).
+
+1. Supabase → **SQL Editor** → **New query**.
+2. Copie le contenu de [`supabase/migrations/0003_bilans.sql`](../supabase/migrations/0003_bilans.sql) (icône **Copy raw file** sur GitHub) → colle → **Run**.
+3. Vérifie : **Storage** contient maintenant un espace **photos**, marqué *Private*.
+
+## Comment fonctionnent les bilans
+
+- Le bilan d'une cliente est prévu tous les **N jours** à partir de sa **date de début** (réglable dans sa fiche, 14 par défaut).
+- Il **s'ouvre 3 jours avant** la date prévue (réglable dans **Réglages → Le bilan**). La cliente voit « Ton bilan est ouvert » sur son accueil et dans **Suivi**.
+- En retard, il reste envoyable pendant la moitié de l'intervalle (7 jours pour un rythme de 14 jours).
+- Entre deux bilans, elle peut **noter une mesure** quand elle veut (« saisie libre ») : elle apparaît dans ses graphiques, mais pas dans ta file à traiter.
+- Les relances automatiques par email et notification arrivent en phase 8. En attendant, le rappel est affiché dans l'app.
+
+## Tester la phase 3
+
+**Préparer** (ton navigateur habituel)
+
+1. Fiche de ta cliente test → **Début du coaching** : mets une date **il y a 12 jours** et **Bilan tous les 14 jours** → Enregistrer.
+   Son bilan est donc prévu dans 2 jours : il est déjà ouvert.
+2. Fiche → **Ouvrir son suivi** → renseigne un **prochain rendez-vous** et un lien de visio → Enregistrer.
+
+**Côté cliente** (fenêtre privée ou téléphone)
+
+3. Accueil : les cartes « Ton bilan est ouvert » et « Prochain rendez-vous » apparaissent.
+4. **Faire mon bilan** : quelques mesures, les ressentis, une ou deux photos, un commentaire → **Envoyer mon bilan à Cindy**.
+5. Onglet **Suivi** : « Bilan envoyé ✓ », puis graphiques, photos et historique.
+6. **Noter une mesure** (par ex. seulement le tour de taille) : elle s'ajoute aux graphiques.
+
+**Côté coach**
+
+7. Le menu **Bilans** affiche une pastille **1** → ouvre le bilan : mesures, ressentis (avec l'écart par rapport au bilan précédent), photos, commentaire.
+8. Écris ton retour → **Envoyer et marquer comme traité**.
+9. **Tableau de bord** : bilans à traiter et section « À surveiller » (bilans manquants, clientes qui ne se connectent plus, fins de suivi dans moins de 15 jours).
+10. Suivi de la cliente → **Exporter (Excel / CSV)** : ouvre le fichier dans Excel.
+11. **Saisir un bilan** pour elle (comme pendant une visio).
+12. **Réglages → Le bilan** : renomme un champ, masque-en un, ajoute « Tour de mollet ».
+
+**De nouveau côté cliente**
+
+13. Accueil : « Cindy a répondu à ton bilan » → le message s'affiche ; la carte disparaît une fois lue.
+14. Côté coach, coche **Mode sans chiffres** dans son suivi → côté cliente, le bilan ne propose plus que les ressentis, sans poids, mesures ni photos.

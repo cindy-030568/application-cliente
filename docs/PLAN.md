@@ -152,16 +152,26 @@ Code TypeScript pur, sans dépendance à la base, couvert par des tests unitaire
 | 0 | **Comptes** | Supabase (Paris) + Vercel créés, guidés pas à pas. |
 | 1 | **Socle** | Projet, thème de la charte, connexion (lien + code), rôles, RLS + tests, création/invitation de clientes, statuts, consentement, navigation à onglets (écrans vides). |
 | 2 | **Plans, formation, ressources** | Dépôt de PDF + historique, liens Drive/Nutrium, lecteur PDF, carte Formation (verrou), Ressources par catégorie et par visibilité. |
-| 3 | **Suivi des mesures** | Champs configurables, saisie et modification, photos privées, graphiques, tableau, avant/après, vue coach + vue d'ensemble, export CSV, message de rappel dans l'app. |
+| 3 | **Suivi et bilans** | Bilan complet (mesures configurables + ressentis : sommeil, énergie, stress, faim, digestion, cycle + photos + commentaire), fenêtre d'ouverture avant chaque échéance, file des bilans coach (à traiter / manquants / traités), retour écrit de la coach, mode sans chiffres par cliente, graphiques, historique, comparatif photos, export CSV, alertes (bilans manqués, décrochage, fin de suivi à 15 jours), prochain rendez-vous sur l'accueil. |
 | 4 | **Vidéos** | Bibliothèque, filtres, fiches exercice, intégration Bunny/YouTube. |
 | 5 | **Aliments et recettes** | Import Ciqual, aliments perso et à l'unité, catégories d'exclusion, saisie des recettes, fichier d'import + les ~50 recettes de départ. |
 | 6 | **Moteur de calcul** | Algorithme + tests unitaires sur des cas réels validés ensemble ; aperçu recettes dans la fiche cliente. |
-| 7 | **Recettes côté cliente** | Choix du repas, liste compatible, fiche personnalisée, portions, favoris, inspiration, exclusions. |
-| 8 | **Rappels et PWA** | Installation sur l'écran d'accueil, icône, notifications push, emails Brevo. |
+| 7 | **Recettes côté cliente** | Choix du repas, liste compatible, fiche personnalisée, portions, favoris, inspiration, exclusions, **liste de courses** générée depuis les recettes choisies. |
+| 8 | **Rappels et PWA** | Installation sur l'écran d'accueil, icône, notifications push, emails Brevo, **relance automatique des bilans non envoyés**. |
 | 9 | **Finitions et mise en ligne** | Passe design, accessibilité, nom de domaine, Supabase Pro, hébergement de production, vérification RGPD. |
 
 Après chaque phase : démonstration, mode d'emploi pour tester, puis attente du feu vert.
 
-## 8. Plus tard (hors v1)
+## 8. Version 2 (après la mise en ligne)
+Inspirées de l'étude d'Ecrine (11/11/2026), validées par Cindy :
+- Questionnaire d'arrivée (habitudes, objectifs, allergies, cycle) qui pré-remplit les exclusions.
+- Compléments : prises, moments, rappels discrets.
+- Séances guidées : exercice par exercice, séries, charges, minuteur de repos, remontée chez la coach.
+- Contrat signé en ligne avant l'accès.
+- Parrainage et avis clientes.
+
+Écartées volontairement : messagerie intégrée (WhatsApp), « repas respecté oui/non » et taux de conformité, courbe des calories, CRM de prospects.
+
+## 9. Plus tard (hors v1)
 - Intégration API Nutrium : seulement si une API publique existe, à vérifier et à confirmer avec Cindy.
 - Intégration API Google Drive.

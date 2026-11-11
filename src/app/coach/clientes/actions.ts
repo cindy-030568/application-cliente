@@ -208,14 +208,22 @@ export async function supprimerCliente(
     return { erreur: `Tape « ${prenom || "supprimer"} » pour confirmer.` };
   }
   const admin = createAdminClient();
-  // 1. Fichiers privés de la cliente (plans PDF…)
+  // 1. Fichiers privés de la cliente : plans PDF…
   for (const dossier of ["nutrition", "sport"]) {
     const { data: fichiers } = await admin.storage.from("plans").list(`${id}/${dossier}`, { limit: 1000 });
     if (fichiers?.length) {
       await admin.storage.from("plans").remove(fichiers.map((f) => `${id}/${dossier}/${f.name}`));
     }
   }
-  // 2. Le compte : profil, fiche, plans, notes et consentements partent en cascade.
+  // Photos de progression : <id>/<id du bilan>/<fichier>
+  const { data: dossiers } = await admin.storage.from("photos").list(id, { limit: 1000 });
+  for (const d of dossiers ?? []) {
+    const { data: fichiers } = await admin.storage.from("photos").list(`${id}/${d.name}`, { limit: 100 });
+    if (fichiers?.length) {
+      await admin.storage.from("photos").remove(fichiers.map((f) => `${id}/${d.name}/${f.name}`));
+    }
+  }
+  // 2. Le compte : profil, fiche, plans, bilans, notes et consentements partent en cascade.
   const { error } = await admin.auth.admin.deleteUser(id);
   if (error) return { erreur: "La suppression a échoué. Réessaie dans un instant." };
   revalidatePath("/coach", "layout");

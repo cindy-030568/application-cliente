@@ -12,14 +12,13 @@ import { modifierCliente } from "../actions";
 import { FormulaireInfos } from "../formulaire-infos";
 import { BlocConnexion, BlocNotes, BlocStatut, BlocSuppression } from "./blocs";
 import { BlocPlan, type PlanAffiche } from "./bloc-plans";
-import { COLONNES_PLAN, type Plan } from "@/lib/types";
+import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const A_VENIR = [
-  { titre: "Mesures et photos", phase: 3 },
   { titre: "Repas et cibles", phase: 5 },
   { titre: "Aliments exclus", phase: 5 },
   { titre: "Aperçu des recettes", phase: 6 },
@@ -41,7 +40,7 @@ export default async function PageFicheCliente({
     supabase
       .from("clientes")
       .select(
-        "id, statut, date_debut, date_fin, acces_formation, masquer_graph_poids, frequence_bilan_jours, ferme_le, created_at, profils!inner(prenom, nom, email)",
+        `${COLONNES_FICHE}, profils!inner(prenom, nom, email)`,
       )
       .eq("id", id)
       .maybeSingle<ClienteListe>(),
@@ -140,6 +139,18 @@ export default async function PageFicheCliente({
         </div>
 
         <div className="flex flex-col gap-6">
+          <Carte className="flex flex-col gap-3 bg-chocolat text-creme">
+            <h2 className="font-titre text-xl font-bold">Suivi et bilans</h2>
+            <p className="text-[14px] text-texte-clair">
+              Ses graphiques, photos, bilans, rendez-vous et l’export pour ton classeur.
+            </p>
+            <Link
+              href={`/coach/clientes/${c.id}/suivi`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-creme px-5 text-[15px] font-medium text-chocolat"
+            >
+              Ouvrir son suivi
+            </Link>
+          </Carte>
           <Section titre="Connexion">
             <BlocConnexion id={c.id} prenom={c.profils.prenom} />
           </Section>
