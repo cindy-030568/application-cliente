@@ -61,7 +61,8 @@ export async function envoyerEmail(o: { email: string; nom: string; sujet: strin
     headers: { "api-key": cle, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
       sender: await expediteur(cle),
-      to: [{ email: o.email, name: o.nom }],
+      // Brevo refuse un nom vide : on ne l'envoie que s'il existe.
+      to: [o.nom.trim() ? { email: o.email, name: o.nom.trim() } : { email: o.email }],
       subject: o.sujet,
       htmlContent: o.html,
       textContent: o.texte,
