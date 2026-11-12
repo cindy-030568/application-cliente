@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
-import { configurationRappels, envoyerEmail, executerRappels } from "@/lib/envoi-rappels";
+import { ErreurBrevo, configurationRappels, envoyerEmail, executerRappels } from "@/lib/envoi-rappels";
 import { SUJETS, emailRappel, personnaliser } from "@/lib/rappels";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -46,13 +46,25 @@ export async function emailDeTest(texte: string): Promise<EtatRappelsCoach> {
     await envoyerEmail({ email: session.profil.email, nom: session.profil.prenom, sujet: `[Test] ${SUJETS.ouverture}`, html, texte: brut });
     return { succes: "Email de test envoyé : regarde ta boîte (et les spams)." };
   } catch (e) {
+    if (e instanceof ErreurBrevo) {
+      console.warn("Email de test :", e.etape, e.statut, e.raison);
+      if (e.statut === 401 && /ip/i.test(e.raison)) {
+        return {
+          erreur: "Brevo bloque l’adresse de Vercel. Dans Brevo : ton nom en haut à droite → Sécurité → IP autorisées → désactive le blocage. Puis réessaie.",
+        };
+      }
+      if (e.statut === 401) return { erreur: `Brevo refuse la clé : vérifie BREVO_API_KEY dans Vercel. (Brevo : « ${e.raison} »)` };
+      if (e.etape === "expediteurs") {
+        return { erreur: `Brevo ne donne pas accès à tes expéditeurs (code ${e.statut}). Si ta clé est « restreinte », ajoute-lui l’accès en lecture aux expéditeurs. (Brevo : « ${e.raison} »)` };
+      }
+      return { erreur: `Brevo a refusé l’envoi (code ${e.statut}). Raison donnée par Brevo : « ${e.raison} »` };
+    }
     const m = e instanceof Error ? e.message : "";
+    console.warn("Email de test : échec", m.slice(0, 200));
     return {
-      erreur: m.includes("401")
-        ? "Brevo refuse la clé : vérifie BREVO_API_KEY dans Vercel, et dans Brevo → Sécurité → IP autorisées, désactive le blocage des adresses IP inconnues."
-        : m.includes("expéditeur")
-          ? "Aucun expéditeur validé dans Brevo."
-          : "L’email n’est pas parti. Réessaie dans un moment.",
+      erreur: m.includes("expéditeur")
+        ? "Aucun expéditeur validé dans Brevo."
+        : `L’email n’est pas parti (${m.slice(0, 120) || "erreur inconnue"}). Réessaie dans un moment.`,
     };
   }
 }

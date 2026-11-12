@@ -16,6 +16,26 @@ export function configurationRappels() {
 
 // ---------------------------------------------------------------- Email (Brevo)
 
+/** Erreur renvoyée par Brevo, avec son code HTTP et sa raison (en anglais). */
+export class ErreurBrevo extends Error {
+  constructor(
+    public etape: "expediteurs" | "envoi",
+    public statut: number,
+    public raison: string,
+  ) {
+    super(`Brevo ${etape} ${statut} : ${raison}`);
+  }
+}
+
+async function raisonBrevo(r: Response): Promise<string> {
+  try {
+    const corps = (await r.json()) as { code?: string; message?: string };
+    return [corps.code, corps.message].filter(Boolean).join(" — ").slice(0, 300) || r.statusText;
+  } catch {
+    return r.statusText;
+  }
+}
+
 let expediteurEnCache: { name: string; email: string } | null = null;
 
 /** Expéditeur : variables BREVO_EXPEDITEUR_* si renseignées, sinon le premier expéditeur validé du compte Brevo. */
@@ -25,7 +45,7 @@ async function expediteur(cle: string) {
   }
   if (expediteurEnCache) return expediteurEnCache;
   const r = await fetch("https://api.brevo.com/v3/senders", { headers: { "api-key": cle, accept: "application/json" } });
-  if (!r.ok) throw new Error(`Brevo : expéditeurs illisibles (${r.status})`);
+  if (!r.ok) throw new ErreurBrevo("expediteurs", r.status, await raisonBrevo(r));
   const { senders } = (await r.json()) as { senders?: { name: string; email: string; active: boolean }[] };
   const s = senders?.find((x) => x.active);
   if (!s) throw new Error("Brevo : aucun expéditeur validé");
@@ -48,7 +68,7 @@ export async function envoyerEmail(o: { email: string; nom: string; sujet: strin
       tags: ["rappel-bilan"],
     }),
   });
-  if (!r.ok) throw new Error(`Brevo : envoi refusé (${r.status})`);
+  if (!r.ok) throw new ErreurBrevo("envoi", r.status, await raisonBrevo(r));
 }
 
 // ---------------------------------------------------------------- Notifications
