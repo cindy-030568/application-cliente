@@ -62,32 +62,44 @@ export async function enregistrerBilan(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > aujourdhui || date < "2020-01-01") {
     return { erreur: "La date du bilan n’est pas valide." };
   }
+  const aCommentaire = formData.has("commentaire");
   const commentaire = String(formData.get("commentaire") ?? "").trim().slice(0, 3000) || null;
 
-  // Valeurs saisies, contrôlées champ par champ.
+  // Seuls les champs affichés dans le formulaire sont remplacés (les autres réponses sont conservées).
+  const presentes = new Set(String(formData.get("champs_presentes") ?? "").split(",").filter(Boolean));
   const champs = (await chargerChamps(supabase)).filter(
-    (c) => !(fiche.mode_sans_chiffres && c.groupe === "mesure"),
+    (c) => presentes.has(c.id) && !(fiche.mode_sans_chiffres && c.groupe === "mesure"),
   );
-  const valeurs: { champ_id: string; valeur_num: number | null; valeur_texte: string | null }[] = [];
+  const valeurs: { champ_id: string; valeur_num: number | null; valeur_texte: string | null; precision: string | null }[] = [];
   for (const champ of champs) {
     const brut = String(formData.get(`champ_${champ.id}`) ?? "").trim();
-    if (!brut) continue;
-    if (champ.type === "choix") {
-      if (!champ.options?.includes(brut)) return { erreur: `Choix invalide pour « ${champ.libelle} ».` };
-      valeurs.push({ champ_id: champ.id, valeur_num: null, valeur_texte: brut });
-    } else {
-      const n = lireNombre(brut);
-      const max = champ.type === "echelle" ? 10 : 999;
-      const min = champ.type === "echelle" ? 1 : 0.1;
-      if (n === null) continue;
-      if (Number.isNaN(n) || n < min || n > max) {
-        return { erreur: `La valeur de « ${champ.libelle} » n’est pas valide.` };
+    const precision = champ.avec_precision
+      ? String(formData.get(`precision_${champ.id}`) ?? "").trim().slice(0, 1000) || null
+      : null;
+    let valeur_num: number | null = null;
+    let valeur_texte: string | null = null;
+    if (brut) {
+      if (champ.type === "texte") {
+        valeur_texte = brut.slice(0, 2000);
+      } else if (champ.type === "choix") {
+        if (!champ.options?.includes(brut)) return { erreur: "Une réponse n’est pas valide. Recharge la page et réessaie." };
+        valeur_texte = brut;
+      } else {
+        const n = lireNombre(brut);
+        const max = champ.type === "echelle" ? 10 : 999;
+        const min = champ.type === "echelle" ? 1 : 0.1;
+        if (n !== null && (Number.isNaN(n) || n < min || n > max)) {
+          return { erreur: `La valeur de « ${champ.libelle.replace(/\{jours\}/g, "…")} » n’est pas valide.` };
+        }
+        valeur_num = n === null ? null : Math.round(n * 100) / 100;
       }
-      valeurs.push({ champ_id: champ.id, valeur_num: Math.round(n * 100) / 100, valeur_texte: null });
+    }
+    if (valeur_num !== null || valeur_texte !== null || precision !== null) {
+      valeurs.push({ champ_id: champ.id, valeur_num, valeur_texte, precision });
     }
   }
   if (valeurs.length === 0 && !commentaire) {
-    return { erreur: "Ton bilan est vide : remplis au moins une mesure, un ressenti ou un commentaire." };
+    return { erreur: "Ton bilan est vide : réponds au moins à une question." };
   }
 
   let id = bilanId;
@@ -95,7 +107,7 @@ export async function enregistrerBilan(
     if (!UUID.test(id)) return { erreur: "Bilan introuvable." };
     const { data, error } = await supabase
       .from("bilans")
-      .update({ date_mesure: date, commentaire })
+      .update(aCommentaire ? { date_mesure: date, commentaire } : { date_mesure: date })
       .eq("id", id)
       .eq("cliente_id", clienteId)
       .select("id")

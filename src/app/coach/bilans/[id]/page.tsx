@@ -26,9 +26,9 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
     chargerBilans(supabase, bilan.cliente_id),
     supabase
       .from("clientes")
-      .select("mode_sans_chiffres, profils!inner(prenom, nom)")
+      .select("mode_sans_chiffres, frequence_bilan_jours, profils!inner(prenom, nom)")
       .eq("id", bilan.cliente_id)
-      .single<{ mode_sans_chiffres: boolean; profils: { prenom: string; nom: string } }>(),
+      .single<{ mode_sans_chiffres: boolean; frequence_bilan_jours: number; profils: { prenom: string; nom: string } }>(),
     chargerFile(),
   ]);
   const index = historique.findIndex((b) => b.id === bilan.id);
@@ -65,7 +65,14 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="flex flex-col gap-6">
-          <DetailBilan bilan={bilan} champs={champs} urls={urls} precedent={precedent} comparer />
+          <DetailBilan
+            bilan={bilan}
+            champs={champs}
+            urls={urls}
+            jours={c?.frequence_bilan_jours ?? 15}
+            precedent={precedent}
+            comparer
+          />
           {precedent && precedent.photos.length > 0 && bilan.photos.length > 0 && (
             <Carte className="flex flex-col gap-3">
               <h2 className="font-titre text-lg font-bold">Photos : bilan précédent → celui-ci</h2>

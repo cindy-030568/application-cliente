@@ -21,20 +21,29 @@ function lireOptions(brut: string): string[] {
 export async function ajouterChamp(_e: EtatChamps, formData: FormData): Promise<EtatChamps> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
-  const libelle = String(formData.get("libelle") ?? "").trim().slice(0, 60);
+  const libelle = String(formData.get("libelle") ?? "").trim().slice(0, 140);
   const type = String(formData.get("type") ?? "");
   if (!libelle) return { erreur: "Donne un nom au champ." };
-  if (!["nombre", "echelle", "choix"].includes(type)) return { erreur: "Choisis le type de champ." };
+  if (!["nombre", "echelle", "choix", "texte"].includes(type)) return { erreur: "Choisis le type de champ." };
+  const section =
+    String(formData.get("section") ?? "").trim().slice(0, 60) || (type === "nombre" ? "Mes mesures" : "Mes ressentis");
   const options = type === "choix" ? lireOptions(String(formData.get("options") ?? "")) : null;
   if (type === "choix" && (options?.length ?? 0) < 2) return { erreur: "Indique au moins deux choix, séparés par des virgules." };
 
-  const { data: max } = await session.supabase
+  // Nouvelle question placée à la fin de sa rubrique.
+  const { data: dansSection } = await session.supabase
     .from("champs_mesure")
     .select("ordre")
+    .eq("section", section)
     .order("ordre", { ascending: false })
     .limit(1)
     .maybeSingle();
+  const { data: max } = dansSection
+    ? { data: dansSection }
+    : await session.supabase.from("champs_mesure").select("ordre").order("ordre", { ascending: false }).limit(1).maybeSingle();
   const { error } = await session.supabase.from("champs_mesure").insert({
+    section,
+    avec_precision: (type === "choix" || type === "echelle") && formData.get("avec_precision") === "on",
     groupe: type === "nombre" ? "mesure" : "ressenti",
     type,
     libelle,
@@ -48,11 +57,14 @@ export async function ajouterChamp(_e: EtatChamps, formData: FormData): Promise<
   return { succes: "Champ ajouté au bilan." };
 }
 
-export async function modifierChamp(id: string, valeurs: { libelle: string; aide: string; unite: string }): Promise<EtatChamps> {
+export async function modifierChamp(
+  id: string,
+  valeurs: { libelle: string; aide: string; unite: string },
+): Promise<EtatChamps> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
   if (!UUID.test(id)) return { erreur: "Champ introuvable." };
-  const libelle = valeurs.libelle.trim().slice(0, 60);
+  const libelle = valeurs.libelle.trim().slice(0, 140);
   if (!libelle) return { erreur: "Le nom ne peut pas être vide." };
   const { error } = await session.supabase
     .from("champs_mesure")
@@ -98,4 +110,25 @@ export async function reglerFenetre(_e: EtatChamps, formData: FormData): Promise
   if (error) return { erreur: "L’enregistrement a échoué." };
   revalidatePath("/", "layout");
   return { succes: "Enregistré." };
+}
+
+export async function renommerSection(ancien: string, nouveau: string): Promise<EtatChamps> {
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE };
+  const propre = nouveau.trim().slice(0, 60);
+  if (!propre) return { erreur: "Le nom de la rubrique ne peut pas être vide." };
+  const { error } = await session.supabase.from("champs_mesure").update({ section: propre }).eq("section", ancien);
+  if (error) return { erreur: "La modification a échoué." };
+  rafraichir();
+  return {};
+}
+
+export async function reglerIntro(_e: EtatChamps, formData: FormData): Promise<EtatChamps> {
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE };
+  const intro = String(formData.get("intro_bilan") ?? "").trim().slice(0, 600);
+  const { error } = await session.supabase.from("reglages").update({ intro_bilan: intro }).eq("id", true);
+  if (error) return { erreur: "L’enregistrement a échoué." };
+  revalidatePath("/", "layout");
+  return { succes: "Texte d’introduction enregistré." };
 }

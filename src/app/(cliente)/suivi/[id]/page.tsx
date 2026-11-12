@@ -55,7 +55,7 @@ export default async function PageBilanCliente({
         </section>
       )}
 
-      <DetailBilan bilan={bilan} champs={champs} urls={urls} />
+      <DetailBilan bilan={bilan} champs={champs} urls={urls} jours={fiche.frequence_bilan_jours} />
 
       <div className="flex flex-col gap-4 pb-4">
         <LienBouton href={`/suivi/${bilan.id}/modifier`} variante="contour" pleineLargeur>

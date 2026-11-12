@@ -72,6 +72,7 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
           masquerPoids={c.masquer_graph_poids}
           sansChiffres={false}
           lienBilan="/coach/bilans/"
+          jours={c.frequence_bilan_jours}
           vueCoach
         />
         <Carte className="flex h-fit flex-col gap-4">

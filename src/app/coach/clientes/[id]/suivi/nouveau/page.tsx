@@ -17,9 +17,9 @@ export default async function PageSaisieCoach({ params }: { params: Promise<{ id
   const { supabase } = await exigerCoach();
   const { data: c } = await supabase
     .from("clientes")
-    .select("mode_sans_chiffres, profils!inner(prenom)")
+    .select("mode_sans_chiffres, frequence_bilan_jours, profils!inner(prenom)")
     .eq("id", id)
-    .maybeSingle<{ mode_sans_chiffres: boolean; profils: { prenom: string } }>();
+    .maybeSingle<{ mode_sans_chiffres: boolean; frequence_bilan_jours: number; profils: { prenom: string } }>();
   if (!c) notFound();
   const champs = champsVisibles(await chargerChamps(supabase), c.mode_sans_chiffres);
   const auj = aujourdhuiParis();
@@ -39,13 +39,15 @@ export default async function PageSaisieCoach({ params }: { params: Promise<{ id
       <Carte>
         <FormulaireBilan
           champs={champs}
+          jours={c.frequence_bilan_jours}
+          avecCommentaire
           clienteCible={id}
           dateInitiale={auj}
           dateMax={auj}
           sansPhotos={c.mode_sans_chiffres}
           redirection={`/coach/bilans/{id}`}
           libelleEnvoi="Enregistrer le bilan"
-          libelleCommentaire="Ce qu’elle t’a dit (facultatif)"
+          libelleCommentaire="Tes notes de l’échange (visibles par elle)"
         />
       </Carte>
     </div>

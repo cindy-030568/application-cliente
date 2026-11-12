@@ -92,9 +92,11 @@ export default async function PageSuivi() {
           </div>
         )}
 
-        <LienBouton href="/suivi/bilan" variante="contour" pleineLargeur>
-          {ouverte && !dejaEnvoye ? "Ou juste noter une mesure" : "Noter une mesure"}
-        </LienBouton>
+        {!fiche.mode_sans_chiffres && (!ouverte || dejaEnvoye) && (
+          <LienBouton href="/suivi/bilan" variante="contour" pleineLargeur>
+            Noter une mesure
+          </LienBouton>
+        )}
 
         <VueSuivi
           champs={champs}
@@ -103,6 +105,7 @@ export default async function PageSuivi() {
           masquerPoids={fiche.masquer_graph_poids}
           sansChiffres={fiche.mode_sans_chiffres}
           lienBilan="/suivi/"
+          jours={fiche.frequence_bilan_jours}
         />
       </div>
     </>

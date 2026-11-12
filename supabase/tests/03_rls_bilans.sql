@@ -24,7 +24,7 @@ insert into storage.objects (bucket_id, name) values
   ('photos', '00000000-0000-0000-0000-0000000000b3/x/face.jpg'),
   ('photos', '00000000-0000-0000-0000-0000000000f3/x/face.jpg');
 
-select test.verifier((select count(*) from public.champs_mesure) = 12, 'les 12 champs de départ existent (6 mesures, 6 ressentis)');
+select test.verifier((select count(*) from public.champs_mesure where actif) = 21, 'les 21 champs de départ sont actifs (15 questions de la trame, 6 mesures)');
 select test.verifier((select public from storage.buckets where id = 'photos') = false, 'le bucket des photos est privé');
 
 -- ===================== Cliente A =====================
@@ -130,7 +130,7 @@ select test.verifier((select count(*) from public.bilans where saisi_par = '0000
 insert into public.retours_bilan (bilan_id, contenu) values ('00000000-0000-0000-0000-00000000a0a1', 'Très beau travail');
 select test.verifier(true, 'la coach peut répondre à un bilan');
 update public.clientes set mode_sans_chiffres = true where id = '00000000-0000-0000-0000-0000000000b3';
-insert into public.champs_mesure (groupe, type, libelle, unite, ordre) values ('mesure', 'nombre', 'Tour de mollet', 'cm', 7);
+insert into public.champs_mesure (groupe, type, libelle, unite, ordre, section) values ('mesure', 'nombre', 'Tour de mollet', 'cm', 107, 'Mes mesures');
 select test.verifier(true, 'la coach peut régler le mode sans chiffres et ajouter un champ');
 do $$ begin
   delete from public.champs_mesure where est_poids;

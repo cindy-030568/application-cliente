@@ -37,7 +37,7 @@ export const lireReglages = cache(async () => {
   const { data } = await session.supabase
     .from("reglages")
     .select(
-      "version_consentement, lien_politique, lien_formation, message_formation, lien_contact, tolerance_pct, tolerance_g, hors_tolerance, fenetre_bilan_jours",
+      "version_consentement, lien_politique, lien_formation, message_formation, lien_contact, tolerance_pct, tolerance_g, hors_tolerance, fenetre_bilan_jours, intro_bilan",
     )
     .single<Reglages>();
   if (!data) throw new Error("Réglages introuvables : la migration a-t-elle été exécutée ?");

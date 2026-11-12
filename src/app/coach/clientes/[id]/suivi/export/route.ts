@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { lireSession } from "@/lib/auth";
+import { libelleChamp } from "@/lib/champs";
 import { chargerBilans, chargerChamps } from "@/lib/suivi";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -18,9 +19,9 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
 
   const { data: c } = await session.supabase
     .from("clientes")
-    .select("profils!inner(prenom, nom)")
+    .select("frequence_bilan_jours, profils!inner(prenom, nom)")
     .eq("id", id)
-    .maybeSingle<{ profils: { prenom: string; nom: string } }>();
+    .maybeSingle<{ frequence_bilan_jours: number; profils: { prenom: string; nom: string } }>();
   if (!c) return new NextResponse("Introuvable", { status: 404 });
 
   const [champs, bilans] = await Promise.all([chargerChamps(session.supabase, true), chargerBilans(session.supabase, id)]);
@@ -30,7 +31,10 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
   const entete = [
     "Date",
     "Type",
-    ...utilises.map((ch) => (ch.unite ? `${ch.libelle} (${ch.unite})` : ch.type === "echelle" ? `${ch.libelle} (/10)` : ch.libelle)),
+    ...utilises.map((ch) => {
+      const l = libelleChamp(ch, c.frequence_bilan_jours);
+      return ch.unite ? `${l} (${ch.unite})` : ch.type === "echelle" ? `${l} (/10)` : l;
+    }),
     "Photos",
     "Commentaire",
     "Retour de Cindy",
@@ -42,7 +46,9 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
       b.echeance ? "Bilan" : "Saisie libre",
       ...utilises.map((ch) => {
         const v = b.valeurs.find((x) => x.champ_id === ch.id);
-        return v ? (v.valeur_texte ?? (v.valeur_num !== null ? nf.format(v.valeur_num) : "")) : "";
+        if (!v) return "";
+        const principal = v.valeur_texte ?? (v.valeur_num !== null ? nf.format(v.valeur_num) : "");
+        return v.precision ? `${principal}${principal ? " — " : ""}${v.precision}` : principal;
       }),
       String(b.photos.length),
       b.commentaire ?? "",

@@ -227,3 +227,31 @@ L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready*
 7. Ouvre l'exercice → appuie sur **Lecture** : la vidéo démarre dans l'app.
 
 > Confidentialité : le lecteur YouTube n'est chargé qu'au moment où la cliente appuie sur Lecture, depuis le domaine youtube-nocookie.com (aucun cookie YouTube déposé avant la lecture).
+
+---
+
+# Le bilan sur la trame de Cindy
+
+Le bilan reprend la « Trame bilan » (Drive) : **Ressentis & énergie**, **Nutrition & habitudes**, **Victoires & difficultés**, **Projection & engagement**, puis les mesures et les photos.
+
+## Mettre à jour la base de données (une seule fois)
+
+> Fais d'abord `0004_videos.sql` si ce n'est pas encore fait (même si tu ajoutes les vidéos plus tard).
+
+1. Ouvre [`supabase/migrations/0005_trame_bilan.sql`](../supabase/migrations/0005_trame_bilan.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+Les anciennes questions de ressenti (faim, confort digestif, cycle) sont masquées. Leurs réponses déjà envoyées restent dans l'historique, et tu peux les réafficher dans **Réglages → Le bilan**.
+
+## Tester
+
+1. Côté cliente : **Suivi** → **Faire mon bilan** → les 4 rubriques de ta trame, puis les mesures et photos.
+   Sous certaines questions, « + Préciser si tu veux » ouvre une petite zone de texte.
+2. Côté coach : ouvre le bilan dans **Bilans** → les réponses sont rangées par rubrique, dans l'ordre de ta trame.
+3. **Réglages → Le bilan** :
+   - modifie le texte d'introduction ;
+   - renomme une rubrique (clique sur son titre) ;
+   - modifie une question ou son aide ;
+   - ajoute une question « Réponse libre ».
+   Dans un texte, `{jours}` s'affiche avec le rythme de bilan de chaque cliente.
+4. Entre deux bilans, « Noter une mesure » ne propose que les mesures, pas tout le questionnaire.

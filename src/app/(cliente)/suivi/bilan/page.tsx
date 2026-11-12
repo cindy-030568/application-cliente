@@ -4,13 +4,15 @@ import { IconeRetour } from "@/components/icones";
 import { FormulaireBilan } from "@/components/suivi/formulaire-bilan";
 import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, echeanceOuverte } from "@/lib/bilan";
+import { redirect } from "next/navigation";
+import { avecJours } from "@/lib/champs";
 import { chargerChamps, champsVisibles } from "@/lib/suivi";
 
 export const metadata: Metadata = { title: "Mon bilan" };
 
 export default async function PageNouveauBilan() {
   const { supabase, profil, fiche, reglages } = await exigerCliente();
-  const champs = champsVisibles(await chargerChamps(supabase), fiche.mode_sans_chiffres);
+  const tous = champsVisibles(await chargerChamps(supabase), fiche.mode_sans_chiffres);
   const auj = aujourdhuiParis();
   const ouverte =
     fiche.statut === "active"
@@ -26,6 +28,10 @@ export default async function PageNouveauBilan() {
       .maybeSingle();
     estBilan = !data;
   }
+  // Bilan : toute la trame. Saisie libre entre deux bilans : seulement les mesures.
+  const champs = estBilan ? tous : tous.filter((c) => c.groupe === "mesure");
+  if (champs.length === 0) redirect("/suivi");
+  const jours = fiche.frequence_bilan_jours;
 
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
@@ -38,12 +44,15 @@ export default async function PageNouveauBilan() {
         </h1>
         <p className="text-[15px] text-texte-2">
           {estBilan
-            ? "Prends quelques minutes pour toi. Il n’y a pas de bonne ou de mauvaise réponse."
+            ? `Trame de bilan · tous les ${jours} jours`
             : "Une mesure en plus de tes bilans, quand tu en as envie."}
         </p>
       </div>
       <FormulaireBilan
         champs={champs}
+        jours={jours}
+        intro={estBilan ? avecJours(reglages.intro_bilan, jours) : undefined}
+        avecCommentaire={!estBilan}
         dateInitiale={auj}
         dateMax={auj}
         sansPhotos={fiche.mode_sans_chiffres}

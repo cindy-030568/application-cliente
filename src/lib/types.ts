@@ -38,6 +38,7 @@ export type Reglages = {
   tolerance_g: number;
   hors_tolerance: "masquer" | "badge";
   fenetre_bilan_jours: number;
+  intro_bilan: string;
 };
 
 export const LIBELLES_STATUT: Record<StatutCliente, string> = {
@@ -93,7 +94,7 @@ export type Ressource = {
 export const COLONNES_RESSOURCE = "id, titre, categorie_id, description, url, visibilite, created_at";
 
 export type GroupeChamp = "mesure" | "ressenti";
-export type TypeChamp = "nombre" | "echelle" | "choix";
+export type TypeChamp = "nombre" | "echelle" | "choix" | "texte";
 
 export type ChampMesure = {
   id: string;
@@ -106,9 +107,12 @@ export type ChampMesure = {
   ordre: number;
   actif: boolean;
   est_poids: boolean;
+  section: string;
+  avec_precision: boolean;
 };
 
-export const COLONNES_CHAMP = "id, groupe, type, libelle, unite, aide, options, ordre, actif, est_poids";
+export const COLONNES_CHAMP =
+  "id, groupe, type, libelle, unite, aide, options, ordre, actif, est_poids, section, avec_precision";
 
 export type AnglePhoto = "face" | "profil" | "dos";
 export const ANGLES: { valeur: AnglePhoto; libelle: string }[] = [
@@ -117,7 +121,12 @@ export const ANGLES: { valeur: AnglePhoto; libelle: string }[] = [
   { valeur: "dos", libelle: "Dos" },
 ];
 
-export type ValeurBilan = { champ_id: string; valeur_num: number | null; valeur_texte: string | null };
+export type ValeurBilan = {
+  champ_id: string;
+  valeur_num: number | null;
+  valeur_texte: string | null;
+  precision: string | null;
+};
 export type PhotoBilan = { id: string; angle: AnglePhoto; fichier_path: string };
 export type RetourBilan = { contenu: string; created_at: string; updated_at: string; lu_le: string | null };
 
@@ -136,7 +145,7 @@ export type Bilan = {
 };
 
 export const SELECTION_BILAN =
-  "id, cliente_id, date_mesure, echeance, commentaire, saisi_par, envoye_le, modifie_le, bilan_valeurs(champ_id, valeur_num, valeur_texte), photos_bilan(id, angle, fichier_path), retours_bilan(contenu, created_at, updated_at, lu_le)";
+  "id, cliente_id, date_mesure, echeance, commentaire, saisi_par, envoye_le, modifie_le, bilan_valeurs(champ_id, valeur_num, valeur_texte, precision), photos_bilan(id, angle, fichier_path), retours_bilan(contenu, created_at, updated_at, lu_le)";
 
 type BilanBrut = Omit<Bilan, "valeurs" | "photos" | "retour"> & {
   bilan_valeurs: ValeurBilan[] | null;

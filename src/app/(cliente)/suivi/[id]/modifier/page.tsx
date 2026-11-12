@@ -17,12 +17,18 @@ export default async function PageModifierBilan({ params }: { params: Promise<{ 
   const { supabase, fiche } = await exigerCliente();
   const bilan = await chargerBilan(supabase, id);
   if (!bilan) notFound();
-  const champs = champsVisibles(await chargerChamps(supabase), fiche.mode_sans_chiffres);
+  const tous = champsVisibles(await chargerChamps(supabase), fiche.mode_sans_chiffres);
+  const estBilan =
+    Boolean(bilan.echeance) ||
+    bilan.valeurs.some((v) => tous.find((c) => c.id === v.champ_id)?.groupe === "ressenti");
+  const champs = estBilan ? tous : tous.filter((c) => c.groupe === "mesure");
   const urls = await urlsPhotos(supabase, bilan.photos.map((p) => p.fichier_path));
 
   const valeurs: Record<string, string> = {};
+  const precisions: Record<string, string> = {};
   for (const v of bilan.valeurs) {
     valeurs[v.champ_id] = v.valeur_texte ?? (v.valeur_num !== null ? String(v.valeur_num).replace(".", ",") : "");
+    if (v.precision) precisions[v.champ_id] = v.precision;
   }
   const photos: Partial<Record<AnglePhoto, string>> = {};
   for (const p of bilan.photos) {
@@ -38,7 +44,10 @@ export default async function PageModifierBilan({ params }: { params: Promise<{ 
       <h1 className="font-titre text-[30px] font-bold leading-tight">Modifier</h1>
       <FormulaireBilan
         champs={champs}
+        jours={fiche.frequence_bilan_jours}
         valeursInitiales={valeurs}
+        precisionsInitiales={precisions}
+        avecCommentaire={!estBilan || Boolean(bilan.commentaire)}
         photosInitiales={photos}
         bilanId={bilan.id}
         dateInitiale={bilan.date_mesure}

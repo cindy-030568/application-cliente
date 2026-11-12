@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Etiquette, Surtitre } from "@/components/ui";
+import { libelleChamp } from "@/lib/champs";
 import type { Bilan, ChampMesure } from "@/lib/types";
 import { ComparatifPhotos, type PhotoDatee } from "./comparatif-photos";
 import { GraphiqueSuivi } from "./graphique";
@@ -23,6 +24,7 @@ export function VueSuivi({
   masquerPoids,
   sansChiffres,
   lienBilan,
+  jours,
   vueCoach = false,
 }: {
   champs: ChampMesure[];
@@ -32,10 +34,11 @@ export function VueSuivi({
   sansChiffres: boolean;
   /** Préfixe des liens vers un bilan, ex. « /suivi/ ». */
   lienBilan: string;
+  jours: number;
   vueCoach?: boolean;
 }) {
   const champsGraphiques = champs.filter(
-    (c) => c.type !== "choix" && !(masquerPoids && c.est_poids && !vueCoach),
+    (c) => (c.type === "nombre" || c.type === "echelle") && !(masquerPoids && c.est_poids && !vueCoach),
   );
   const points = (c: ChampMesure) =>
     bilans.flatMap((b) => {
@@ -43,7 +46,7 @@ export function VueSuivi({
       return v && v.valeur_num !== null ? [{ date: b.date_mesure, valeur: v.valeur_num }] : [];
     });
   const avecDonnees = champsGraphiques.filter((c) => points(c).length > 0);
-  const colonnes = champs.filter((c) => bilans.some((b) => valeurAffichee(c, b) !== null));
+  const colonnes = champs.filter((c) => c.type !== "texte" && bilans.some((b) => valeurAffichee(c, b) !== null));
 
   return (
     <div className="flex flex-col gap-8">
@@ -59,7 +62,7 @@ export function VueSuivi({
             {avecDonnees.map((c) => (
               <GraphiqueSuivi
                 key={c.id}
-                titre={c.libelle}
+                titre={libelleChamp(c, jours)}
                 unite={c.unite}
                 echelle={c.type === "echelle"}
                 points={points(c)}
@@ -126,7 +129,7 @@ export function VueSuivi({
                         </th>
                         {colonnes.map((c) => (
                           <th key={c.id} scope="col" className="px-3 py-2.5 font-medium">
-                            {c.libelle}
+                            {libelleChamp(c, jours)}
                           </th>
                         ))}
                       </tr>

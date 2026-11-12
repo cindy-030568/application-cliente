@@ -23,10 +23,10 @@ export default async function PageReglages() {
         <div>
           <h2 className="font-titre text-xl font-bold">Le bilan</h2>
           <p className="text-[14px] text-texte-2">
-            Les mesures et ressentis proposés à tes clientes, dans cet ordre.
+            Les questions posées à tes clientes, rubrique par rubrique, dans cet ordre.
           </p>
         </div>
-        <GestionChamps champs={champs} fenetre={reglages.fenetre_bilan_jours} />
+        <GestionChamps champs={champs} fenetre={reglages.fenetre_bilan_jours} intro={reglages.intro_bilan} />
       </Carte>
     </div>
   );
