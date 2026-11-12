@@ -43,3 +43,6 @@ next-env.d.ts
 
 # fichiers pdf.js copiés automatiquement
 /public/pdfjs
+
+# Python
+__pycache__/

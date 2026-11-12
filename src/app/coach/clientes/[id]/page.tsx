@@ -12,6 +12,8 @@ import { modifierCliente } from "../actions";
 import { FormulaireInfos } from "../formulaire-infos";
 import { BlocConnexion, BlocNotes, BlocStatut, BlocSuppression } from "./blocs";
 import { BlocPlan, type PlanAffiche } from "./bloc-plans";
+import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
+import { chargerCategoriesAliment } from "@/lib/aliments";
 import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
@@ -19,8 +21,6 @@ export const metadata: Metadata = { title: "Fiche cliente" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const A_VENIR = [
-  { titre: "Repas et cibles", phase: 5 },
-  { titre: "Aliments exclus", phase: 5 },
   { titre: "Aperçu des recettes", phase: 6 },
 ];
 
@@ -36,7 +36,7 @@ export default async function PageFicheCliente({
   if (!UUID.test(id)) notFound();
 
   const { supabase } = await exigerCoach();
-  const [{ data: c }, { data: notes }, { data: plans }] = await Promise.all([
+  const [{ data: c }, { data: notes }, { data: plans }, { data: repas }, { data: exclusions }, categoriesAliment] = await Promise.all([
     supabase
       .from("clientes")
       .select(
@@ -55,6 +55,13 @@ export default async function PageFicheCliente({
       .eq("cliente_id", id)
       .order("created_at", { ascending: false })
       .returns<Plan[]>(),
+    supabase
+      .from("repas_cibles")
+      .select("type_repas, libelle, proteines_g, glucides_g, lipides_g")
+      .eq("cliente_id", id)
+      .order("ordre"),
+    supabase.from("exclusions").select("categorie_id, aliments(id, nom)").eq("cliente_id", id),
+    chargerCategoriesAliment(supabase),
   ]);
   if (!c) notFound();
 
@@ -125,6 +132,29 @@ export default async function PageFicheCliente({
             <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />
             <hr className="border-ligne" />
             <BlocPlan clienteId={c.id} type="sport" plans={plansAffiches("sport")} />
+          </Section>
+          <Section titre="Repas et cibles" sousTitre="Les cibles de chaque repas de son plan. Les kcal sont calculées automatiquement.">
+            <BlocRepas
+              clienteId={c.id}
+              initiaux={(repas ?? []).map((r) => ({
+                type_repas: r.type_repas as string,
+                libelle: r.libelle as string,
+                proteines_g: Number(r.proteines_g),
+                glucides_g: Number(r.glucides_g),
+                lipides_g: Number(r.lipides_g),
+              }))}
+            />
+          </Section>
+          <Section titre="Aliments exclus" sousTitre="Allergies, aversions, végétarienne… Les recettes concernées ne lui seront pas proposées.">
+            <BlocExclusions
+              clienteId={c.id}
+              categories={categoriesAliment}
+              categoriesInitiales={(exclusions ?? []).flatMap((e) => (e.categorie_id ? [e.categorie_id as string] : []))}
+              alimentsInitiaux={(exclusions ?? []).flatMap((e) => {
+                const a = (Array.isArray(e.aliments) ? e.aliments[0] : e.aliments) as { id: string; nom: string } | null;
+                return a ? [{ id: a.id, nom: a.nom }] : [];
+              })}
+            />
           </Section>
           <Section titre="Notes privées" sousTitre="Jamais visibles par la cliente.">
             <BlocNotes

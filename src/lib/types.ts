@@ -192,3 +192,119 @@ export function normaliserVideo(v: VideoBrute): Video {
   const { videos_filtres, ...reste } = v;
   return { ...reste, filtres: (videos_filtres ?? []).map((f) => f.filtre_id) };
 }
+
+export type CategorieAliment = { id: string; nom: string; ordre: number };
+
+export type Aliment = {
+  id: string;
+  source: "ciqual" | "perso";
+  code_ciqual: string | null;
+  nom: string;
+  groupe: string | null;
+  sous_groupe: string | null;
+  proteines_100: number;
+  glucides_100: number;
+  lipides_100: number;
+  kcal_100: number;
+  incomplet: boolean;
+  nom_unite: string | null;
+  poids_unite_g: number | null;
+  categories_verifiees: boolean;
+  actif: boolean;
+  categories: string[];
+};
+export const SELECTION_ALIMENT =
+  "id, source, code_ciqual, nom, groupe, sous_groupe, proteines_100, glucides_100, lipides_100, kcal_100, incomplet, nom_unite, poids_unite_g, categories_verifiees, actif, aliments_categories(categorie_id)";
+export type AlimentBrut = Omit<Aliment, "categories"> & { aliments_categories: { categorie_id: string }[] | null };
+export function normaliserAliment(a: AlimentBrut): Aliment {
+  const { aliments_categories, ...reste } = a;
+  return {
+    ...reste,
+    proteines_100: Number(reste.proteines_100),
+    glucides_100: Number(reste.glucides_100),
+    lipides_100: Number(reste.lipides_100),
+    kcal_100: Number(reste.kcal_100),
+    poids_unite_g: reste.poids_unite_g === null ? null : Number(reste.poids_unite_g),
+    categories: (aliments_categories ?? []).map((c) => c.categorie_id),
+  };
+}
+
+export type IngredientRecette = {
+  id: string;
+  aliment_id: string;
+  role: "proteine" | "glucide" | "lipide" | "fruit" | "fixe";
+  unite: "g" | "unite";
+  qte_base: number;
+  qte_min: number;
+  qte_max: number;
+  pas: number;
+  note: string | null;
+  ordre: number;
+  aliment: Pick<
+    Aliment,
+    "id" | "nom" | "proteines_100" | "glucides_100" | "lipides_100" | "kcal_100" | "nom_unite" | "poids_unite_g" | "categories"
+  >;
+};
+
+export type Recette = {
+  id: string;
+  titre: string;
+  description: string | null;
+  photo_path: string | null;
+  temps_prep_min: number | null;
+  etapes: string[];
+  astuce: string | null;
+  publiee: boolean;
+  repas: string[];
+  tags: string[];
+  ingredients: IngredientRecette[];
+};
+
+export const SELECTION_RECETTE =
+  "id, titre, description, photo_path, temps_prep_min, etapes, astuce, publiee, recettes_repas(type_repas), recettes_tags(tag_id), recette_ingredients(id, aliment_id, role, unite, qte_base, qte_min, qte_max, pas, note, ordre, aliments(id, nom, proteines_100, glucides_100, lipides_100, kcal_100, nom_unite, poids_unite_g, aliments_categories(categorie_id)))";
+
+type AlimentEmbarque = {
+  id: string; nom: string; proteines_100: number; glucides_100: number; lipides_100: number; kcal_100: number;
+  nom_unite: string | null; poids_unite_g: number | null; aliments_categories: { categorie_id: string }[] | null;
+};
+export type RecetteBrute = Omit<Recette, "repas" | "tags" | "ingredients"> & {
+  recettes_repas: { type_repas: string }[] | null;
+  recettes_tags: { tag_id: string }[] | null;
+  recette_ingredients: (Omit<IngredientRecette, "aliment"> & { aliments: AlimentEmbarque | AlimentEmbarque[] })[] | null;
+};
+
+export function normaliserRecette(r: RecetteBrute): Recette {
+  const { recettes_repas, recettes_tags, recette_ingredients, ...reste } = r;
+  return {
+    ...reste,
+    repas: (recettes_repas ?? []).map((x) => x.type_repas),
+    tags: (recettes_tags ?? []).map((x) => x.tag_id),
+    ingredients: (recette_ingredients ?? [])
+      .map((i) => {
+        const a = Array.isArray(i.aliments) ? i.aliments[0] : i.aliments;
+        const { aliments: _a, ...ing } = i;
+        void _a;
+        return {
+          ...ing,
+          qte_base: Number(ing.qte_base),
+          qte_min: Number(ing.qte_min),
+          qte_max: Number(ing.qte_max),
+          pas: Number(ing.pas),
+          aliment: {
+            id: a.id,
+            nom: a.nom,
+            proteines_100: Number(a.proteines_100),
+            glucides_100: Number(a.glucides_100),
+            lipides_100: Number(a.lipides_100),
+            kcal_100: Number(a.kcal_100),
+            nom_unite: a.nom_unite,
+            poids_unite_g: a.poids_unite_g === null ? null : Number(a.poids_unite_g),
+            categories: (a.aliments_categories ?? []).map((c) => c.categorie_id),
+          },
+        };
+      })
+      .sort((x, y) => x.ordre - y.ordre),
+  };
+}
+
+export type Tag = { id: string; nom: string; ordre: number };

@@ -1,0 +1,4496 @@
+{
+ "aliments_perso": [
+  {
+   "nom": "Skyr nature 0 %",
+   "p": 10.0,
+   "g": 4.0,
+   "l": 0.2,
+   "k": 58,
+   "categories": [
+    "Produits laitiers"
+   ]
+  },
+  {
+   "nom": "Protéine en poudre (whey isolat), nature",
+   "p": 85.0,
+   "g": 4.0,
+   "l": 1.5,
+   "k": 370,
+   "categories": [
+    "Produits laitiers"
+   ]
+  }
+ ],
+ "recettes": [
+  {
+   "titre": "Pancakes moelleux à la banane",
+   "description": "Des pancakes bien épais, à garnir de fruits frais.",
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 15,
+   "tags": [
+    "Sucré",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 40,
+     "min": 15,
+     "max": 90,
+     "pas": 5,
+     "note": "mixés en farine"
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 20,
+     "min": 10,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13005",
+     "role": "fruit",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 100,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11046",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11025",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17130",
+     "role": "lipide",
+     "unite": "g",
+     "base": 3,
+     "min": 0,
+     "max": 8,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mixe les flocons d’avoine en farine fine.",
+    "Ajoute l’œuf, la protéine, la banane écrasée, le lait, la levure et la cannelle : mélange jusqu’à obtenir une pâte lisse.",
+    "Huile légèrement une poêle chaude et verse de petites louches de pâte.",
+    "Cuis 1 à 2 minutes par face, jusqu’à ce que des bulles se forment."
+   ],
+   "astuce": "La pâte se garde 24 h au frais : parfait pour le lendemain."
+  },
+  {
+   "titre": "Overnight oats chocolat & fruits rouges",
+   "description": "Préparé la veille, prêt au réveil : on n’a plus qu’à savourer.",
+   "repas": [
+    "petit_dejeuner"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 150,
+     "min": 75,
+     "max": 300,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 100,
+     "min": 100,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:18100",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13997",
+     "role": "fruit",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 160,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:15047",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Dans un bocal, mélange les flocons, le skyr, le lait, le cacao, les graines de chia et le sirop d’érable.",
+    "Couvre et laisse une nuit au réfrigérateur.",
+    "Le matin, ajoute les fruits rouges sur le dessus."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Bowl skyr, myrtilles & amandes",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 170,
+     "min": 85,
+     "max": 340,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 65,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:15000",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13028",
+     "role": "fruit",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:31008",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11025",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Verse le skyr dans un bol.",
+    "Ajoute les flocons d’avoine, les myrtilles et les amandes concassées.",
+    "Termine par le miel et une pincée de cannelle."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Omelette épinards & feta, pain complet",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "dejeuner"
+   ],
+   "temps": 10,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12066",
+     "role": "lipide",
+     "unite": "g",
+     "base": 20,
+     "min": 5,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:7110",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 3,
+     "min": 0,
+     "max": 8,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais tomber les épinards 1 minute dans une poêle avec l’huile.",
+    "Bats les œufs et les blancs, verse sur les épinards.",
+    "Émiette la feta, laisse cuire à feu doux jusqu’à ce que l’omelette prenne.",
+    "Sers avec le pain complet grillé."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Tartine avocat & œufs",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 10,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7110",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 20,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les œufs 6 minutes dans l’eau bouillante (mollets), puis passe-les sous l’eau froide.",
+    "Écrase l’avocat avec le jus de citron, sel et poivre.",
+    "Tartine le pain grillé, ajoute les rondelles de tomate et les œufs coupés en deux."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Porridge pomme-cannelle & noix",
+   "description": null,
+   "repas": [
+    "petit_dejeuner"
+   ],
+   "temps": 10,
+   "tags": [
+    "Sucré",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 45,
+     "min": 20,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 20,
+     "min": 10,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13039",
+     "role": "fruit",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 160,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:15005",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11025",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais chauffer les flocons et le lait 4 à 5 minutes en remuant.",
+    "Hors du feu, incorpore la protéine et la cannelle.",
+    "Ajoute la pomme en petits dés et les noix concassées."
+   ],
+   "astuce": "Pour une version plus fondante, fais revenir la pomme 3 minutes à la poêle avec la cannelle."
+  },
+  {
+   "titre": "Galette complète jambon, œuf & champignons",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:23801",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 20,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:28913",
+     "role": "proteine",
+     "unite": "g",
+     "base": 40,
+     "min": 20,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:12118",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20056",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais revenir les champignons émincés 3 minutes dans une poêle.",
+    "Pose la galette dans la poêle chaude, casse l’œuf au centre.",
+    "Ajoute le jambon, les champignons et l’emmental autour.",
+    "Replie les bords quand le blanc est pris."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Smoothie bowl mangue-banane",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 150,
+     "min": 75,
+     "max": 300,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13005",
+     "role": "fruit",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:13025",
+     "role": "fruit",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 25,
+     "min": 10,
+     "max": 55,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:15047",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 2,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:18107",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mixe le skyr, la banane, la mangue et la boisson à l’amande jusqu’à obtenir une texture épaisse.",
+    "Verse dans un bol.",
+    "Parsème de flocons d’avoine et de graines de chia."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Tartines ricotta, fraises & miel",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7110",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 20,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:19585",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19644",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13014",
+     "role": "fruit",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 160,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:31008",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mélange la ricotta et le fromage blanc.",
+    "Tartine le pain grillé de ce mélange.",
+    "Ajoute les fraises en lamelles et un filet de miel."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Muffins salés aux légumes",
+   "description": null,
+   "repas": [
+    "petit_dejeuner",
+    "collation"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 65,
+     "pas": 5,
+     "note": "mixés"
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20020",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12118",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11046",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 180 °C.",
+    "Coupe le poivron et la courgette en tout petits dés.",
+    "Mélange les œufs, les blancs, les flocons mixés, la levure et l’emmental, puis ajoute les légumes.",
+    "Répartis dans des moules à muffins et enfourne 20 minutes."
+   ],
+   "astuce": "Ils se gardent 3 jours au frais : réchauffe-les 30 secondes au micro-ondes."
+  },
+  {
+   "titre": "Bowl poulet teriyaki & riz",
+   "description": "Le grand classique sucré-salé, version maison.",
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20057",
+     "role": "fixe",
+     "unite": "g",
+     "base": 100,
+     "min": 100,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11104",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31008",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17130",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15010",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le riz.",
+    "Fais dorer le poulet en dés dans l’huile.",
+    "Ajoute la sauce soja et le miel, laisse caraméliser 2 minutes.",
+    "Cuis le brocoli et la carotte à la vapeur.",
+    "Dresse le bol et parsème de sésame."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Wrap poulet croquant",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 10,
+   "tags": [
+    "Salé",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7815",
+     "role": "glucide",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": "cuit à la poêle"
+    },
+    {
+     "a": "ciqual:20031",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19644",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11013",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le poulet en lanières à la poêle.",
+    "Mélange le fromage blanc et la moutarde pour la sauce.",
+    "Garnis la tortilla : sauce, salade, tomate, avocat et poulet.",
+    "Roule bien serré et coupe en deux."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Salade de quinoa, pois chiches & feta",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9340",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20532",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12066",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20019",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 0,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11027",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le quinoa et laisse-le refroidir.",
+    "Coupe le concombre et les tomates en dés.",
+    "Mélange avec les pois chiches rincés et la feta émiettée.",
+    "Assaisonne avec l’huile, le citron et la menthe ciselée."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Pâtes au thon & à la tomate",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9810",
+     "role": "glucide",
+     "unite": "g",
+     "base": 70,
+     "min": 30,
+     "max": 155,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:26039",
+     "role": "proteine",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 160,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11033",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:12120",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pâtes.",
+    "Fais revenir l’oignon émincé dans l’huile, ajoute la pulpe de tomate et laisse mijoter 8 minutes.",
+    "Ajoute le thon émietté et le basilic.",
+    "Mélange aux pâtes et parsème de parmesan."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Buddha bowl patate douce & tofu",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20904",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:4101",
+     "role": "glucide",
+     "unite": "g",
+     "base": 150,
+     "min": 60,
+     "max": 330,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11104",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15010",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 200 °C. Coupe la patate douce en cubes et rôtis-la 25 minutes.",
+    "Coupe le tofu en dés et fais-le dorer à la poêle avec la sauce soja.",
+    "Dresse le bol : jeunes pousses d’épinards, patate douce, tofu et avocat.",
+    "Parsème de sésame."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Poké bowl saumon & mangue",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:26036",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": "très frais"
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20019",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13025",
+     "role": "fruit",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 80,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:11104",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15010",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le riz et laisse-le tiédir.",
+    "Coupe le saumon, l’avocat, le concombre et la mangue en dés.",
+    "Dispose tous les ingrédients sur le riz.",
+    "Arrose de sauce soja et parsème de sésame."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Curry de lentilles corail & raïta",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20535",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 40,
+     "min": 15,
+     "max": 90,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:18041",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 100,
+     "min": 100,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11005",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11006",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": "en raïta"
+    }
+   ],
+   "etapes": [
+    "Fais revenir l’oignon avec le curry et le gingembre.",
+    "Ajoute les lentilles rincées, la pulpe de tomate, le lait de coco et 200 ml d’eau. Laisse mijoter 15 minutes.",
+    "Ajoute les épinards en fin de cuisson.",
+    "Sers avec le riz et le skyr mélangé à un peu de menthe (raïta)."
+   ],
+   "astuce": "Le curry est encore meilleur le lendemain : double les quantités."
+  },
+  {
+   "titre": "Croque protéiné jambon-fromage",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 10,
+   "tags": [
+    "Salé",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7111",
+     "role": "glucide",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:28913",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12118",
+     "role": "lipide",
+     "unite": "g",
+     "base": 20,
+     "min": 5,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19644",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20031",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Tartine les tranches de pain de fromage blanc.",
+    "Garnis de jambon et d’emmental, referme.",
+    "Fais dorer 4 minutes au four ou à la poêle.",
+    "Sers avec la salade."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Chili con carne",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 35,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:6250",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20524",
+     "role": "glucide",
+     "unite": "g",
+     "base": 80,
+     "min": 30,
+     "max": 175,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 40,
+     "min": 15,
+     "max": 90,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11042",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11049",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 3,
+     "min": 0,
+     "max": 8,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais revenir l’oignon et le poivron dans l’huile.",
+    "Ajoute la viande hachée et fais-la dorer.",
+    "Ajoute les épices, la pulpe de tomate et les haricots rouges : laisse mijoter 20 minutes.",
+    "Sers avec le riz."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Salade niçoise revisitée",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:26039",
+     "role": "proteine",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 160,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:4008",
+     "role": "glucide",
+     "unite": "g",
+     "base": 150,
+     "min": 60,
+     "max": 330,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20061",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13186",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11091",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pommes de terre et les haricots verts à l’eau, l’œuf 9 minutes.",
+    "Laisse refroidir puis coupe en morceaux.",
+    "Assemble avec les tomates, le thon et les olives.",
+    "Assaisonne avec l’huile et le vinaigre."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Bowl mexicain poulet, maïs & haricots",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20524",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20066",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:2030",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11049",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le riz.",
+    "Fais dorer le poulet en dés avec le paprika.",
+    "Réchauffe les haricots et le maïs.",
+    "Dresse le bol avec le poivron cru, l’avocat et un filet de citron vert."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Taboulé libanais au poulet",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9690",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20019",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11014",
+     "role": "fixe",
+     "unite": "g",
+     "base": 15,
+     "min": 15,
+     "max": 15,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11027",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 15,
+     "min": 15,
+     "max": 15,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 0,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le boulgour et laisse-le refroidir.",
+    "Fais griller le poulet et coupe-le en lamelles.",
+    "Hache finement le persil et la menthe, coupe tomates et concombre en petits dés.",
+    "Mélange le tout avec le citron et l’huile."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Gnocchis poêlés, tomates & mozzarella",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:26264",
+     "role": "glucide",
+     "unite": "g",
+     "base": 150,
+     "min": 60,
+     "max": 330,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19590",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20172",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 4,
+     "min": 0,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11033",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais dorer les gnocchis 5 minutes dans l’huile.",
+    "Ajoute les tomates cerises coupées en deux et les épinards, laisse fondre 2 minutes.",
+    "Ajoute la mozzarella en morceaux et le basilic juste avant de servir."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Shakshuka",
+   "description": null,
+   "repas": [
+    "dejeuner",
+    "diner"
+   ],
+   "temps": 25,
+   "tags": [
+    "Salé",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:7110",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 200,
+     "min": 200,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11042",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11049",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:12066",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais revenir l’oignon et le poivron dans l’huile.",
+    "Ajoute la pulpe de tomate et les épices, laisse mijoter 10 minutes.",
+    "Creuse deux puits, casse les œufs dedans, couvre et cuis 6 à 8 minutes.",
+    "Émiette la feta et sers avec le pain."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Salade de pâtes poulet, mozzarella & basilic",
+   "description": null,
+   "repas": [
+    "dejeuner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9810",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 90,
+     "min": 45,
+     "max": 180,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19590",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20172",
+     "role": "fixe",
+     "unite": "g",
+     "base": 100,
+     "min": 100,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20217",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11033",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11091",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pâtes et laisse-les refroidir.",
+    "Fais griller le poulet, coupe-le en dés.",
+    "Mélange avec les tomates, la mozzarella, la roquette et le basilic.",
+    "Assaisonne avec l’huile et le vinaigre balsamique."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Saumon au four, patate douce & haricots verts",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:26036",
+     "role": "proteine",
+     "unite": "g",
+     "base": 110,
+     "min": 55,
+     "max": 220,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:4101",
+     "role": "glucide",
+     "unite": "g",
+     "base": 200,
+     "min": 80,
+     "max": 440,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20061",
+     "role": "fixe",
+     "unite": "g",
+     "base": 120,
+     "min": 120,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:16400",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11070",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 200 °C.",
+    "Rôtis la patate douce en quartiers 25 minutes.",
+    "Ajoute le saumon les 12 dernières minutes, avec citron et thym.",
+    "Cuis les haricots verts à la vapeur et ajoute une noisette de beurre."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Cabillaud en papillote, riz & courgettes",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 25,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:26043",
+     "role": "proteine",
+     "unite": "g",
+     "base": 140,
+     "min": 70,
+     "max": 280,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20020",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 15,
+     "min": 15,
+     "max": 15,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 6,
+     "min": 0,
+     "max": 15,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11070",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 200 °C. Fais cuire le riz.",
+    "Sur une feuille de papier cuisson, dépose courgette en rondelles, tomate, cabillaud, citron, thym et huile.",
+    "Ferme la papillote et enfourne 15 minutes."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Boulettes de bœuf à la tomate & semoule",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:6250",
+     "role": "proteine",
+     "unite": "g",
+     "base": 110,
+     "min": 55,
+     "max": 220,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9610",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11042",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11014",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 4,
+     "min": 0,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mélange la viande hachée avec le persil, le cumin, sel et poivre, puis forme des boulettes.",
+    "Fais-les dorer dans l’huile.",
+    "Ajoute l’oignon et la pulpe de tomate, laisse mijoter 15 minutes.",
+    "Sers avec la semoule."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Escalope de dinde, crème de champignons & pâtes",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:36304",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9810",
+     "role": "glucide",
+     "unite": "g",
+     "base": 60,
+     "min": 25,
+     "max": 130,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20056",
+     "role": "fixe",
+     "unite": "g",
+     "base": 120,
+     "min": 120,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19436",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11014",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pâtes.",
+    "Fais dorer l’escalope, réserve.",
+    "Dans la même poêle, fais revenir l’oignon et les champignons, puis ajoute la crème.",
+    "Remets la dinde 2 minutes dans la sauce, parsème de persil."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Curry de poulet au lait de coco",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 25,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:18041",
+     "role": "lipide",
+     "unite": "g",
+     "base": 50,
+     "min": 15,
+     "max": 125,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11005",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le riz.",
+    "Fais revenir l’oignon et le poivron, ajoute le poulet en dés et le curry.",
+    "Verse le lait de coco, laisse mijoter 10 minutes.",
+    "Ajoute les épinards en fin de cuisson."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Frittata courgette, chèvre & menthe",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 25,
+   "tags": [
+    "Salé",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 3,
+     "min": 1,
+     "max": 6,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:4008",
+     "role": "glucide",
+     "unite": "g",
+     "base": 150,
+     "min": 60,
+     "max": 330,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20020",
+     "role": "fixe",
+     "unite": "g",
+     "base": 120,
+     "min": 120,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12805",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11027",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 3,
+     "min": 0,
+     "max": 8,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pommes de terre en rondelles 10 minutes à l’eau.",
+    "Fais revenir la courgette dans l’huile, ajoute les pommes de terre.",
+    "Verse les œufs battus, parsème de chèvre et de menthe.",
+    "Cuis à couvert 8 minutes à feu doux."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Pizza tortilla express aux légumes",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 15,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7815",
+     "role": "glucide",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:19590",
+     "role": "proteine",
+     "unite": "g",
+     "base": 50,
+     "min": 25,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20056",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13186",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11035",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 220 °C.",
+    "Étale la pulpe de tomate sur la tortilla.",
+    "Ajoute les légumes émincés, la mozzarella, les olives et l’origan.",
+    "Enfourne 8 à 10 minutes."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Soupe thaï aux crevettes & nouilles de riz",
+   "description": null,
+   "repas": [
+    "diner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:10006",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9901",
+     "role": "glucide",
+     "unite": "g",
+     "base": 150,
+     "min": 60,
+     "max": 330,
+     "pas": 5,
+     "note": "poids cuit"
+    },
+    {
+     "a": "ciqual:18041",
+     "role": "lipide",
+     "unite": "g",
+     "base": 40,
+     "min": 10,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20056",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11006",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:2030",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11094",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:25948",
+     "role": "fixe",
+     "unite": "g",
+     "base": 250,
+     "min": 250,
+     "max": 250,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Porte le bouillon à frémissement avec le gingembre et le lait de coco.",
+    "Ajoute la carotte en julienne et les champignons, laisse cuire 5 minutes.",
+    "Ajoute les crevettes et les nouilles, réchauffe 2 minutes.",
+    "Termine avec le citron vert et la coriandre."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Wok de tofu, brocoli & noix de cajou",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20904",
+     "role": "proteine",
+     "unite": "g",
+     "base": 130,
+     "min": 65,
+     "max": 260,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20057",
+     "role": "fixe",
+     "unite": "g",
+     "base": 120,
+     "min": 120,
+     "max": 120,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11104",
+     "role": "fixe",
+     "unite": "g",
+     "base": 15,
+     "min": 15,
+     "max": 15,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11006",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15054",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17130",
+     "role": "lipide",
+     "unite": "g",
+     "base": 3,
+     "min": 0,
+     "max": 8,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire le riz.",
+    "Fais dorer le tofu en dés dans l’huile, réserve.",
+    "Saute le brocoli et le poivron 5 minutes à feu vif.",
+    "Remets le tofu, ajoute la sauce soja, le gingembre et les noix de cajou."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Hachis parmentier de patate douce",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 45,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:6250",
+     "role": "proteine",
+     "unite": "g",
+     "base": 110,
+     "min": 55,
+     "max": 220,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:4101",
+     "role": "glucide",
+     "unite": "g",
+     "base": 220,
+     "min": 90,
+     "max": 485,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12118",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire la patate douce à l’eau puis écrase-la avec le lait.",
+    "Fais revenir l’oignon, la carotte râpée et la viande, ajoute la pulpe de tomate.",
+    "Dans un plat, mets la viande puis la purée, parsème d’emmental.",
+    "Gratine 15 minutes à 200 °C."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Chili sin carne au tempeh",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20917",
+     "role": "proteine",
+     "unite": "g",
+     "base": 90,
+     "min": 45,
+     "max": 180,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20524",
+     "role": "glucide",
+     "unite": "g",
+     "base": 90,
+     "min": 35,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9100",
+     "role": "glucide",
+     "unite": "g",
+     "base": 40,
+     "min": 15,
+     "max": 90,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11042",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11049",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13004",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Émiette le tempeh et fais-le dorer avec l’oignon et le poivron.",
+    "Ajoute les épices, la pulpe de tomate et les haricots : laisse mijoter 15 minutes.",
+    "Sers avec le riz et l’avocat en dés."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Omelette roulée saumon fumé & épinards",
+   "description": null,
+   "repas": [
+    "diner"
+   ],
+   "temps": 20,
+   "tags": [
+    "Salé"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:26037",
+     "role": "proteine",
+     "unite": "g",
+     "base": 40,
+     "min": 20,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:4008",
+     "role": "glucide",
+     "unite": "g",
+     "base": 180,
+     "min": 70,
+     "max": 395,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20059",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19436",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les pommes de terre à la vapeur.",
+    "Fais une omelette fine, garnis-la d’épinards tombés et de saumon fumé.",
+    "Roule-la et coupe en tronçons.",
+    "Sers avec les pommes de terre et la crème."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Poulet, ratatouille & quinoa",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 40,
+   "tags": [
+    "Salé",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:36017",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9340",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20053",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20020",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20087",
+     "role": "fixe",
+     "unite": "g",
+     "base": 60,
+     "min": 60,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20047",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 0,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11060",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Coupe tous les légumes en dés et fais-les mijoter 25 minutes avec l’huile et les herbes.",
+    "Fais cuire le quinoa.",
+    "Fais griller le poulet.",
+    "Sers le poulet sur la ratatouille et le quinoa."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Pâtes complètes à la bolognaise de lentilles",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 30,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20535",
+     "role": "proteine",
+     "unite": "g",
+     "base": 45,
+     "min": 20,
+     "max": 90,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9870",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20169",
+     "role": "fixe",
+     "unite": "g",
+     "base": 200,
+     "min": 200,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 50,
+     "min": 50,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12120",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 4,
+     "min": 0,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais revenir l’oignon et la carotte râpée dans l’huile.",
+    "Ajoute les lentilles, la pulpe de tomate et 150 ml d’eau : laisse mijoter 15 minutes.",
+    "Fais cuire les pâtes.",
+    "Sers avec le parmesan."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Salade tiède de lentilles, betterave & chèvre",
+   "description": null,
+   "repas": [
+    "diner",
+    "dejeuner"
+   ],
+   "temps": 25,
+   "tags": [
+    "Salé",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20585",
+     "role": "glucide",
+     "unite": "g",
+     "base": 50,
+     "min": 20,
+     "max": 110,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:12805",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20003",
+     "role": "fixe",
+     "unite": "g",
+     "base": 100,
+     "min": 100,
+     "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20217",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:15005",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11091",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 4,
+     "min": 0,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Fais cuire les lentilles 20 minutes, les œufs 9 minutes.",
+    "Coupe la betterave en dés.",
+    "Mélange les lentilles tièdes avec la roquette, la betterave, les œufs et le chèvre.",
+    "Ajoute les noix, l’huile et le vinaigre."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Mug cake chocolat",
+   "description": null,
+   "repas": [
+    "collation"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 20,
+     "min": 10,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 25,
+     "min": 10,
+     "max": 55,
+     "pas": 5,
+     "note": "mixés"
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 30,
+     "min": 15,
+     "max": 60,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:18100",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 30,
+     "min": 30,
+     "max": 30,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:11046",
+     "role": "fixe",
+     "unite": "g",
+     "base": 2,
+     "min": 2,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31074",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mélange tous les ingrédients dans un grand mug, sauf le chocolat.",
+    "Enfonce les carrés de chocolat au centre.",
+    "Cuis 70 à 90 secondes au micro-ondes."
+   ],
+   "astuce": "Le cœur doit rester légèrement fondant : arrête la cuisson dès que le dessus est pris."
+  },
+  {
+   "titre": "Energy balls dattes & cacao",
+   "description": null,
+   "repas": [
+    "collation"
+   ],
+   "temps": 15,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:13011",
+     "role": "fruit",
+     "unite": "g",
+     "base": 30,
+     "min": 15,
+     "max": 50,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 15,
+     "min": 6,
+     "max": 33,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15000",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:18100",
+     "role": "fixe",
+     "unite": "g",
+     "base": 4,
+     "min": 4,
+     "max": 4,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 10,
+     "min": 5,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mixe les dattes dénoyautées avec les amandes.",
+    "Ajoute les flocons, le cacao et la protéine, mixe encore.",
+    "Forme 3 ou 4 boules et garde-les au frais."
+   ],
+   "astuce": "Prépare-en pour la semaine : elles se gardent 5 jours au réfrigérateur."
+  },
+  {
+   "titre": "Skyr, fruits rouges & amandes",
+   "description": null,
+   "repas": [
+    "collation",
+    "petit_dejeuner"
+   ],
+   "temps": 3,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 150,
+     "min": 75,
+     "max": 300,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13997",
+     "role": "fruit",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 160,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:15000",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31008",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Verse le skyr dans un bol.",
+    "Ajoute les fruits rouges et les amandes effilées.",
+    "Termine par un filet de miel."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Fromage blanc, banane & beurre de cacahuète",
+   "description": null,
+   "repas": [
+    "collation"
+   ],
+   "temps": 3,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:19644",
+     "role": "proteine",
+     "unite": "g",
+     "base": 150,
+     "min": 75,
+     "max": 300,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13005",
+     "role": "fruit",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:15202",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11025",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Verse le fromage blanc dans un bol.",
+    "Ajoute la banane en rondelles.",
+    "Termine par le beurre de cacahuète et la cannelle."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Galettes de riz, saumon fumé & chèvre frais",
+   "description": null,
+   "repas": [
+    "collation",
+    "dejeuner"
+   ],
+   "temps": 5,
+   "tags": [
+    "Salé",
+    "Rapide",
+    "Sans cuisson"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:7352",
+     "role": "glucide",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:26037",
+     "role": "proteine",
+     "unite": "g",
+     "base": 40,
+     "min": 20,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:12805",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20019",
+     "role": "fixe",
+     "unite": "g",
+     "base": 40,
+     "min": 40,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Tartine les galettes de chèvre frais.",
+    "Ajoute le saumon fumé et les rondelles de concombre.",
+    "Un trait de citron, du poivre, c’est prêt."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Smoothie banane-cacao protéiné",
+   "description": null,
+   "repas": [
+    "collation",
+    "petit_dejeuner"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Rapide"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:19041",
+     "role": "fixe",
+     "unite": "g",
+     "base": 200,
+     "min": 200,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 20,
+     "min": 10,
+     "max": 40,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13005",
+     "role": "fruit",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 160,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 15,
+     "min": 6,
+     "max": 33,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15202",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 2,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:18100",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mets tous les ingrédients dans le blender.",
+    "Mixe 1 minute jusqu’à ce que ce soit bien lisse.",
+    "Ajoute quelques glaçons si tu l’aimes bien frais."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Pomme au four, skyr & noix",
+   "description": null,
+   "repas": [
+    "collation"
+   ],
+   "temps": 25,
+   "tags": [
+    "Sucré",
+    "Végétarien"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:13039",
+     "role": "fruit",
+     "unite": "g",
+     "base": 150,
+     "min": 80,
+     "max": 240,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 120,
+     "min": 60,
+     "max": 240,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:15005",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11025",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 180 °C.",
+    "Coupe la pomme en quartiers, saupoudre de cannelle et enfourne 20 minutes.",
+    "Sers chaude sur le skyr, avec les noix et le sirop d’érable."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Cookies avoine, banane & chocolat",
+   "description": null,
+   "repas": [
+    "collation"
+   ],
+   "temps": 20,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 65,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Protéine en poudre (whey isolat), nature",
+     "role": "proteine",
+     "unite": "g",
+     "base": 15,
+     "min": 8,
+     "max": 30,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13005",
+     "role": "fruit",
+     "unite": "g",
+     "base": 40,
+     "min": 20,
+     "max": 60,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:31074",
+     "role": "lipide",
+     "unite": "g",
+     "base": 8,
+     "min": 2,
+     "max": 20,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:15202",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 2,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11046",
+     "role": "fixe",
+     "unite": "g",
+     "base": 1,
+     "min": 1,
+     "max": 1,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Préchauffe le four à 180 °C.",
+    "Écrase la banane et mélange-la avec les flocons, la protéine, la levure et le beurre de cacahuète.",
+    "Ajoute le chocolat en pépites.",
+    "Forme 3 cookies et enfourne 12 minutes."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Houmous maison & pain pita",
+   "description": null,
+   "repas": [
+    "collation",
+    "dejeuner"
+   ],
+   "temps": 10,
+   "tags": [
+    "Salé",
+    "Végétarien",
+    "Sans cuisson"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:20532",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:7180",
+     "role": "glucide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 65,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:15010",
+     "role": "lipide",
+     "unite": "g",
+     "base": 10,
+     "min": 3,
+     "max": 25,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:17270",
+     "role": "lipide",
+     "unite": "g",
+     "base": 5,
+     "min": 0,
+     "max": 12,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 10,
+     "min": 10,
+     "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:11000",
+     "role": "fixe",
+     "unite": "g",
+     "base": 3,
+     "min": 3,
+     "max": 3,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:20019",
+     "role": "fixe",
+     "unite": "g",
+     "base": 80,
+     "min": 80,
+     "max": 80,
+     "pas": 5,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mixe les pois chiches, le sésame, l’huile, le citron et l’ail avec 2 à 3 cuillères d’eau.",
+    "Coupe la carotte et le concombre en bâtonnets.",
+    "Sers avec le pain pita grillé."
+   ],
+   "astuce": null
+  },
+  {
+   "titre": "Chia pudding coco-mangue",
+   "description": null,
+   "repas": [
+    "collation",
+    "petit_dejeuner"
+   ],
+   "temps": 5,
+   "tags": [
+    "Sucré",
+    "Végétarien",
+    "Sans cuisson",
+    "Batch cooking"
+   ],
+   "ingredients": [
+    {
+     "a": "ciqual:15047",
+     "role": "lipide",
+     "unite": "g",
+     "base": 15,
+     "min": 4,
+     "max": 38,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:18107",
+     "role": "fixe",
+     "unite": "g",
+     "base": 150,
+     "min": 150,
+     "max": 150,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 100,
+     "min": 50,
+     "max": 200,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:13025",
+     "role": "fruit",
+     "unite": "g",
+     "base": 80,
+     "min": 40,
+     "max": 130,
+     "pas": 10,
+     "note": null
+    },
+    {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 10,
+     "min": 4,
+     "max": 22,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:31034",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
+     "pas": 1,
+     "note": null
+    }
+   ],
+   "etapes": [
+    "Mélange les graines de chia avec la boisson à l’amande et le sirop d’érable.",
+    "Laisse prendre au moins 2 heures au frais (ou une nuit).",
+    "Ajoute le skyr, les flocons et la mangue en dés au moment de servir."
+   ],
+   "astuce": null
+  }
+ ]
+}

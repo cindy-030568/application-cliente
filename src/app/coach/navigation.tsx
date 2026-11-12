@@ -2,19 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconeClientes, IconeReglages, IconeRessources, IconeSuivi, IconeTableau, IconeVideo } from "@/components/icones";
+import {
+  IconeClientes,
+  IconeNutrition,
+  IconeRecettes,
+  IconeReglages,
+  IconeRessources,
+  IconeSuivi,
+  IconeTableau,
+  IconeVideo,
+} from "@/components/icones";
 import { cx } from "@/components/ui";
 
 const LIENS = [
   { href: "/coach", label: "Tableau de bord", Icone: IconeTableau },
   { href: "/coach/bilans", label: "Bilans", Icone: IconeSuivi },
   { href: "/coach/clientes", label: "Clientes", Icone: IconeClientes },
+  { href: "/coach/recettes", label: "Recettes", Icone: IconeRecettes },
+  { href: "/coach/aliments", label: "Aliments", Icone: IconeNutrition },
   { href: "/coach/videos", label: "Vidéos", Icone: IconeVideo },
   { href: "/coach/ressources", label: "Ressources", Icone: IconeRessources },
   { href: "/coach/reglages", label: "Réglages", Icone: IconeReglages },
 ];
 
-const A_VENIR = ["Recettes", "Aliments"];
+const A_VENIR: string[] = [];
 
 export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
   const chemin = usePathname();
@@ -45,7 +56,7 @@ export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
           </Link>
         );
       })}
-      <div className="mt-6 hidden flex-col gap-1 md:flex">
+      {A_VENIR.length > 0 && <div className="mt-6 hidden flex-col gap-1 md:flex">
         <p className="px-3 text-[11px] font-medium uppercase tracking-[0.14em] text-texte-2">
           Bientôt
         </p>
@@ -54,7 +65,7 @@ export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
             {l}
           </span>
         ))}
-      </div>
+      </div>}
     </nav>
   );
 }

@@ -267,3 +267,33 @@ Les anciennes questions de ressenti (faim, confort digestif, cycle) sont masqué
 
 > Rien à régler dans Supabase : la connexion par mot de passe est déjà active.
 > Pour tester côté cliente, la fenêtre de navigation privée oublie toujours la connexion à sa fermeture : c'est normal.
+
+---
+
+# Phase 5 — Aliments et recettes
+
+## Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0006_aliments_recettes.sql`](../supabase/migrations/0006_aliments_recettes.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+3. Vérifie : **Storage** contient un espace **recettes** (marqué *Public* : ce sont les photos des plats, sans donnée personnelle).
+
+## Dans ton dashboard, dans cet ordre
+
+1. **Aliments** → **Importer la table Ciqual (3 049 aliments)**. Patiente environ 30 secondes.
+   La table officielle de l'ANSES est importée avec ses catégories d'exclusion proposées automatiquement. Ce sont des propositions : vérifie celles des aliments que tu utilises, surtout pour les allergies.
+2. **Recettes** → **Importer les 50 recettes de départ**.
+3. Ouvre une recette pour la découvrir ou la modifier :
+   - le **rôle** de chaque ingrédient indique ce que le moteur pourra ajuster :
+     - **Protéine / Glucide / Lipide** : ajusté pour atteindre la cible correspondante ;
+     - **Fruit** : ajusté dans sa fourchette ;
+     - **Fixe** : légumes, épices, sauces légères, ne bouge pas ;
+   - **Min / Max / Pas** encadrent les quantités que le moteur pourra proposer (le pas sert à l'arrondi : 5 g, 1 œuf…) ;
+   - en haut du tableau, les macros de la recette de base.
+4. Ajoute une photo à une recette, puis crée une recette de test avec « + Ajouter un ingrédient ».
+5. **Fiche de ta cliente test** :
+   - **Repas et cibles** : ajoute ses repas (petit-déjeuner, déjeuner, collation(s), dîner…) avec protéines, glucides et lipides. Les kcal se calculent seules. → **Enregistrer les repas**.
+   - **Aliments exclus** : essaie le raccourci « Végétarienne », ajoute un aliment précis → **Enregistrer les exclusions**.
+6. **Aliments** → **Nouvel aliment** : crée un aliment perso (valeurs de l'étiquette pour 100 g), avec une unité si besoin.
+
+> Les recettes ne sont pas encore visibles côté cliente avec ses quantités : c'est l'objet des phases 6 (moteur de calcul) et 7 (expérience cliente).
