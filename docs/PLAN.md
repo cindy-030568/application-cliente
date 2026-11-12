@@ -159,6 +159,7 @@ Code TypeScript pur, sans dépendance à la base, couvert par des tests unitaire
 | 7 | **Recettes côté cliente** | Choix du repas, liste compatible, fiche personnalisée, portions, favoris, inspiration, exclusions, **liste de courses** générée depuis les recettes choisies. |
 | 8 | **Rappels et PWA** | Installation sur l'écran d'accueil, icône, notifications push, emails Brevo, **relance automatique des bilans non envoyés**. |
 | 9 | **Finitions et mise en ligne** | Passe design, accessibilité, nom de domaine, Supabase Pro, hébergement de production, vérification RGPD. |
+| 10 | **Communauté** (après la mise en ligne) | Un seul groupe d'échange entre clientes : messages et **photos**, **réactions**, clientes affichées par leur **prénom**. Adhésion volontaire avec charte, modération par la coach (supprimer, épingler, retirer une cliente), signalement, suppression de ses propres messages, notifications en option. Aucune donnée de suivi visible. Mise à jour de la politique de confidentialité. |
 
 Après chaque phase : démonstration, mode d'emploi pour tester, puis attente du feu vert.
 
@@ -170,7 +171,7 @@ Inspirées de l'étude d'Ecrine (11/11/2026), validées par Cindy :
 - Contrat signé en ligne avant l'accès.
 - Parrainage et avis clientes.
 
-Écartées volontairement : messagerie intégrée (WhatsApp), « repas respecté oui/non » et taux de conformité, courbe des calories, CRM de prospects.
+Écartées volontairement : messagerie privée cliente ↔ coach (WhatsApp), « repas respecté oui/non » et taux de conformité, courbe des calories, CRM de prospects.
 
 ## 9. Plus tard (hors v1)
 - Intégration API Nutrium : seulement si une API publique existe, à vérifier et à confirmer avec Cindy.
