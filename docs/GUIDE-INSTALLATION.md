@@ -465,3 +465,22 @@ Après 5 à 30 minutes, Vercel passe en « Valid Configuration » ✅ et le cade
 ## Sauvegarde mensuelle
 
 **Réglages** → **Télécharger une sauvegarde** : un fichier avec toutes les données. Fais-le une fois par mois et range-le dans un endroit privé.
+
+## Étape 2 : relier Brevo à ton domaine (emails à ton nom, moins de spams)
+
+**A. Authentifier le domaine** (une seule fois, puis jusqu'à 48 h d'attente)
+1. Brevo → ton nom en haut à droite → **Expéditeurs, domaines et IP dédiées** → onglet **Domaines** → **Ajouter un domaine**.
+2. Écris `fitw-cindy.fr` → valide.
+3. Si Brevo propose de **se connecter à ton hébergeur (OVH) pour tout configurer automatiquement**, accepte : c'est le plus simple.
+4. Sinon, Brevo affiche 3 ou 4 lignes (Brevo code, DKIM, DMARC). Pour chacune, chez OVH → **Zone DNS** → **Ajouter une entrée** :
+   - choisis le **type** indiqué par Brevo (**TXT** ou **CNAME**) ;
+   - **Sous-domaine** : ce que Brevo indique comme « Hôte / Nom », **sans** `.fitw-cindy.fr` à la fin (ex. `brevo1._domainkey`, `_dmarc`, ou vide pour le Brevo code) ;
+   - **Valeur / Cible** : copie exactement ce que donne Brevo (pour un CNAME, ajoute un point à la fin).
+5. Retourne dans Brevo → **Authentifier ce domaine**. S'il dit que ce n'est pas encore bon, réessaie quelques heures plus tard.
+
+**B. Créer l'expéditeur** (quand le domaine est authentifié ✅)
+1. Brevo → **Expéditeurs, domaines et IP dédiées** → onglet **Expéditeurs** → **Ajouter un expéditeur**.
+2. Nom : `Cindy · fitw_cindy` — Email : `cindy@fitw-cindy.fr`.
+3. L'app utilisera automatiquement cet expéditeur pour les rappels.
+
+**C. Les emails de connexion (codes)** : Supabase → **Authentication** → **Emails** → **SMTP Settings** → remplace l'adresse d'expéditeur par `cindy@fitw-cindy.fr` → **Save**.

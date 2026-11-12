@@ -38,7 +38,10 @@ async function raisonBrevo(r: Response): Promise<string> {
 
 let expediteurEnCache: { name: string; email: string } | null = null;
 
-/** Expéditeur : variables BREVO_EXPEDITEUR_* si renseignées, sinon le premier expéditeur validé du compte Brevo. */
+/**
+ * Expéditeur : variables BREVO_EXPEDITEUR_* si renseignées ; sinon un expéditeur validé
+ * du compte Brevo, de préférence sur le domaine de l'app (ex. @fitw-cindy.fr pour app.fitw-cindy.fr).
+ */
 async function expediteur(cle: string) {
   if (process.env.BREVO_EXPEDITEUR_EMAIL) {
     return { name: process.env.BREVO_EXPEDITEUR_NOM || "Cindy · fitw_cindy", email: process.env.BREVO_EXPEDITEUR_EMAIL };
@@ -47,10 +50,24 @@ async function expediteur(cle: string) {
   const r = await fetch("https://api.brevo.com/v3/senders", { headers: { "api-key": cle, accept: "application/json" } });
   if (!r.ok) throw new ErreurBrevo("expediteurs", r.status, await raisonBrevo(r));
   const { senders } = (await r.json()) as { senders?: { name: string; email: string; active: boolean }[] };
-  const s = senders?.find((x) => x.active);
+  const actifs = (senders ?? []).filter((x) => x.active);
+  const s = actifs.find((x) => surDomaineDuSite(x.email)) ?? actifs[0];
   if (!s) throw new Error("Brevo : aucun expéditeur validé");
   expediteurEnCache = { name: s.name || "Cindy · fitw_cindy", email: s.email };
   return expediteurEnCache;
+}
+
+/** Vrai si l'adresse est sur le domaine du site (app.fitw-cindy.fr → @fitw-cindy.fr). */
+export function surDomaineDuSite(email: string, site = SITE_URL()): boolean {
+  const domaine = email.split("@")[1]?.toLowerCase();
+  if (!domaine) return false;
+  let hote: string;
+  try {
+    hote = new URL(site).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return hote === domaine || hote.endsWith(`.${domaine}`);
 }
 
 export async function envoyerEmail(o: { email: string; nom: string; sujet: string; html: string; texte: string }) {
