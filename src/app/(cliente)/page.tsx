@@ -163,7 +163,7 @@ export default async function PageAccueil() {
         </Link>
 
         <div className="grid grid-cols-2 gap-3">
-          <Tuile href="/sport#videos" icone={<IconeVideo className="size-6" />} titre="Vidéos d’exercices" />
+          <Tuile href="/sport/videos" icone={<IconeVideo className="size-6" />} titre="Vidéos d’exercices" />
           <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
         </div>
 

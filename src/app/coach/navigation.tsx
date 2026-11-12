@@ -2,18 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconeClientes, IconeReglages, IconeRessources, IconeSuivi, IconeTableau } from "@/components/icones";
+import { IconeClientes, IconeReglages, IconeRessources, IconeSuivi, IconeTableau, IconeVideo } from "@/components/icones";
 import { cx } from "@/components/ui";
 
 const LIENS = [
   { href: "/coach", label: "Tableau de bord", Icone: IconeTableau },
   { href: "/coach/bilans", label: "Bilans", Icone: IconeSuivi },
   { href: "/coach/clientes", label: "Clientes", Icone: IconeClientes },
+  { href: "/coach/videos", label: "Vidéos", Icone: IconeVideo },
   { href: "/coach/ressources", label: "Ressources", Icone: IconeRessources },
   { href: "/coach/reglages", label: "Réglages", Icone: IconeReglages },
 ];
 
-const A_VENIR = ["Recettes", "Aliments", "Vidéos"];
+const A_VENIR = ["Recettes", "Aliments"];
 
 export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
   const chemin = usePathname();

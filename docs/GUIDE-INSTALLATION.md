@@ -195,3 +195,35 @@ L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready*
 
 13. Accueil : « Cindy a répondu à ton bilan » → le message s'affiche ; la carte disparaît une fois lue.
 14. Côté coach, coche **Mode sans chiffres** dans son suivi → côté cliente, le bilan ne propose plus que les ressentis, sans poids, mesures ni photos.
+
+---
+
+# Phase 4 — Vidéos d'exercices
+
+## Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0004_videos.sql`](../supabase/migrations/0004_videos.sql) sur GitHub → icône **Copy raw file** (deux carrés).
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## Préparer une vidéo sur YouTube
+
+1. Mets en ligne ta vidéo sur ta chaîne YouTube.
+2. Visibilité : **Non répertoriée**. Une vidéo « Privée » ne peut pas être lue dans l'app.
+3. Sous la vidéo : **Partager** → **Copier** le lien (du type `https://youtu.be/…`).
+
+## Tester la phase 4
+
+**Côté coach**
+
+1. Menu **Vidéos** → **Nouvelle vidéo**.
+2. Nom de l'exercice, lien YouTube (l'aperçu apparaît à droite), points clés et erreurs fréquentes (**une par ligne**), filtres (plusieurs cases possibles par colonne).
+3. **Ajouter la vidéo**. Ajoute-en une deuxième, en décochant **Visible par les clientes** (brouillon).
+4. Dans la colonne **Filtres**, ajoute un matériel (par ex. « TRX »).
+
+**Côté cliente** (fenêtre privée ou téléphone)
+
+5. Onglet **Sport** → **La bibliothèque** : seule la vidéo publiée apparaît, pas le brouillon.
+6. Touche un filtre (par ex. « Fessiers »), puis tape un mot dans la recherche.
+7. Ouvre l'exercice → appuie sur **Lecture** : la vidéo démarre dans l'app.
+
+> Confidentialité : le lecteur YouTube n'est chargé qu'au moment où la cliente appuie sur Lecture, depuis le domaine youtube-nocookie.com (aucun cookie YouTube déposé avant la lecture).

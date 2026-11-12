@@ -156,3 +156,30 @@ export function normaliserBilan(b: BilanBrut): Bilan {
   };
 }
 export type { BilanBrut };
+
+export type FamilleFiltre = "groupe" | "materiel" | "categorie";
+export const FAMILLES: { valeur: FamilleFiltre; libelle: string; param: string }[] = [
+  { valeur: "groupe", libelle: "Groupe musculaire", param: "groupe" },
+  { valeur: "materiel", libelle: "Matériel", param: "materiel" },
+  { valeur: "categorie", libelle: "Catégorie", param: "categorie" },
+];
+export type FiltreVideo = { id: string; famille: FamilleFiltre; nom: string; ordre: number };
+
+export type Video = {
+  id: string;
+  titre: string;
+  youtube_id: string;
+  description: string | null;
+  points_cles: string[];
+  erreurs: string[];
+  publiee: boolean;
+  created_at: string;
+  filtres: string[];
+};
+export const SELECTION_VIDEO =
+  "id, titre, youtube_id, description, points_cles, erreurs, publiee, created_at, videos_filtres(filtre_id)";
+export type VideoBrute = Omit<Video, "filtres"> & { videos_filtres: { filtre_id: string }[] | null };
+export function normaliserVideo(v: VideoBrute): Video {
+  const { videos_filtres, ...reste } = v;
+  return { ...reste, filtres: (videos_filtres ?? []).map((f) => f.filtre_id) };
+}
