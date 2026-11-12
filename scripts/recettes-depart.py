@@ -349,7 +349,16 @@ if __name__ == "__main__":
         "Tartine avocat & œufs brouillés": ["Tartine avocat & œufs"],
     }
     assert set(ANCIENS_TITRES) <= set(titres), "ancien titre pour une recette inconnue"
-    sortie = [{**{k: v for k, v in r.items() if k != "_macros"}, "anciens_titres": ANCIENS_TITRES.get(r["titre"], [])} for r in R]
+    # Photos fournies avec l'app : public/recettes-depart/<titre-simplifie>.webp
+    import os, unicodedata, re as _re
+    def slug(t):
+        t = unicodedata.normalize("NFKD", t.replace("œ", "oe")).encode("ascii", "ignore").decode().lower()
+        return _re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+    def photo(t):
+        f = slug(t) + ".webp"
+        return f if os.path.exists(os.path.join("public", "recettes-depart", f)) else None
+    sortie = [{**{k: v for k, v in r.items() if k != "_macros"}, "anciens_titres": ANCIENS_TITRES.get(r["titre"], []), "photo": photo(r["titre"])} for r in R]
+    print(sum(1 for r in sortie if r["photo"]), "photos")
     with open("data/recettes-depart.json", "w", encoding="utf-8") as f:
         json.dump({"aliments_perso": ALIMENTS_PERSO, "recettes": sortie}, f, ensure_ascii=False, indent=1)
     if erreurs:

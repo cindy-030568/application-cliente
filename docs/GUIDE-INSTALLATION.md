@@ -296,7 +296,7 @@ Les anciennes questions de ressenti (faim, confort digestif, cycle) sont masqué
    - **Aliments exclus** : essaie le raccourci « Végétarienne », ajoute un aliment précis → **Enregistrer les exclusions**.
 6. **Aliments** → **Nouvel aliment** : crée un aliment perso (valeurs de l'étiquette pour 100 g), avec une unité si besoin.
 
-> Les recettes ne sont pas encore visibles côté cliente : c'est l'objet de la phase 7. La phase 6 te permet déjà de voir, dans la fiche, ce qu'elle verra.
+> Les recettes sont visibles côté cliente depuis la phase 7.
 
 ---
 
@@ -336,3 +336,42 @@ Plusieurs recettes de départ ont été retravaillées pour que le moteur puisse
    - change une cible dans sa fiche, puis reviens : les quantités changent ;
    - ajoute l'exclusion « Végétarienne » : les recettes avec viande ou poisson disparaissent (« X écartées ») ;
    - passe le réglage sur « La proposer avec la mention approximative » : des recettes marquées **Approximative** apparaissent en fin de liste.
+
+---
+
+# Phase 7 — Les recettes côté cliente et la liste de courses
+
+## Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0007_liste_courses.sql`](../supabase/migrations/0007_liste_courses.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+La liste de courses est **privée** : chaque cliente ne voit que la sienne, et toi non plus tu ne la vois pas.
+
+## Les photos des recettes
+
+4 recettes de départ ont maintenant leur photo, créée avec l'IA de Canva : bowl skyr myrtilles, pancakes à la banane, overnight oats, omelette épinards-feta.
+Pour les afficher : **Recettes** → **Mettre à jour les recettes de départ** → confirme. Les photos que tu as ajoutées toi-même ne sont jamais remplacées.
+
+Pour les autres recettes : ouvre la recette → **Ajouter une photo**.
+
+## Tester la phase 7
+
+Connecte-toi avec ta **cliente test** (sur ton téléphone, c'est encore mieux), après avoir rempli ses repas et cibles dans sa fiche.
+
+1. Onglet **Recettes** :
+   - « Quel repas veux-tu remplacer ? » : un bouton par repas, puis **Toutes** (pour s'inspirer) et **Favoris** ;
+   - la recherche et les filtres (Rapide, Végétarien, Sucré…).
+2. Ouvre une recette :
+   - les quantités sont **les siennes**, calculées pour ce repas ;
+   - si la recette convient à plusieurs repas, elle peut choisir lequel ;
+   - **1 · 2 · 3 · 4** : le nombre de portions (batch cooking) multiplie les quantités ;
+   - le **cœur** l'ajoute à ses favoris ;
+   - en petit, les macros d'une portion (masquées si son suivi est en « mode sans chiffres »).
+3. **Ajouter à ma liste de courses**, sur deux ou trois recettes.
+4. **Ma liste de courses** (en haut de l'onglet Recettes) :
+   - les ingrédients sont **additionnés** (deux recettes avec du poulet = une seule ligne) et rangés **par rayon** ;
+   - toucher un article le coche ;
+   - « Ajouter autre chose » pour le pain, le café… ;
+   - **Envoyer ma liste** : sur téléphone, elle s'envoie par WhatsApp, SMS, Notes… ;
+   - « Retirer » une recette, « Retirer les articles cochés », « Vider la liste ».

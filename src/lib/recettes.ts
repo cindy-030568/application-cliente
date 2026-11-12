@@ -18,7 +18,13 @@ export async function chargerRecette(supabase: SupabaseClient, id: string): Prom
   return data ? normaliserRecette(data) : null;
 }
 
+/** Photos fournies avec les recettes de départ : fichiers de l'app (public/recettes-depart). */
+export const PREFIXE_PHOTO_DEPART = "depart/";
+export const PHOTO_DEPART_VALIDE = /^depart\/[a-z0-9-]+\.webp$/;
+
 /** Les photos de recettes sont publiques (aucune donnée personnelle). */
 export function urlPhotoRecette(chemin: string | null): string | null {
-  return chemin ? `${SUPABASE_URL()}/storage/v1/object/public/recettes/${chemin}` : null;
+  if (!chemin) return null;
+  if (PHOTO_DEPART_VALIDE.test(chemin)) return `/recettes-depart/${chemin.slice(PREFIXE_PHOTO_DEPART.length)}`;
+  return `${SUPABASE_URL()}/storage/v1/object/public/recettes/${chemin}`;
 }

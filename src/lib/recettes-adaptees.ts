@@ -97,3 +97,42 @@ export async function recettesAdapteesCliente(
     return { repas: rp, cible, ...s };
   });
 }
+
+/** Une recette proposée à la cliente, avec les repas pour lesquels elle convient. */
+export type RecettePourCliente = {
+  recette: Recette;
+  /** Index des repas (dans l'ordre des cibles) pour lesquels la recette est proposée. */
+  repas: number[];
+  approximative: boolean;
+};
+
+/**
+ * Toutes les recettes proposables à la cliente (mode « inspiration ») :
+ * celles qui conviennent à au moins un de ses repas.
+ */
+export function recettesInspiration(repas: RepasAvecRecettes[]): RecettePourCliente[] {
+  const parId = new Map<string, { recette: Recette; exacts: number[]; approx: number[] }>();
+  repas.forEach((r, index) => {
+    for (const [liste, approx] of [[r.compatibles, false], [r.approximatives, true]] as const) {
+      for (const a of liste) {
+        const e = parId.get(a.recette.id) ?? { recette: a.recette.source, exacts: [], approx: [] };
+        (approx ? e.approx : e.exacts).push(index);
+        parId.set(a.recette.id, e);
+      }
+    }
+  });
+  return [...parId.values()]
+    // Les repas où la recette colle exactement d'abord.
+    .map((e) => ({ recette: e.recette, repas: [...e.exacts, ...e.approx], approximative: e.exacts.length === 0 }))
+    .sort((a, b) => a.recette.titre.localeCompare(b.recette.titre, "fr"));
+}
+
+/** Résultat du moteur pour UNE recette et UN repas de la cliente (null si non proposée). */
+export function trouverAdaptation(repas: RepasAvecRecettes[], index: number, recetteId: string) {
+  const r = repas[index];
+  if (!r) return null;
+  const c = r.compatibles.find((a) => a.recette.id === recetteId);
+  if (c) return { ...c, approximative: false, repas: r };
+  const a = r.approximatives.find((x) => x.recette.id === recetteId);
+  return a ? { ...a, approximative: true, repas: r } : null;
+}

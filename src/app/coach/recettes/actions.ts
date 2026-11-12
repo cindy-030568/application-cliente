@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import depart from "../../../../data/recettes-depart.json";
+import { PHOTO_DEPART_VALIDE, PREFIXE_PHOTO_DEPART } from "@/lib/recettes";
 import { normaliser } from "@/lib/texte";
 import { SESSION_PERDUE, UUID, sessionCoach } from "../clientes/verification";
 
@@ -82,7 +83,7 @@ export async function enregistrerRecette(id: string | null, _e: EtatRecette, for
   }
 
   const photo = String(formData.get("photo_path") ?? "") || null;
-  if (photo && !/^[0-9a-f-]{36}\.jpg$/.test(photo)) return { erreur: "Photo invalide." };
+  if (photo && !/^[0-9a-f-]{36}\.jpg$/.test(photo) && !PHOTO_DEPART_VALIDE.test(photo)) return { erreur: "Photo invalide." };
 
   const valeurs = {
     titre,
@@ -131,7 +132,9 @@ export async function supprimerRecette(id: string): Promise<EtatRecette> {
   const { data } = await session.supabase.from("recettes").select("photo_path").eq("id", id).maybeSingle();
   const { error } = await session.supabase.from("recettes").delete().eq("id", id);
   if (error) return { erreur: "La suppression a échoué." };
-  if (data?.photo_path) await session.supabase.storage.from("recettes").remove([data.photo_path]);
+  if (data?.photo_path && !PHOTO_DEPART_VALIDE.test(data.photo_path)) {
+    await session.supabase.storage.from("recettes").remove([data.photo_path]);
+  }
   rafraichir();
   redirect("/coach/recettes?supprimee=1");
 }
@@ -151,6 +154,7 @@ type FichierDepart = {
   recettes: {
     titre: string; description: string | null; repas: string[]; temps: number; tags: string[]; etapes: string[]; astuce: string | null;
     anciens_titres?: string[];
+    photo?: string | null;
     ingredients: { a: string; role: string; unite: string; base: number; min: number; max: number; pas: number; note: string | null }[];
   }[];
 };
@@ -201,15 +205,23 @@ export async function importerRecettesDepart(mettreAJour = false): Promise<EtatR
 
   const { data: tags } = await supabase.from("tags").select("id, nom");
   const idTag = new Map((tags ?? []).map((t) => [t.nom as string, t.id as string]));
-  const { data: existantes } = await supabase.from("recettes").select("id, titre");
+  const { data: existantes } = await supabase.from("recettes").select("id, titre, photo_path");
   const idParTitre = new Map((existantes ?? []).map((r) => [r.titre as string, r.id as string]));
+  const photoParId = new Map((existantes ?? []).map((r) => [r.id as string, r.photo_path as string | null]));
 
   let ajoutees = 0;
   let misesAJour = 0;
   for (const r of fichier.recettes) {
     const idExistant = [r.titre, ...(r.anciens_titres ?? [])].map((t) => idParTitre.get(t)).find(Boolean);
     if (idExistant && !mettreAJour) continue;
-    const champs = { titre: r.titre, description: r.description, temps_prep_min: r.temps, etapes: r.etapes, astuce: r.astuce };
+    const photoDepart = r.photo ? `${PREFIXE_PHOTO_DEPART}${r.photo}` : null;
+    // Une photo ajoutée par la coach n'est jamais remplacée.
+    const photoActuelle = idExistant ? photoParId.get(idExistant) : null;
+    const garderPhoto = photoActuelle && !PHOTO_DEPART_VALIDE.test(photoActuelle);
+    const champs = {
+      titre: r.titre, description: r.description, temps_prep_min: r.temps, etapes: r.etapes, astuce: r.astuce,
+      ...(garderPhoto ? {} : { photo_path: photoDepart }),
+    };
     let id: string;
     if (idExistant) {
       const { error } = await supabase.from("recettes").update(champs).eq("id", idExistant);

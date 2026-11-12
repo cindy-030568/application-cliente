@@ -77,3 +77,18 @@ export const IconeEnveloppe = (p: P) => (
 export const IconeDeconnexion = (p: P) => (
   <svg {...base} {...p}><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 16l-4-4 4-4M6 12h10" /></svg>
 );
+export const IconePanier = (p: P) => (
+  <svg {...base} {...p}><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8L4 9z" /><path d="M8.5 9 11 4M15.5 9 13 4M9.5 13v3M14.5 13v3" /></svg>
+);
+export const IconeHorloge = (p: P) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>
+);
+export const IconePartager = (p: P) => (
+  <svg {...base} {...p}><path d="M12 15V4M8 8l4-4 4 4" /><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>
+);
+export const IconeCoche = (p: P) => (
+  <svg {...base} {...p}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+);
+export const IconeRecherche = (p: P) => (
+  <svg {...base} {...p}><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+);
