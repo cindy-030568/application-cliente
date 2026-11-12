@@ -296,4 +296,43 @@ Les anciennes questions de ressenti (faim, confort digestif, cycle) sont masqué
    - **Aliments exclus** : essaie le raccourci « Végétarienne », ajoute un aliment précis → **Enregistrer les exclusions**.
 6. **Aliments** → **Nouvel aliment** : crée un aliment perso (valeurs de l'étiquette pour 100 g), avec une unité si besoin.
 
-> Les recettes ne sont pas encore visibles côté cliente avec ses quantités : c'est l'objet des phases 6 (moteur de calcul) et 7 (expérience cliente).
+> Les recettes ne sont pas encore visibles côté cliente : c'est l'objet de la phase 7. La phase 6 te permet déjà de voir, dans la fiche, ce qu'elle verra.
+
+---
+
+# Phase 6 — Le moteur de recettes adaptées
+
+Rien à changer dans Supabase pour cette phase.
+
+## Ce que fait le moteur
+
+Pour chaque repas d'une cliente, il recalcule les quantités de chaque recette pour atteindre ses cibles de protéines, glucides et lipides :
+
+- seuls les ingrédients **Protéine / Glucide / Lipide / Fruit** bougent, toujours entre leur **min** et leur **max**, arrondis au **pas** (5 g, 1 œuf…) ;
+- les ingrédients **Fixes** ne bougent jamais ;
+- une recette est **proposée** si chaque macro tombe dans l'écart accepté (réglable) ;
+- une recette qui contient un **aliment exclu** n'est jamais proposée.
+
+Le fichier [`docs/MOTEUR-CAS.md`](MOTEUR-CAS.md) montre des exemples concrets sur trois profils types.
+
+## Mettre à jour tes recettes de départ (une seule fois)
+
+Plusieurs recettes de départ ont été retravaillées pour que le moteur puisse les adapter à plus de cibles (6 ont changé de nom, par exemple « Tartine avocat & œufs brouillés »).
+
+1. **Aliments** → **Importer la table Ciqual** (une correction de catégorie : le seitan est maintenant classé « Gluten »).
+2. **Recettes** → **Mettre à jour les recettes de départ** → confirme.
+   - Les 50 recettes de départ reprennent leur dernière version : titre, ingrédients, étapes.
+   - Tes **photos**, tes **brouillons** et **tes propres recettes** ne changent pas.
+   - Si tu avais modifié une recette de départ, ta modification est remplacée.
+
+## Tester la phase 6
+
+1. **Réglages** → carte **Recettes adaptées** :
+   - **Écart accepté** : 10 % par macro, ou au moins 3 g (pour les petites cibles) ;
+   - **Si une recette ne peut pas atteindre les cibles** : « Ne pas la proposer » (recommandé) ou « La proposer avec la mention approximative ».
+2. **Clientes** → ta cliente test (avec ses repas et cibles remplis) → carte **Ses recettes** → **Aperçu des recettes**.
+3. Un onglet par repas : les recettes proposées, avec les quantités calculées pour elle. Le chiffre à côté du repas est le nombre de recettes proposées.
+4. Essaie :
+   - change une cible dans sa fiche, puis reviens : les quantités changent ;
+   - ajoute l'exclusion « Végétarienne » : les recettes avec viande ou poisson disparaissent (« X écartées ») ;
+   - passe le réglage sur « La proposer avec la mention approximative » : des recettes marquées **Approximative** apparaissent en fin de liste.

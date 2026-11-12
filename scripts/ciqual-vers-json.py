@@ -121,7 +121,8 @@ def categories(nom_brut, groupe, sous_groupe):
                    "epeautre", "seigle", "orge", "avoine", "biscuit", "gateau", "viennoiserie", "croissant", "brioche",
                    "pizza", "quiche", "tarte", "crepe", "gaufre", "chapelure", "muesli", "cereales", "lasagne", "ravioli",
                    "tortilla de ble", "wrap", "galette des rois", "madeleine", "cake", "cookie", "sandwich", "burger",
-                   "biere", "panure", "pane", "nuggets", "cordon bleu", "blini", "pancake", "taboule", "gnocchi"]
+                   "biere", "panure", "pane", "nuggets", "cordon bleu", "blini", "pancake", "taboule", "gnocchi",
+                   "seitan", "gluten de ble"]
     sans_gluten = ["sans gluten", "farine de riz", "farine de mais", "farine de sarrasin", "farine de chataigne",
                    "farine de pois chiche", "galette de riz", "galette de sarrasin", "pomme de terre", "pain de sucre",
                    "pate d'amande", "pate de fruit", "pate a tartiner", "pate de campagne", "pate de foie"]

@@ -20,10 +20,6 @@ export const metadata: Metadata = { title: "Fiche cliente" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const A_VENIR = [
-  { titre: "Aperçu des recettes", phase: 6 },
-];
-
 export default async function PageFicheCliente({
   params,
   searchParams,
@@ -187,15 +183,17 @@ export default async function PageFicheCliente({
           <Section titre="Statut">
             <BlocStatut id={c.id} statut={c.statut} />
           </Section>
-          <Carte className="flex flex-col gap-2 border border-dashed border-caramel-clair bg-blanc-casse/60 shadow-none">
-            <h2 className="font-titre text-lg font-bold">Bientôt dans cette fiche</h2>
-            <ul className="flex flex-col gap-1 text-[14px] text-texte-2">
-              {A_VENIR.map((a) => (
-                <li key={a.titre}>
-                  {a.titre} <span className="opacity-60">· phase {a.phase}</span>
-                </li>
-              ))}
-            </ul>
+          <Carte className="flex flex-col gap-3">
+            <h2 className="font-titre text-xl font-bold">Ses recettes</h2>
+            <p className="text-[14px] text-texte-2">
+              Les recettes qu’elle verra pour chaque repas, avec les quantités calculées pour ses cibles.
+            </p>
+            <Link
+              href={`/coach/clientes/${c.id}/recettes`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
+            >
+              Aperçu des recettes
+            </Link>
           </Carte>
           <Section titre="Zone sensible">
             <BlocSuppression id={c.id} prenom={c.profils.prenom} />

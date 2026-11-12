@@ -29,7 +29,7 @@ export default async function PageRecettesCoach({
           <Surtitre>Recettes</Surtitre>
           <h1 className="font-titre text-[34px] font-bold leading-tight">Recettes maîtres</h1>
           <p className="mt-1 text-[15px] text-texte-2">
-            {recettes.length} recette{recettes.length > 1 ? "s" : ""} · les quantités s’adapteront à chaque cliente (phase 6)
+            {recettes.length} recette{recettes.length > 1 ? "s" : ""} · les quantités s’adaptent aux cibles de chaque cliente
           </p>
         </div>
         <LienBouton href="/coach/recettes/nouvelle">
@@ -38,18 +38,14 @@ export default async function PageRecettesCoach({
       </div>
       {supprimee && <Message ton="succes">Recette supprimée.</Message>}
 
-      {recettes.length < 50 && (
-        <Carte className="flex flex-col gap-3">
-          <h2 className="font-titre text-xl font-bold">Tes 50 recettes de départ</h2>
-          <p className="text-[15px] text-texte-2">
-            10 petits-déjeuners, 15 déjeuners, 15 dîners et 10 collations, dont 29 végétariennes. Il faut d’abord avoir importé la
-            table Ciqual (menu Aliments). Tu pourras ensuite tout modifier.
-          </p>
-          <div>
-            <BoutonImportRecettes principal={recettes.length === 0} />
-          </div>
-        </Carte>
-      )}
+      <Carte className="flex flex-col gap-3">
+        <h2 className="font-titre text-xl font-bold">Tes 50 recettes de départ</h2>
+        <p className="text-[15px] text-texte-2">
+          10 petits-déjeuners, 15 déjeuners, 15 dîners et 10 collations, dont 27 végétariennes. Il faut d’abord avoir importé la
+          table Ciqual (menu Aliments). Tu pourras ensuite tout modifier.
+        </p>
+        <BoutonImportRecettes principal={recettes.length === 0} misesAJourPossibles={recettes.length > 0} />
+      </Carte>
 
       <form action="/coach/recettes" className="flex flex-wrap gap-2">
         <input

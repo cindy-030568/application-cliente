@@ -122,7 +122,8 @@
     "Huile légèrement une poêle chaude et verse de petites louches de pâte.",
     "Cuis 1 à 2 minutes par face, jusqu’à ce que des bulles se forment."
    ],
-   "astuce": "La pâte se garde 24 h au frais : parfait pour le lendemain."
+   "astuce": "La pâte se garde 24 h au frais : parfait pour le lendemain.",
+   "anciens_titres": []
   },
   {
    "titre": "Overnight oats chocolat & fruits rouges",
@@ -214,7 +215,8 @@
     "Couvre et laisse une nuit au réfrigérateur.",
     "Le matin, ajoute les fruits rouges sur le dessus."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Bowl skyr, myrtilles & amandes",
@@ -297,7 +299,8 @@
     "Ajoute les flocons d’avoine, les myrtilles et les amandes concassées.",
     "Termine par le miel et une pincée de cannelle."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Omelette épinards & feta, pain complet",
@@ -380,10 +383,11 @@
     "Émiette la feta, laisse cuire à feu doux jusqu’à ce que l’omelette prenne.",
     "Sers avec le pain complet grillé."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Tartine avocat & œufs",
+   "titre": "Tartine avocat & œufs brouillés",
    "description": null,
    "repas": [
     "petit_dejeuner",
@@ -410,9 +414,9 @@
      "a": "ciqual:13004",
      "role": "lipide",
      "unite": "g",
-     "base": 40,
-     "min": 10,
-     "max": 100,
+     "base": 30,
+     "min": 0,
+     "max": 75,
      "pas": 5,
      "note": null
     },
@@ -420,10 +424,20 @@
      "a": "ciqual:22000",
      "role": "proteine",
      "unite": "unite",
-     "base": 2,
+     "base": 1,
      "min": 1,
-     "max": 4,
+     "max": 2,
      "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
      "note": null
     },
     {
@@ -448,11 +462,14 @@
     }
    ],
    "etapes": [
-    "Fais cuire les œufs 6 minutes dans l’eau bouillante (mollets), puis passe-les sous l’eau froide.",
     "Écrase l’avocat avec le jus de citron, sel et poivre.",
-    "Tartine le pain grillé, ajoute les rondelles de tomate et les œufs coupés en deux."
+    "Brouille l’œuf et les blancs à feu doux, en remuant sans cesse.",
+    "Tartine le pain grillé d’avocat, ajoute les rondelles de tomate et les œufs brouillés."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Tartine avocat & œufs"
+   ]
   },
   {
    "titre": "Porridge pomme-cannelle & noix",
@@ -532,7 +549,8 @@
     "Hors du feu, incorpore la protéine et la cannelle.",
     "Ajoute la pomme en petits dés et les noix concassées."
    ],
-   "astuce": "Pour une version plus fondante, fais revenir la pomme 3 minutes à la poêle avec la cannelle."
+   "astuce": "Pour une version plus fondante, fais revenir la pomme 3 minutes à la poêle avec la cannelle.",
+   "anciens_titres": []
   },
   {
    "titre": "Galette complète jambon, œuf & champignons",
@@ -604,7 +622,8 @@
     "Ajoute le jambon, les champignons et l’emmental autour.",
     "Replie les bords quand le blanc est pris."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Smoothie bowl mangue-banane",
@@ -687,7 +706,8 @@
     "Verse dans un bol.",
     "Parsème de flocons d’avoine et de graines de chia."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Tartines ricotta, fraises & miel",
@@ -759,7 +779,8 @@
     "Tartine le pain grillé de ce mélange.",
     "Ajoute les fraises en lamelles et un filet de miel."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Muffins salés aux légumes",
@@ -852,7 +873,8 @@
     "Mélange les œufs, les blancs, les flocons mixés, la levure et l’emmental, puis ajoute les légumes.",
     "Répartis dans des moules à muffins et enfourne 20 minutes."
    ],
-   "astuce": "Ils se gardent 3 jours au frais : réchauffe-les 30 secondes au micro-ondes."
+   "astuce": "Ils se gardent 3 jours au frais : réchauffe-les 30 secondes au micro-ondes.",
+   "anciens_titres": []
   },
   {
    "titre": "Bowl poulet teriyaki & riz",
@@ -954,7 +976,8 @@
     "Cuis le brocoli et la carotte à la vapeur.",
     "Dresse le bol et parsème de sésame."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Wrap poulet croquant",
@@ -1045,15 +1068,16 @@
     "Garnis la tortilla : sauce, salade, tomate, avocat et poulet.",
     "Roule bien serré et coupe en deux."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Salade de quinoa, pois chiches & feta",
+   "titre": "Salade de quinoa, pois chiches, œufs & feta",
    "description": null,
    "repas": [
     "dejeuner"
    ],
-   "temps": 15,
+   "temps": 20,
    "tags": [
     "Salé",
     "Végétarien",
@@ -1064,29 +1088,39 @@
      "a": "ciqual:9340",
      "role": "glucide",
      "unite": "g",
-     "base": 50,
-     "min": 20,
-     "max": 110,
+     "base": 40,
+     "min": 15,
+     "max": 90,
      "pas": 5,
      "note": null
     },
     {
      "a": "ciqual:20532",
-     "role": "proteine",
+     "role": "glucide",
      "unite": "g",
-     "base": 100,
-     "min": 50,
-     "max": 200,
+     "base": 80,
+     "min": 30,
+     "max": 175,
      "pas": 5,
      "note": null
+    },
+    {
+     "a": "ciqual:22000",
+     "role": "proteine",
+     "unite": "unite",
+     "base": 2,
+     "min": 1,
+     "max": 4,
+     "pas": 1,
+     "note": "durs"
     },
     {
      "a": "ciqual:12066",
      "role": "lipide",
      "unite": "g",
-     "base": 30,
-     "min": 10,
-     "max": 75,
+     "base": 20,
+     "min": 5,
+     "max": 50,
      "pas": 5,
      "note": null
     },
@@ -1142,12 +1176,15 @@
     }
    ],
    "etapes": [
-    "Fais cuire le quinoa et laisse-le refroidir.",
-    "Coupe le concombre et les tomates en dés.",
+    "Fais cuire le quinoa et laisse-le refroidir. Fais cuire les œufs 9 minutes.",
+    "Coupe le concombre, les tomates et les œufs.",
     "Mélange avec les pois chiches rincés et la feta émiettée.",
     "Assaisonne avec l’huile, le citron et la menthe ciselée."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Salade de quinoa, pois chiches & feta"
+   ]
   },
   {
    "titre": "Pâtes au thon & à la tomate",
@@ -1239,7 +1276,8 @@
     "Ajoute le thon émietté et le basilic.",
     "Mélange aux pâtes et parsème de parmesan."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Buddha bowl patate douce & tofu",
@@ -1258,11 +1296,21 @@
      "a": "ciqual:20904",
      "role": "proteine",
      "unite": "g",
-     "base": 120,
-     "min": 60,
-     "max": 240,
+     "base": 100,
+     "min": 50,
+     "max": 200,
      "pas": 5,
      "note": null
+    },
+    {
+     "a": "perso:Skyr nature 0 %",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
+     "note": "sauce citronnée"
     },
     {
      "a": "ciqual:4101",
@@ -1288,9 +1336,9 @@
      "a": "ciqual:13004",
      "role": "lipide",
      "unite": "g",
-     "base": 40,
-     "min": 10,
-     "max": 100,
+     "base": 30,
+     "min": 0,
+     "max": 75,
      "pas": 5,
      "note": null
     },
@@ -1301,6 +1349,16 @@
      "base": 10,
      "min": 10,
      "max": 10,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:13009",
+     "role": "fixe",
+     "unite": "g",
+     "base": 5,
+     "min": 5,
+     "max": 5,
      "pas": 1,
      "note": null
     },
@@ -1318,10 +1376,11 @@
    "etapes": [
     "Préchauffe le four à 200 °C. Coupe la patate douce en cubes et rôtis-la 25 minutes.",
     "Coupe le tofu en dés et fais-le dorer à la poêle avec la sauce soja.",
-    "Dresse le bol : jeunes pousses d’épinards, patate douce, tofu et avocat.",
-    "Parsème de sésame."
+    "Mélange le skyr avec le jus de citron, sel et poivre : c’est la sauce.",
+    "Dresse le bol : jeunes pousses d’épinards, patate douce, tofu, avocat et sauce. Parsème de sésame."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Poké bowl saumon & mangue",
@@ -1359,7 +1418,7 @@
      "role": "lipide",
      "unite": "g",
      "base": 30,
-     "min": 10,
+     "min": 0,
      "max": 75,
      "pas": 5,
      "note": null
@@ -1411,7 +1470,8 @@
     "Dispose tous les ingrédients sur le riz.",
     "Arrose de sauce soja et parsème de sésame."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Curry de lentilles corail & raïta",
@@ -1524,7 +1584,8 @@
     "Ajoute les épinards en fin de cuisson.",
     "Sers avec le riz et le skyr mélangé à un peu de menthe (raïta)."
    ],
-   "astuce": "Le curry est encore meilleur le lendemain : double les quantités."
+   "astuce": "Le curry est encore meilleur le lendemain : double les quantités.",
+   "anciens_titres": []
   },
   {
    "titre": "Croque protéiné jambon-fromage",
@@ -1596,7 +1657,8 @@
     "Fais dorer 4 minutes au four ou à la poêle.",
     "Sers avec la salade."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Chili con carne",
@@ -1708,7 +1770,8 @@
     "Ajoute les épices, la pulpe de tomate et les haricots rouges : laisse mijoter 20 minutes.",
     "Sers avec le riz."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Salade niçoise revisitée",
@@ -1808,7 +1871,8 @@
     "Assemble avec les tomates, le thon et les olives.",
     "Assaisonne avec l’huile et le vinaigre."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Bowl mexicain poulet, maïs & haricots",
@@ -1909,7 +1973,8 @@
     "Réchauffe les haricots et le maïs.",
     "Dresse le bol avec le poivron cru, l’avocat et un filet de citron vert."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Taboulé libanais au poulet",
@@ -2010,19 +2075,19 @@
     "Hache finement le persil et la menthe, coupe tomates et concombre en petits dés.",
     "Mélange le tout avec le citron et l’huile."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Gnocchis poêlés, tomates & mozzarella",
+   "titre": "Gnocchis poêlés au poulet, tomates & mozzarella",
    "description": null,
    "repas": [
     "dejeuner",
     "diner"
    ],
-   "temps": 15,
+   "temps": 20,
    "tags": [
     "Salé",
-    "Végétarien",
     "Rapide"
    ],
    "ingredients": [
@@ -2037,12 +2102,22 @@
      "note": null
     },
     {
-     "a": "ciqual:19590",
+     "a": "ciqual:36017",
      "role": "proteine",
      "unite": "g",
-     "base": 60,
-     "min": 30,
-     "max": 120,
+     "base": 90,
+     "min": 45,
+     "max": 180,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19590",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
      "pas": 5,
      "note": null
     },
@@ -2088,11 +2163,14 @@
     }
    ],
    "etapes": [
-    "Fais dorer les gnocchis 5 minutes dans l’huile.",
-    "Ajoute les tomates cerises coupées en deux et les épinards, laisse fondre 2 minutes.",
+    "Fais dorer le poulet en dés, réserve. Fais dorer les gnocchis 5 minutes dans l’huile.",
+    "Ajoute les tomates cerises coupées en deux, les épinards et le poulet, laisse fondre 2 minutes.",
     "Ajoute la mozzarella en morceaux et le basilic juste avant de servir."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Gnocchis poêlés, tomates & mozzarella"
+   ]
   },
   {
    "titre": "Shakshuka",
@@ -2115,6 +2193,16 @@
      "min": 1,
      "max": 4,
      "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 60,
+     "min": 30,
+     "max": 120,
+     "pas": 5,
      "note": null
     },
     {
@@ -2201,10 +2289,11 @@
    "etapes": [
     "Fais revenir l’oignon et le poivron dans l’huile.",
     "Ajoute la pulpe de tomate et les épices, laisse mijoter 10 minutes.",
-    "Creuse deux puits, casse les œufs dedans, couvre et cuis 6 à 8 minutes.",
+    "Verse les blancs d’œufs en filet, puis creuse deux puits et casse les œufs entiers dedans. Couvre et cuis 6 à 8 minutes.",
     "Émiette la feta et sers avec le pain."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Salade de pâtes poulet, mozzarella & basilic",
@@ -2305,7 +2394,8 @@
     "Mélange avec les tomates, la mozzarella, la roquette et le basilic.",
     "Assaisonne avec l’huile et le vinaigre balsamique."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Saumon au four, patate douce & haricots verts",
@@ -2386,7 +2476,8 @@
     "Ajoute le saumon les 12 dernières minutes, avec citron et thym.",
     "Cuis les haricots verts à la vapeur et ajoute une noisette de beurre."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Cabillaud en papillote, riz & courgettes",
@@ -2476,7 +2567,8 @@
     "Sur une feuille de papier cuisson, dépose courgette en rondelles, tomate, cabillaud, citron, thym et huile.",
     "Ferme la papillote et enfourne 15 minutes."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Boulettes de bœuf à la tomate & semoule",
@@ -2568,7 +2660,8 @@
     "Ajoute l’oignon et la pulpe de tomate, laisse mijoter 15 minutes.",
     "Sers avec la semoule."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Escalope de dinde, crème de champignons & pâtes",
@@ -2650,7 +2743,8 @@
     "Dans la même poêle, fais revenir l’oignon et les champignons, puis ajoute la crème.",
     "Remets la dinde 2 minutes dans la sauce, parsème de persil."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Curry de poulet au lait de coco",
@@ -2742,7 +2836,8 @@
     "Verse le lait de coco, laisse mijoter 10 minutes.",
     "Ajoute les épinards en fin de cuisson."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Frittata courgette, chèvre & menthe",
@@ -2761,10 +2856,20 @@
      "a": "ciqual:22000",
      "role": "proteine",
      "unite": "unite",
-     "base": 3,
+     "base": 2,
      "min": 1,
-     "max": 6,
+     "max": 4,
      "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:22001",
+     "role": "proteine",
+     "unite": "g",
+     "base": 90,
+     "min": 45,
+     "max": 180,
+     "pas": 5,
      "note": null
     },
     {
@@ -2821,13 +2926,14 @@
    "etapes": [
     "Fais cuire les pommes de terre en rondelles 10 minutes à l’eau.",
     "Fais revenir la courgette dans l’huile, ajoute les pommes de terre.",
-    "Verse les œufs battus, parsème de chèvre et de menthe.",
+    "Verse les œufs et les blancs battus ensemble, parsème de chèvre et de menthe.",
     "Cuis à couvert 8 minutes à feu doux."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Pizza tortilla express aux légumes",
+   "titre": "Pizza tortilla jambon & champignons",
    "description": null,
    "repas": [
     "diner",
@@ -2836,7 +2942,6 @@
    "temps": 15,
    "tags": [
     "Salé",
-    "Végétarien",
     "Rapide"
    ],
    "ingredients": [
@@ -2851,12 +2956,22 @@
      "note": null
     },
     {
-     "a": "ciqual:19590",
+     "a": "ciqual:28913",
      "role": "proteine",
      "unite": "g",
      "base": 50,
      "min": 25,
      "max": 100,
+     "pas": 5,
+     "note": null
+    },
+    {
+     "a": "ciqual:19590",
+     "role": "lipide",
+     "unite": "g",
+     "base": 30,
+     "min": 10,
+     "max": 75,
      "pas": 5,
      "note": null
     },
@@ -2895,7 +3010,7 @@
      "role": "lipide",
      "unite": "g",
      "base": 10,
-     "min": 3,
+     "min": 0,
      "max": 25,
      "pas": 1,
      "note": null
@@ -2914,10 +3029,13 @@
    "etapes": [
     "Préchauffe le four à 220 °C.",
     "Étale la pulpe de tomate sur la tortilla.",
-    "Ajoute les légumes émincés, la mozzarella, les olives et l’origan.",
+    "Ajoute le jambon, les légumes émincés, la mozzarella, les olives et l’origan.",
     "Enfourne 8 à 10 minutes."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Pizza tortilla express aux légumes"
+   ]
   },
   {
    "titre": "Soupe thaï aux crevettes & nouilles de riz",
@@ -3027,7 +3145,8 @@
     "Ajoute les crevettes et les nouilles, réchauffe 2 minutes.",
     "Termine avec le citron vert et la coriandre."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Wok de tofu, brocoli & noix de cajou",
@@ -3129,7 +3248,8 @@
     "Saute le brocoli et le poivron 5 minutes à feu vif.",
     "Remets le tofu, ajoute la sauce soja, le gingembre et les noix de cajou."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Hachis parmentier de patate douce",
@@ -3221,7 +3341,8 @@
     "Dans un plat, mets la viande puis la purée, parsème d’emmental.",
     "Gratine 15 minutes à 200 °C."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Chili sin carne au tempeh",
@@ -3333,7 +3454,8 @@
     "Ajoute les épices, la pulpe de tomate et les haricots : laisse mijoter 15 minutes.",
     "Sers avec le riz et l’avocat en dés."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Omelette roulée saumon fumé & épinards",
@@ -3403,7 +3525,8 @@
     "Roule-la et coupe en tronçons.",
     "Sers avec les pommes de terre et la crème."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Poulet, ratatouille & quinoa",
@@ -3515,10 +3638,11 @@
     "Fais griller le poulet.",
     "Sers le poulet sur la ratatouille et le quinoa."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Pâtes complètes à la bolognaise de lentilles",
+   "titre": "Pâtes complètes à la bolognaise végétale",
    "description": null,
    "repas": [
     "diner",
@@ -3532,12 +3656,22 @@
    ],
    "ingredients": [
     {
-     "a": "ciqual:20535",
+     "a": "ciqual:20591",
      "role": "proteine",
      "unite": "g",
-     "base": 45,
-     "min": 20,
-     "max": 90,
+     "base": 80,
+     "min": 40,
+     "max": 160,
+     "pas": 5,
+     "note": "réhydratées"
+    },
+    {
+     "a": "ciqual:20535",
+     "role": "glucide",
+     "unite": "g",
+     "base": 25,
+     "min": 10,
+     "max": 55,
      "pas": 5,
      "note": null
     },
@@ -3603,12 +3737,16 @@
     }
    ],
    "etapes": [
-    "Fais revenir l’oignon et la carotte râpée dans l’huile.",
+    "Réhydrate les protéines de soja 10 minutes dans de l’eau chaude, puis égoutte-les.",
+    "Fais revenir l’oignon et la carotte râpée dans l’huile, ajoute les protéines de soja.",
     "Ajoute les lentilles, la pulpe de tomate et 150 ml d’eau : laisse mijoter 15 minutes.",
     "Fais cuire les pâtes.",
     "Sers avec le parmesan."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Pâtes complètes à la bolognaise de lentilles"
+   ]
   },
   {
    "titre": "Salade tiède de lentilles, betterave & chèvre",
@@ -3710,7 +3848,8 @@
     "Mélange les lentilles tièdes avec la roquette, la betterave, les œufs et le chèvre.",
     "Ajoute les noix, l’huile et le vinaigre."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Mug cake chocolat",
@@ -3801,7 +3940,8 @@
     "Enfonce les carrés de chocolat au centre.",
     "Cuis 70 à 90 secondes au micro-ondes."
    ],
-   "astuce": "Le cœur doit rester légèrement fondant : arrête la cuisson dès que le dessus est pris."
+   "astuce": "Le cœur doit rester légèrement fondant : arrête la cuisson dès que le dessus est pris.",
+   "anciens_titres": []
   },
   {
    "titre": "Energy balls dattes & cacao",
@@ -3873,7 +4013,8 @@
     "Ajoute les flocons, le cacao et la protéine, mixe encore.",
     "Forme 3 ou 4 boules et garde-les au frais."
    ],
-   "astuce": "Prépare-en pour la semaine : elles se gardent 5 jours au réfrigérateur."
+   "astuce": "Prépare-en pour la semaine : elles se gardent 5 jours au réfrigérateur.",
+   "anciens_titres": []
   },
   {
    "titre": "Skyr, fruits rouges & amandes",
@@ -3911,6 +4052,16 @@
      "note": null
     },
     {
+     "a": "ciqual:9311",
+     "role": "glucide",
+     "unite": "g",
+     "base": 20,
+     "min": 10,
+     "max": 45,
+     "pas": 5,
+     "note": null
+    },
+    {
      "a": "ciqual:15000",
      "role": "lipide",
      "unite": "g",
@@ -3933,10 +4084,11 @@
    ],
    "etapes": [
     "Verse le skyr dans un bol.",
-    "Ajoute les fruits rouges et les amandes effilées.",
+    "Ajoute les fruits rouges, les flocons d’avoine et les amandes effilées.",
     "Termine par un filet de miel."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Fromage blanc, banane & beurre de cacahuète",
@@ -3998,14 +4150,14 @@
     "Ajoute la banane en rondelles.",
     "Termine par le beurre de cacahuète et la cannelle."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Galettes de riz, saumon fumé & chèvre frais",
    "description": null,
    "repas": [
-    "collation",
-    "dejeuner"
+    "collation"
    ],
    "temps": 5,
    "tags": [
@@ -4070,7 +4222,8 @@
     "Ajoute le saumon fumé et les rondelles de concombre.",
     "Un trait de citron, du poivre, c’est prêt."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Smoothie banane-cacao protéiné",
@@ -4153,7 +4306,8 @@
     "Mixe 1 minute jusqu’à ce que ce soit bien lisse.",
     "Ajoute quelques glaçons si tu l’aimes bien frais."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Pomme au four, skyr & noix",
@@ -4223,7 +4377,8 @@
     "Coupe la pomme en quartiers, saupoudre de cannelle et enfourne 20 minutes.",
     "Sers chaude sur le skyr, avec les noix et le sirop d’érable."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
    "titre": "Cookies avoine, banane & chocolat",
@@ -4305,29 +4460,38 @@
     "Ajoute le chocolat en pépites.",
     "Forme 3 cookies et enfourne 12 minutes."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   },
   {
-   "titre": "Houmous maison & pain pita",
+   "titre": "Houmous maison, pain pita & œuf dur",
    "description": null,
    "repas": [
-    "collation",
-    "dejeuner"
+    "collation"
    ],
-   "temps": 10,
+   "temps": 15,
    "tags": [
     "Salé",
-    "Végétarien",
-    "Sans cuisson"
+    "Végétarien"
    ],
    "ingredients": [
     {
-     "a": "ciqual:20532",
+     "a": "ciqual:22000",
      "role": "proteine",
+     "unite": "unite",
+     "base": 1,
+     "min": 1,
+     "max": 2,
+     "pas": 1,
+     "note": null
+    },
+    {
+     "a": "ciqual:20532",
+     "role": "glucide",
      "unite": "g",
-     "base": 100,
-     "min": 50,
-     "max": 200,
+     "base": 80,
+     "min": 30,
+     "max": 175,
      "pas": 5,
      "note": null
     },
@@ -4335,9 +4499,9 @@
      "a": "ciqual:7180",
      "role": "glucide",
      "unite": "g",
-     "base": 30,
+     "base": 25,
      "min": 10,
-     "max": 65,
+     "max": 55,
      "pas": 5,
      "note": null
     },
@@ -4405,9 +4569,12 @@
    "etapes": [
     "Mixe les pois chiches, le sésame, l’huile, le citron et l’ail avec 2 à 3 cuillères d’eau.",
     "Coupe la carotte et le concombre en bâtonnets.",
-    "Sers avec le pain pita grillé."
+    "Sers avec le pain pita grillé et l’œuf dur (9 minutes de cuisson)."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": [
+    "Houmous maison & pain pita"
+   ]
   },
   {
    "titre": "Chia pudding coco-mangue",
@@ -4490,7 +4657,8 @@
     "Laisse prendre au moins 2 heures au frais (ou une nuit).",
     "Ajoute le skyr, les flocons et la mangue en dés au moment de servir."
    ],
-   "astuce": null
+   "astuce": null,
+   "anciens_titres": []
   }
  ]
 }

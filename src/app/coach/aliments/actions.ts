@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ciqual from "../../../../data/ciqual.json";
 import { rechercherAliments } from "@/lib/aliments";
+import { UNITES_PAR_DEFAUT } from "@/lib/unites-defaut";
 import { normaliser } from "@/lib/texte";
 import type { Aliment } from "@/lib/types";
 import { SESSION_PERDUE, UUID, sessionCoach } from "../clientes/verification";
@@ -15,19 +16,6 @@ type LigneCiqual = {
   p: number; gl: number; l: number; k: number; i: boolean; cat: string[];
 };
 
-/** Unités proposées par défaut (modifiables ensuite par la coach). */
-const UNITES_PAR_DEFAUT: Record<string, [string, number]> = {
-  "22000": ["œuf", 50],
-  "13005": ["banane", 120],
-  "13039": ["pomme", 150],
-  "13021": ["kiwi", 75],
-  "7111": ["tranche", 25],
-  "7200": ["tranche", 25],
-  "7110": ["tranche", 40],
-  "7815": ["tortilla", 40],
-  "7352": ["galette", 9],
-  "31074": ["carré", 5],
-};
 
 /** Importe ou met à jour la table Ciqual (sans écraser les unités ni les catégories vérifiées). */
 export async function importerCiqual(): Promise<EtatAliment> {

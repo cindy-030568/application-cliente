@@ -4,6 +4,7 @@ import { exigerCoach, lireReglages } from "@/lib/auth";
 import { chargerChamps } from "@/lib/suivi";
 import { GestionChamps } from "./champs";
 import { FormulaireReglages } from "./formulaire";
+import { FormulaireTolerance } from "./tolerance";
 
 export const metadata: Metadata = { title: "Réglages" };
 
@@ -18,6 +19,17 @@ export default async function PageReglages() {
       </div>
       <Carte>
         <FormulaireReglages reglages={reglages} />
+      </Carte>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Recettes adaptées</h2>
+          <p className="text-[14px] text-texte-2">
+            L’app recalcule les quantités de chaque recette pour les cibles du repas. Une recette est
+            proposée si chaque macro (protéines, glucides, lipides) tombe dans l’écart accepté : le plus
+            large des deux réglages ci-dessous.
+          </p>
+        </div>
+        <FormulaireTolerance reglages={reglages} />
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

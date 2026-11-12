@@ -122,3 +122,13 @@ export function roleSuggere(a: {
   if (l >= g) return "lipide";
   return "glucide";
 }
+
+const nombreFr = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
+
+/** « 120 g », « 2 œufs », « 1 tranche » — quantité brute, telle qu'on la pèse ou la compte. */
+export function formaterQuantite(qte: number, unite: Unite, nomUnite: string | null): string {
+  if (unite === "g") return `${nombreFr.format(qte)} g`;
+  const nom = nomUnite?.trim() || "unité";
+  const pluriel = qte >= 2 && !/[sxz]$/.test(nom) ? `${nom}s` : nom;
+  return `${nombreFr.format(qte)} ${pluriel}`;
+}

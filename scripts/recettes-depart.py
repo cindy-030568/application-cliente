@@ -48,6 +48,7 @@ def X(ref, base, **k): return ing(ref, "fixe", base, **k)
 POULET, DINDE, BOEUF5, SAUMON, SAUMON_FUME, CABILLAUD, THON, CREVETTE = (
     "ciqual:36017", "ciqual:36304", "ciqual:6250", "ciqual:26036", "ciqual:26037", "ciqual:26043", "ciqual:26039", "ciqual:10006")
 OEUF, BLANC_OEUF, JAMBON, TOFU, TEMPEH = "ciqual:22000", "ciqual:22001", "ciqual:28913", "ciqual:20904", "ciqual:20917"
+PST = "ciqual:20591"  # protéines de soja texturées, réhydratées
 SKYR, WHEY = "perso:Skyr nature 0 %", "perso:Protéine en poudre (whey isolat), nature"
 FROMAGE_BLANC, YAOURT_GREC, RICOTTA, MOZZA, FETA, PARMESAN, EMMENTAL, CHEVRE_FRAIS = (
     "ciqual:19644", "ciqual:19860", "ciqual:19585", "ciqual:19590", "ciqual:12066", "ciqual:12120", "ciqual:12118", "ciqual:12805")
@@ -104,10 +105,10 @@ recette("Omelette épinards & feta, pain complet", ["petit_dejeuner", "dejeuner"
     P(OEUF, 2, unite="unite"), P(BLANC_OEUF, 60), L(FETA, 20), X(EPINARD, 60), G(PAIN_COMPLET, 50, pas=10), L(HUILE_OLIVE, 3, mini=0)],
     ["Fais tomber les épinards 1 minute dans une poêle avec l’huile.", "Bats les œufs et les blancs, verse sur les épinards.",
      "Émiette la feta, laisse cuire à feu doux jusqu’à ce que l’omelette prenne.", "Sers avec le pain complet grillé."])
-recette("Tartine avocat & œufs", ["petit_dejeuner", "collation"], 10, ["Salé", "Végétarien", "Rapide"], [
-    G(PAIN_COMPLET, 60, pas=10), L(AVOCAT, 40), P(OEUF, 2, unite="unite"), X(TOMATE, 50), X(CITRON, 5)],
-    ["Fais cuire les œufs 6 minutes dans l’eau bouillante (mollets), puis passe-les sous l’eau froide.", "Écrase l’avocat avec le jus de citron, sel et poivre.",
-     "Tartine le pain grillé, ajoute les rondelles de tomate et les œufs coupés en deux."])
+recette("Tartine avocat & œufs brouillés", ["petit_dejeuner", "collation"], 10, ["Salé", "Végétarien", "Rapide"], [
+    G(PAIN_COMPLET, 60, pas=10), L(AVOCAT, 30, mini=0), P(OEUF, 1, unite="unite"), P(BLANC_OEUF, 60), X(TOMATE, 50), X(CITRON, 5)],
+    ["Écrase l’avocat avec le jus de citron, sel et poivre.", "Brouille l’œuf et les blancs à feu doux, en remuant sans cesse.",
+     "Tartine le pain grillé d’avocat, ajoute les rondelles de tomate et les œufs brouillés."])
 recette("Porridge pomme-cannelle & noix", ["petit_dejeuner"], 10, ["Sucré", "Végétarien"], [
     G(FLOCONS, 45), X(LAIT, 150), P(WHEY, 20), F(POMME, 100, pas=10), L(NOIX, 10), X(CANNELLE, 2)],
     ["Fais chauffer les flocons et le lait 4 à 5 minutes en remuant.", "Hors du feu, incorpore la protéine et la cannelle.",
@@ -140,20 +141,20 @@ recette("Wrap poulet croquant", ["dejeuner"], 10, ["Salé", "Rapide"], [
     G(TORTILLA, 1, unite="unite"), P(POULET, 100, note="cuit à la poêle"), X(LAITUE, 30), X(TOMATE, 50), X(FROMAGE_BLANC, 30), X(MOUTARDE, 5), L(AVOCAT, 30)],
     ["Fais cuire le poulet en lanières à la poêle.", "Mélange le fromage blanc et la moutarde pour la sauce.",
      "Garnis la tortilla : sauce, salade, tomate, avocat et poulet.", "Roule bien serré et coupe en deux."])
-recette("Salade de quinoa, pois chiches & feta", ["dejeuner"], 15, ["Salé", "Végétarien", "Batch cooking"], [
-    G(QUINOA, 50), P(POIS_CHICHE, 100), L(FETA, 30), X(CONCOMBRE, 80), X(TOMATE, 80), L(HUILE_OLIVE, 8, mini=0), X(CITRON, 10), X(MENTHE, 2)],
-    ["Fais cuire le quinoa et laisse-le refroidir.", "Coupe le concombre et les tomates en dés.", "Mélange avec les pois chiches rincés et la feta émiettée.",
+recette("Salade de quinoa, pois chiches, œufs & feta", ["dejeuner"], 20, ["Salé", "Végétarien", "Batch cooking"], [
+    G(QUINOA, 40), G(POIS_CHICHE, 80), P(OEUF, 2, unite="unite", note="durs"), L(FETA, 20), X(CONCOMBRE, 80), X(TOMATE, 80), L(HUILE_OLIVE, 8, mini=0), X(CITRON, 10), X(MENTHE, 2)],
+    ["Fais cuire le quinoa et laisse-le refroidir. Fais cuire les œufs 9 minutes.", "Coupe le concombre, les tomates et les œufs.", "Mélange avec les pois chiches rincés et la feta émiettée.",
      "Assaisonne avec l’huile, le citron et la menthe ciselée."])
 recette("Pâtes au thon & à la tomate", ["dejeuner", "diner"], 15, ["Salé", "Rapide"], [
     G(PATES, 70), P(THON, 80), X(TOMATE_PULPE, 150), X(OIGNON, 30), L(HUILE_OLIVE, 5, mini=0), X(BASILIC, 2), X(PARMESAN, 5)],
     ["Fais cuire les pâtes.", "Fais revenir l’oignon émincé dans l’huile, ajoute la pulpe de tomate et laisse mijoter 8 minutes.",
      "Ajoute le thon émietté et le basilic.", "Mélange aux pâtes et parsème de parmesan."])
 recette("Buddha bowl patate douce & tofu", ["dejeuner", "diner"], 30, ["Salé", "Végétarien"], [
-    P(TOFU, 120), G(PATATE_DOUCE, 150), X(EPINARD, 50), L(AVOCAT, 40), X(SAUCE_SOJA, 10), L(SESAME, 5, mini=0)],
+    P(TOFU, 100), P(SKYR, 60, note="sauce citronnée"), G(PATATE_DOUCE, 150), X(EPINARD, 50), L(AVOCAT, 30, mini=0), X(SAUCE_SOJA, 10), X(CITRON, 5), L(SESAME, 5, mini=0)],
     ["Préchauffe le four à 200 °C. Coupe la patate douce en cubes et rôtis-la 25 minutes.", "Coupe le tofu en dés et fais-le dorer à la poêle avec la sauce soja.",
-     "Dresse le bol : jeunes pousses d’épinards, patate douce, tofu et avocat.", "Parsème de sésame."])
+     "Mélange le skyr avec le jus de citron, sel et poivre : c’est la sauce.", "Dresse le bol : jeunes pousses d’épinards, patate douce, tofu, avocat et sauce. Parsème de sésame."])
 recette("Poké bowl saumon & mangue", ["dejeuner"], 20, ["Salé"], [
-    P(SAUMON, 100, note="très frais"), G(RIZ, 60), L(AVOCAT, 30), X(CONCOMBRE, 60), F(MANGUE, 50, pas=10), X(SAUCE_SOJA, 10), X(SESAME, 3)],
+    P(SAUMON, 100, note="très frais"), G(RIZ, 60), L(AVOCAT, 30, mini=0), X(CONCOMBRE, 60), F(MANGUE, 50, pas=10), X(SAUCE_SOJA, 10), X(SESAME, 3)],
     ["Fais cuire le riz et laisse-le tiédir.", "Coupe le saumon, l’avocat, le concombre et la mangue en dés.",
      "Dispose tous les ingrédients sur le riz.", "Arrose de sauce soja et parsème de sésame."])
 recette("Curry de lentilles corail & raïta", ["dejeuner", "diner"], 30, ["Salé", "Végétarien", "Batch cooking"], [
@@ -180,14 +181,14 @@ recette("Taboulé libanais au poulet", ["dejeuner"], 20, ["Salé", "Batch cookin
     G(BOULGOUR, 50), P(POULET, 100), X(TOMATE, 80), X(CONCOMBRE, 60), X(PERSIL, 15), X(MENTHE, 3), X(CITRON, 15), L(HUILE_OLIVE, 8, mini=0)],
     ["Fais cuire le boulgour et laisse-le refroidir.", "Fais griller le poulet et coupe-le en lamelles.",
      "Hache finement le persil et la menthe, coupe tomates et concombre en petits dés.", "Mélange le tout avec le citron et l’huile."])
-recette("Gnocchis poêlés, tomates & mozzarella", ["dejeuner", "diner"], 15, ["Salé", "Végétarien", "Rapide"], [
-    G(GNOCCHI, 150), P(MOZZA, 60), X(EPINARD, 80), X(TOMATE_CERISE, 80), L(HUILE_OLIVE, 4, mini=0), X(BASILIC, 2)],
-    ["Fais dorer les gnocchis 5 minutes dans l’huile.", "Ajoute les tomates cerises coupées en deux et les épinards, laisse fondre 2 minutes.",
+recette("Gnocchis poêlés au poulet, tomates & mozzarella", ["dejeuner", "diner"], 20, ["Salé", "Rapide"], [
+    G(GNOCCHI, 150), P(POULET, 90), L(MOZZA, 30), X(EPINARD, 80), X(TOMATE_CERISE, 80), L(HUILE_OLIVE, 4, mini=0), X(BASILIC, 2)],
+    ["Fais dorer le poulet en dés, réserve. Fais dorer les gnocchis 5 minutes dans l’huile.", "Ajoute les tomates cerises coupées en deux, les épinards et le poulet, laisse fondre 2 minutes.",
      "Ajoute la mozzarella en morceaux et le basilic juste avant de servir."])
 recette("Shakshuka", ["dejeuner", "diner"], 25, ["Salé", "Végétarien"], [
-    P(OEUF, 2, unite="unite"), G(PAIN_COMPLET, 50, pas=10), X(TOMATE_PULPE, 200), X(POIVRON, 80), X(OIGNON, 40), X(CUMIN, 1), X(PAPRIKA, 1), L(HUILE_OLIVE, 5, mini=0), L(FETA, 15)],
+    P(OEUF, 2, unite="unite"), P(BLANC_OEUF, 60), G(PAIN_COMPLET, 50, pas=10), X(TOMATE_PULPE, 200), X(POIVRON, 80), X(OIGNON, 40), X(CUMIN, 1), X(PAPRIKA, 1), L(HUILE_OLIVE, 5, mini=0), L(FETA, 15)],
     ["Fais revenir l’oignon et le poivron dans l’huile.", "Ajoute la pulpe de tomate et les épices, laisse mijoter 10 minutes.",
-     "Creuse deux puits, casse les œufs dedans, couvre et cuis 6 à 8 minutes.", "Émiette la feta et sers avec le pain."])
+     "Verse les blancs d’œufs en filet, puis creuse deux puits et casse les œufs entiers dedans. Couvre et cuis 6 à 8 minutes.", "Émiette la feta et sers avec le pain."])
 recette("Salade de pâtes poulet, mozzarella & basilic", ["dejeuner"], 15, ["Salé", "Batch cooking"], [
     G(PATES, 60), P(POULET, 90), L(MOZZA, 30), X(TOMATE_CERISE, 100), X(ROQUETTE, 30), L(HUILE_OLIVE, 5, mini=0), X(BASILIC, 2), X(VINAIGRE_BALSAMIQUE, 5)],
     ["Fais cuire les pâtes et laisse-les refroidir.", "Fais griller le poulet, coupe-le en dés.", "Mélange avec les tomates, la mozzarella, la roquette et le basilic.",
@@ -215,12 +216,12 @@ recette("Curry de poulet au lait de coco", ["diner", "dejeuner"], 25, ["Salé", 
     ["Fais cuire le riz.", "Fais revenir l’oignon et le poivron, ajoute le poulet en dés et le curry.", "Verse le lait de coco, laisse mijoter 10 minutes.",
      "Ajoute les épinards en fin de cuisson."])
 recette("Frittata courgette, chèvre & menthe", ["diner", "dejeuner"], 25, ["Salé", "Végétarien"], [
-    P(OEUF, 3, unite="unite"), G(PDT, 150), X(COURGETTE, 120), L(CHEVRE_FRAIS, 30), X(MENTHE, 2), L(HUILE_OLIVE, 3, mini=0)],
+    P(OEUF, 2, unite="unite"), P(BLANC_OEUF, 90), G(PDT, 150), X(COURGETTE, 120), L(CHEVRE_FRAIS, 30), X(MENTHE, 2), L(HUILE_OLIVE, 3, mini=0)],
     ["Fais cuire les pommes de terre en rondelles 10 minutes à l’eau.", "Fais revenir la courgette dans l’huile, ajoute les pommes de terre.",
-     "Verse les œufs battus, parsème de chèvre et de menthe.", "Cuis à couvert 8 minutes à feu doux."])
-recette("Pizza tortilla express aux légumes", ["diner", "dejeuner"], 15, ["Salé", "Végétarien", "Rapide"], [
-    G(TORTILLA, 1, unite="unite"), P(MOZZA, 50), X(TOMATE_PULPE, 60), X(CHAMPIGNON, 50), X(POIVRON, 40), L(OLIVE, 10), X(ORIGAN, 1)],
-    ["Préchauffe le four à 220 °C.", "Étale la pulpe de tomate sur la tortilla.", "Ajoute les légumes émincés, la mozzarella, les olives et l’origan.",
+     "Verse les œufs et les blancs battus ensemble, parsème de chèvre et de menthe.", "Cuis à couvert 8 minutes à feu doux."])
+recette("Pizza tortilla jambon & champignons", ["diner", "dejeuner"], 15, ["Salé", "Rapide"], [
+    G(TORTILLA, 1, unite="unite"), P(JAMBON, 50), L(MOZZA, 30), X(TOMATE_PULPE, 60), X(CHAMPIGNON, 50), X(POIVRON, 40), L(OLIVE, 10, mini=0), X(ORIGAN, 1)],
+    ["Préchauffe le four à 220 °C.", "Étale la pulpe de tomate sur la tortilla.", "Ajoute le jambon, les légumes émincés, la mozzarella, les olives et l’origan.",
      "Enfourne 8 à 10 minutes."])
 recette("Soupe thaï aux crevettes & nouilles de riz", ["diner"], 20, ["Salé"], [
     P(CREVETTE, 120), G(VERMICELLE_RIZ, 150, note="poids cuit"), L(LAIT_COCO, 40), X(CHAMPIGNON, 60), X(CAROTTE, 40), X(GINGEMBRE, 2),
@@ -247,9 +248,10 @@ recette("Poulet, ratatouille & quinoa", ["diner", "dejeuner"], 40, ["Salé", "Ba
     P(POULET, 120), G(QUINOA, 50), X(AUBERGINE, 80), X(COURGETTE, 80), X(POIVRON, 60), X(TOMATE, 80), X(OIGNON, 30), L(HUILE_OLIVE, 8, mini=0), X(HERBES, 1)],
     ["Coupe tous les légumes en dés et fais-les mijoter 25 minutes avec l’huile et les herbes.", "Fais cuire le quinoa.",
      "Fais griller le poulet.", "Sers le poulet sur la ratatouille et le quinoa."])
-recette("Pâtes complètes à la bolognaise de lentilles", ["diner", "dejeuner"], 30, ["Salé", "Végétarien", "Batch cooking"], [
-    P(LENTILLE_CORAIL, 45), G(PATES_COMPLETES, 50), X(TOMATE_PULPE, 200), X(CAROTTE, 50), X(OIGNON, 40), L(PARMESAN, 10), L(HUILE_OLIVE, 4, mini=0)],
-    ["Fais revenir l’oignon et la carotte râpée dans l’huile.", "Ajoute les lentilles, la pulpe de tomate et 150 ml d’eau : laisse mijoter 15 minutes.",
+recette("Pâtes complètes à la bolognaise végétale", ["diner", "dejeuner"], 30, ["Salé", "Végétarien", "Batch cooking"], [
+    P(PST, 80, note="réhydratées"), G(LENTILLE_CORAIL, 25), G(PATES_COMPLETES, 50), X(TOMATE_PULPE, 200), X(CAROTTE, 50), X(OIGNON, 40), L(PARMESAN, 10), L(HUILE_OLIVE, 4, mini=0)],
+    ["Réhydrate les protéines de soja 10 minutes dans de l’eau chaude, puis égoutte-les.", "Fais revenir l’oignon et la carotte râpée dans l’huile, ajoute les protéines de soja.",
+     "Ajoute les lentilles, la pulpe de tomate et 150 ml d’eau : laisse mijoter 15 minutes.",
      "Fais cuire les pâtes.", "Sers avec le parmesan."])
 recette("Salade tiède de lentilles, betterave & chèvre", ["diner", "dejeuner"], 25, ["Salé", "Végétarien"], [
     G(LENTILLE_VERTE, 50), P(OEUF, 2, unite="unite"), L(CHEVRE_FRAIS, 30), X(BETTERAVE, 100), X(ROQUETTE, 30), L(NOIX, 10), X(VINAIGRE_BALSAMIQUE, 5), L(HUILE_OLIVE, 4, mini=0)],
@@ -266,13 +268,13 @@ recette("Energy balls dattes & cacao", ["collation"], 15, ["Sucré", "Végétari
     ["Mixe les dattes dénoyautées avec les amandes.", "Ajoute les flocons, le cacao et la protéine, mixe encore.", "Forme 3 ou 4 boules et garde-les au frais."],
     astuce="Prépare-en pour la semaine : elles se gardent 5 jours au réfrigérateur.")
 recette("Skyr, fruits rouges & amandes", ["collation", "petit_dejeuner"], 3, ["Sucré", "Végétarien", "Sans cuisson", "Rapide"], [
-    P(SKYR, 150), F(FRUITS_ROUGES, 100, pas=10), L(AMANDE, 10), X(MIEL, 5)],
-    ["Verse le skyr dans un bol.", "Ajoute les fruits rouges et les amandes effilées.", "Termine par un filet de miel."])
+    P(SKYR, 150), F(FRUITS_ROUGES, 100, pas=10), G(FLOCONS, 20), L(AMANDE, 10), X(MIEL, 5)],
+    ["Verse le skyr dans un bol.", "Ajoute les fruits rouges, les flocons d’avoine et les amandes effilées.", "Termine par un filet de miel."])
 recette("Fromage blanc, banane & beurre de cacahuète", ["collation"], 3, ["Sucré", "Végétarien", "Sans cuisson", "Rapide"], [
     P(FROMAGE_BLANC, 150), F(BANANE, 80, pas=10), L(CACAHUETE_BEURRE, 10), X(CANNELLE, 1)],
     ["Verse le fromage blanc dans un bol.", "Ajoute la banane en rondelles.", "Termine par le beurre de cacahuète et la cannelle."])
-recette("Galettes de riz, saumon fumé & chèvre frais", ["collation", "dejeuner"], 5, ["Salé", "Rapide", "Sans cuisson"], [
-    G(GALETTE_RIZ, 2, unite="unite"), P(SAUMON_FUME, 40), L(CHEVRE_FRAIS, 15), X(CONCOMBRE, 40), X(CITRON, 5)],
+recette("Galettes de riz, saumon fumé & chèvre frais", ["collation"], 5, ["Salé", "Rapide", "Sans cuisson"], [
+    G(GALETTE_RIZ, 2, unite="unite", maxi=5), P(SAUMON_FUME, 40), L(CHEVRE_FRAIS, 15), X(CONCOMBRE, 40), X(CITRON, 5)],
     ["Tartine les galettes de chèvre frais.", "Ajoute le saumon fumé et les rondelles de concombre.", "Un trait de citron, du poivre, c’est prêt."])
 recette("Smoothie banane-cacao protéiné", ["collation", "petit_dejeuner"], 5, ["Sucré", "Végétarien", "Sans cuisson", "Rapide"], [
     X(LAIT, 200), P(WHEY, 20), F(BANANE, 100, pas=10), G(FLOCONS, 15), L(CACAHUETE_BEURRE, 8), X(CACAO, 3)],
@@ -285,10 +287,10 @@ recette("Cookies avoine, banane & chocolat", ["collation"], 20, ["Sucré", "Vég
     G(FLOCONS, 30), P(WHEY, 15), F(BANANE, 40, pas=10), L(CHOCOLAT_NOIR, 8), L(CACAHUETE_BEURRE, 5), X(LEVURE, 1)],
     ["Préchauffe le four à 180 °C.", "Écrase la banane et mélange-la avec les flocons, la protéine, la levure et le beurre de cacahuète.",
      "Ajoute le chocolat en pépites.", "Forme 3 cookies et enfourne 12 minutes."])
-recette("Houmous maison & pain pita", ["collation", "dejeuner"], 10, ["Salé", "Végétarien", "Sans cuisson"], [
-    P(POIS_CHICHE, 100), G(PAIN_PITA, 30), L(SESAME, 10), L(HUILE_OLIVE, 5, mini=0), X(CITRON, 10), X(AIL, 3), X(CAROTTE, 80), X(CONCOMBRE, 80)],
+recette("Houmous maison, pain pita & œuf dur", ["collation"], 15, ["Salé", "Végétarien"], [
+    P(OEUF, 1, unite="unite"), G(POIS_CHICHE, 80), G(PAIN_PITA, 25), L(SESAME, 10), L(HUILE_OLIVE, 5, mini=0), X(CITRON, 10), X(AIL, 3), X(CAROTTE, 80), X(CONCOMBRE, 80)],
     ["Mixe les pois chiches, le sésame, l’huile, le citron et l’ail avec 2 à 3 cuillères d’eau.", "Coupe la carotte et le concombre en bâtonnets.",
-     "Sers avec le pain pita grillé."])
+     "Sers avec le pain pita grillé et l’œuf dur (9 minutes de cuisson)."])
 recette("Chia pudding coco-mangue", ["collation", "petit_dejeuner"], 5, ["Sucré", "Végétarien", "Sans cuisson", "Batch cooking"], [
     L(CHIA, 15), X(LAIT_AMANDE, 150), P(SKYR, 100), F(MANGUE, 80, pas=10), G(FLOCONS, 10), X(SIROP_ERABLE, 5)],
     ["Mélange les graines de chia avec la boisson à l’amande et le sirop d’érable.", "Laisse prendre au moins 2 heures au frais (ou une nuit).",
@@ -337,7 +339,17 @@ if __name__ == "__main__":
         print("ERREUR :", e)
     titres = [r["titre"] for r in R]
     assert len(set(titres)) == len(titres), "titres en double"
-    sortie = [{k: v for k, v in r.items() if k != "_macros"} for r in R]
+    # Recettes renommées depuis une version précédente : la mise à jour les retrouve sous leur ancien titre.
+    ANCIENS_TITRES = {
+        "Gnocchis poêlés au poulet, tomates & mozzarella": ["Gnocchis poêlés, tomates & mozzarella"],
+        "Houmous maison, pain pita & œuf dur": ["Houmous maison & pain pita"],
+        "Pizza tortilla jambon & champignons": ["Pizza tortilla express aux légumes"],
+        "Pâtes complètes à la bolognaise végétale": ["Pâtes complètes à la bolognaise de lentilles"],
+        "Salade de quinoa, pois chiches, œufs & feta": ["Salade de quinoa, pois chiches & feta"],
+        "Tartine avocat & œufs brouillés": ["Tartine avocat & œufs"],
+    }
+    assert set(ANCIENS_TITRES) <= set(titres), "ancien titre pour une recette inconnue"
+    sortie = [{**{k: v for k, v in r.items() if k != "_macros"}, "anciens_titres": ANCIENS_TITRES.get(r["titre"], [])} for r in R]
     with open("data/recettes-depart.json", "w", encoding="utf-8") as f:
         json.dump({"aliments_perso": ALIMENTS_PERSO, "recettes": sortie}, f, ensure_ascii=False, indent=1)
     if erreurs:

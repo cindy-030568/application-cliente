@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formaterQuantite,
   additionner,
   arrondir,
   bornesParDefaut,
@@ -62,5 +63,15 @@ describe("roleSuggere", () => {
   it("légumes → fixe, fruits → fruit", () => {
     expect(roleSuggere({ proteines_100: 1, glucides_100: 2, lipides_100: 0.3, sous_groupe: "légumes" })).toBe("fixe");
     expect(roleSuggere({ proteines_100: 1, glucides_100: 20, lipides_100: 0.3, sous_groupe: "fruits" })).toBe("fruit");
+  });
+});
+
+describe("formaterQuantite", () => {
+  it("grammes et unités, avec pluriel", () => {
+    expect(formaterQuantite(120, "g", null)).toBe("120 g");
+    expect(formaterQuantite(1, "unite", "œuf")).toBe("1 œuf");
+    expect(formaterQuantite(2, "unite", "œuf")).toBe("2 œufs");
+    expect(formaterQuantite(3, "unite", "carrés")).toBe("3 carrés");
+    expect(formaterQuantite(2, "unite", null)).toBe("2 unités");
   });
 });

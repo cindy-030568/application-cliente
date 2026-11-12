@@ -150,12 +150,18 @@ type FichierDepart = {
   aliments_perso: { nom: string; p: number; g: number; l: number; k: number; categories: string[] }[];
   recettes: {
     titre: string; description: string | null; repas: string[]; temps: number; tags: string[]; etapes: string[]; astuce: string | null;
+    anciens_titres?: string[];
     ingredients: { a: string; role: string; unite: string; base: number; min: number; max: number; pas: number; note: string | null }[];
   }[];
 };
 
-/** Importe les recettes de départ (les recettes déjà présentes, même titre, sont ignorées). */
-export async function importerRecettesDepart(): Promise<EtatRecette> {
+/**
+ * Importe les recettes de départ.
+ * Sans `mettreAJour`, les recettes déjà présentes (même titre, ou ancien titre) sont ignorées.
+ * Avec `mettreAJour`, elles sont remises à jour (titre, textes, repas, tags, ingrédients) ;
+ * la photo et l'état publié/brouillon sont conservés.
+ */
+export async function importerRecettesDepart(mettreAJour = false): Promise<EtatRecette> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
   const { supabase } = session;
@@ -195,19 +201,30 @@ export async function importerRecettesDepart(): Promise<EtatRecette> {
 
   const { data: tags } = await supabase.from("tags").select("id, nom");
   const idTag = new Map((tags ?? []).map((t) => [t.nom as string, t.id as string]));
-  const { data: existantes } = await supabase.from("recettes").select("titre");
-  const dejaLa = new Set((existantes ?? []).map((r) => r.titre as string));
+  const { data: existantes } = await supabase.from("recettes").select("id, titre");
+  const idParTitre = new Map((existantes ?? []).map((r) => [r.titre as string, r.id as string]));
 
   let ajoutees = 0;
+  let misesAJour = 0;
   for (const r of fichier.recettes) {
-    if (dejaLa.has(r.titre)) continue;
-    const { data, error } = await supabase
-      .from("recettes")
-      .insert({ titre: r.titre, description: r.description, temps_prep_min: r.temps, etapes: r.etapes, astuce: r.astuce, publiee: true })
-      .select("id")
-      .single();
-    if (error || !data) return { erreur: `La recette « ${r.titre} » n’a pas pu être importée (${ajoutees} importées avant elle).` };
-    const id = data.id as string;
+    const idExistant = [r.titre, ...(r.anciens_titres ?? [])].map((t) => idParTitre.get(t)).find(Boolean);
+    if (idExistant && !mettreAJour) continue;
+    const champs = { titre: r.titre, description: r.description, temps_prep_min: r.temps, etapes: r.etapes, astuce: r.astuce };
+    let id: string;
+    if (idExistant) {
+      const { error } = await supabase.from("recettes").update(champs).eq("id", idExistant);
+      if (error) return { erreur: `La recette « ${r.titre} » n’a pas pu être mise à jour (${misesAJour} mises à jour avant elle).` };
+      id = idExistant;
+      await Promise.all([
+        supabase.from("recettes_repas").delete().eq("recette_id", id),
+        supabase.from("recettes_tags").delete().eq("recette_id", id),
+        supabase.from("recette_ingredients").delete().eq("recette_id", id),
+      ]);
+    } else {
+      const { data, error } = await supabase.from("recettes").insert({ ...champs, publiee: true }).select("id").single();
+      if (error || !data) return { erreur: `La recette « ${r.titre} » n’a pas pu être importée (${ajoutees} importées avant elle).` };
+      id = data.id as string;
+    }
     await supabase.from("recettes_repas").insert(r.repas.map((type_repas) => ({ recette_id: id, type_repas })));
     const t = r.tags.flatMap((nom) => (idTag.get(nom) ? [{ recette_id: id, tag_id: idTag.get(nom)! }] : []));
     if (t.length) await supabase.from("recettes_tags").insert(t);
@@ -226,11 +243,13 @@ export async function importerRecettesDepart(): Promise<EtatRecette> {
       })),
     );
     if (e2) {
-      await supabase.from("recettes").delete().eq("id", id);
-      return { erreur: `Les ingrédients de « ${r.titre} » n’ont pas pu être importés.` };
+      if (!idExistant) await supabase.from("recettes").delete().eq("id", id);
+      return { erreur: `Les ingrédients de « ${r.titre} » n’ont pas pu être enregistrés. Relance l’opération.` };
     }
-    ajoutees++;
+    if (idExistant) misesAJour++;
+    else ajoutees++;
   }
   rafraichir();
+  if (mettreAJour) return { succes: `${misesAJour} recettes mises à jour, ${ajoutees} ajoutées.` };
   return { succes: ajoutees ? `${ajoutees} recettes importées.` : "Toutes les recettes de départ sont déjà là." };
 }
