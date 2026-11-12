@@ -427,3 +427,41 @@ Connecte-toi avec ta **cliente test** (sur ton téléphone, c'est encore mieux),
 - Tu règles le délai et les deux messages dans **Réglages** ; tu peux aussi tout mettre en pause.
 - **Envoyer les rappels du jour maintenant** fait la même chose tout de suite (pratique pour tester).
 - Tant qu'il n'y a pas de nom de domaine (phase 9), les emails peuvent arriver dans les spams : c'est normal.
+
+---
+
+# Phase 9 — Mise en ligne
+
+## Étape 1 : brancher ton nom de domaine sur Vercel
+
+L'app sera à l'adresse **https://app.fitw-cindy.fr**.
+
+**Dans Vercel**
+1. Ton projet → onglet **Settings** → menu de gauche **Domains** → **Add Domain**.
+2. Écris `app.fitw-cindy.fr` → **Add** (s'il demande, choisis « Production »).
+3. Vercel affiche « Invalid Configuration » et un petit tableau **Type / Name / Value**. Laisse cette page ouverte : la ligne de type **CNAME** est celle qu'on va recopier chez OVH.
+
+**Chez OVH**
+1. Connecte-toi sur [ovhcloud.com](https://www.ovh.com/manager/) → **Web Cloud** → **Noms de domaine** → **fitw-cindy.fr** → onglet **Zone DNS**.
+2. **Ajouter une entrée** → choisis **CNAME**.
+3. **Sous-domaine** : `app`. **Cible** : la valeur « Value » donnée par Vercel (elle finit par `vercel-dns.com`), avec un **point à la fin**. Exemple : `xxxx.vercel-dns-017.com.`
+4. **Suivant** → **Valider**.
+
+Après 5 à 30 minutes, Vercel passe en « Valid Configuration » ✅ et le cadenas HTTPS est créé tout seul.
+
+**Ensuite, dans Vercel** → **Settings** → **Environment Variables** → **Add** :
+- Key `SITE_URL`, Value `https://app.fitw-cindy.fr`, type **Config** → **Save**.
+- Puis **Deployments** → **⋯** → **Redeploy**.
+
+**Dans Supabase** (pour que les liens de connexion pointent vers la nouvelle adresse)
+1. **Authentication** → **URL Configuration**.
+2. **Site URL** : `https://app.fitw-cindy.fr` → **Save**.
+3. **Redirect URLs** → **Add URL** : `https://app.fitw-cindy.fr/**` → **Save**. (Garde l'ancienne adresse vercel.app pour l'instant.)
+
+**Tester** : ouvre https://app.fitw-cindy.fr, connecte-toi, et sur ton téléphone réinstalle l'app depuis cette nouvelle adresse (supprime l'ancienne icône).
+
+> Vercel gratuit interdit en principe l'usage commercial : on démarre ainsi, et on basculera sur Netlify (gratuit, usage commercial autorisé) plus tard. L'app est déjà prête pour ce changement.
+
+## Sauvegarde mensuelle
+
+**Réglages** → **Télécharger une sauvegarde** : un fichier avec toutes les données. Fais-le une fois par mois et range-le dans un endroit privé.

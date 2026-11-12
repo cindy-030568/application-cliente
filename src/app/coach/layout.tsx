@@ -22,11 +22,19 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
   }).length;
   return (
     <div className="min-h-dvh md:flex">
-      <aside className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
+      <aside className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
         <div className="flex flex-col gap-0.5 md:px-3">
           <Logo className="text-xl" />
           <span className="hidden font-main text-[19px] text-caramel md:block">Espace coach</span>
         </div>
+        <form action="/auth/deconnexion" method="post" className="md:hidden">
+          <button
+            type="submit"
+            className="inline-flex min-h-11 items-center gap-1.5 text-[13.5px] text-texte-2 hover:text-chocolat"
+          >
+            <IconeDeconnexion className="size-4" /> Déconnexion
+          </button>
+        </form>
         <NavigationCoach aTraiter={aTraiter} />
         <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
           <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>

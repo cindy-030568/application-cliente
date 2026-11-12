@@ -30,7 +30,7 @@ const A_VENIR: string[] = [];
 export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
   const chemin = usePathname();
   return (
-    <nav aria-label="Navigation coach" className="flex gap-1 md:flex-col">
+    <nav aria-label="Navigation coach" className="-mx-1 flex w-full gap-1 overflow-x-auto px-1 md:mx-0 md:w-auto md:flex-col md:overflow-visible md:px-0">
       {LIENS.map(({ href, label, Icone }) => {
         const actif = href === "/coach" ? chemin === "/coach" : chemin.startsWith(href);
         return (
@@ -38,17 +38,18 @@ export function NavigationCoach({ aTraiter = 0 }: { aTraiter?: number }) {
             key={href}
             href={href}
             aria-current={actif ? "page" : undefined}
+            title={label}
             className={cx(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] transition-colors",
+              "flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] transition-colors",
               actif ? "bg-chocolat text-creme" : "text-chocolat hover:bg-sable/60",
             )}
           >
             <Icone className="size-5 shrink-0" />
-            <span className="hidden sm:inline">{label}</span>
+            <span className="sr-only md:not-sr-only">{label}</span>
             {href === "/coach/bilans" && aTraiter > 0 && (
               <span
                 aria-label={`${aTraiter} à traiter`}
-                className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[11.5px] font-medium text-white"
+                className="rounded-full bg-accent px-2 py-0.5 md:ml-auto text-[11.5px] font-medium text-white"
               >
                 {aTraiter}
               </span>

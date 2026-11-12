@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Carte, Message, Surtitre } from "@/components/ui";
+import { Carte, Message, Surtitre, classesBouton } from "@/components/ui";
 import { exigerCoach, lireReglages } from "@/lib/auth";
 import { chargerChamps } from "@/lib/suivi";
 import { GestionChamps } from "./champs";
@@ -51,6 +51,19 @@ export default async function PageReglages() {
           </p>
         </div>
         <FormulaireTolerance reglages={reglages} />
+      </Carte>
+      <Carte className="flex flex-col gap-3">
+        <h2 className="font-titre text-xl font-bold">Sauvegarde de tes données</h2>
+        <p className="text-[14px] text-texte-2">
+          Un fichier avec toutes les données de l’app : clientes, bilans, mesures, notes, plans, recettes, réglages.
+          Télécharge-le <strong>une fois par mois</strong> et range-le dans un endroit sûr et privé (pas dans un dossier
+          partagé). Les PDF et les photos restent stockés dans Supabase.
+        </p>
+        <div>
+          <a href="/coach/sauvegarde" download className={classesBouton("contour")}>
+            Télécharger une sauvegarde
+          </a>
+        </div>
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

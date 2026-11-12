@@ -1,0 +1,9 @@
+# Hébergement Netlify (offre gratuite, usage commercial autorisé).
+# Next.js est détecté automatiquement (adaptateur OpenNext de Netlify).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"

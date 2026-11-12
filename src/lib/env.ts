@@ -15,12 +15,13 @@ export const SUPABASE_PUBLISHABLE_KEY = () =>
 /**
  * Adresse publique de l'app, utilisée dans les liens de connexion.
  * Ordre : variable SITE_URL (ou NEXT_PUBLIC_SITE_URL) si renseignée,
- * sinon l'adresse de production fournie automatiquement par Vercel,
- * sinon le serveur local.
+ * sinon l'adresse principale fournie automatiquement par Netlify (URL)
+ * ou par Vercel, sinon le serveur local.
  */
 export const SITE_URL = () => {
   const explicite = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  const netlify = process.env.NETLIFY === "true" ? process.env.URL : undefined;
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  const url = explicite || (vercel ? `https://${vercel}` : "http://localhost:3000");
+  const url = explicite || netlify || (vercel ? `https://${vercel}` : "http://localhost:3000");
   return url.trim().replace(/\/+$/, "");
 };
