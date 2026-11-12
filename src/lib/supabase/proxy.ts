@@ -2,7 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_RESTER, appliquerPreference } from "@/lib/session-preference";
 
-const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm"];
+// /api/rappels : tâche quotidienne protégée par son propre secret (CRON_SECRET).
+const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm", "/api/rappels"];
 // /compte/mot-de-passe exige une session : il n'est pas public.
 
 /** Rafraîchit la session et renvoie vers /connexion si personne n'est connecté. */

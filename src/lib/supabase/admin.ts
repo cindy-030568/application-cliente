@@ -5,7 +5,8 @@ import { SUPABASE_URL } from "@/lib/env";
 /**
  * Client administrateur (clé secrète) : contourne la RLS.
  * À n'utiliser QUE pour les opérations sur les comptes (créer, bloquer,
- * supprimer, générer un lien), toujours après avoir vérifié exigerCoach().
+ * supprimer, générer un lien), toujours après avoir vérifié exigerCoach(),
+ * et pour la tâche quotidienne des rappels (protégée par CRON_SECRET).
  */
 export function createAdminClient() {
   const cle = process.env.SUPABASE_SECRET_KEY;

@@ -5,11 +5,18 @@ import { Carte } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
 import { formaterDate } from "@/lib/bilan";
 import { LIBELLES_STATUT } from "@/lib/types";
+import { ReglagesRappels } from "./rappels";
 
 export const metadata: Metadata = { title: "Mon profil" };
 
 export default async function PageProfil() {
-  const { profil, fiche, reglages } = await exigerCliente();
+  const { supabase, profil, fiche, reglages } = await exigerCliente();
+  // Lue à part : la page reste utilisable avant la mise à jour de la base (0008).
+  const { data: pref, error: sansRappels } = await supabase
+    .from("clientes")
+    .select("rappels_email")
+    .eq("id", profil.id)
+    .maybeSingle<{ rappels_email: boolean }>();
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
       <Link href="/" className="inline-flex items-center gap-1 text-[15px] text-texte-2">
@@ -24,6 +31,16 @@ export default async function PageProfil() {
         {fiche.date_debut && <Ligne label="Début" valeur={formaterDate(fiche.date_debut)} />}
         {fiche.date_fin && <Ligne label="Fin prévue" valeur={formaterDate(fiche.date_fin)} />}
       </Carte>
+
+      {!sansRappels && fiche.statut === "active" && (
+        <Carte className="flex flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Mes rappels de bilan</h2>
+            <p className="text-[13.5px] text-texte-2">Un petit signe quand c’est le moment de faire le point.</p>
+          </div>
+          <ReglagesRappels email={pref?.rappels_email ?? true} clePublique={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} />
+        </Carte>
+      )}
 
       <Link
         href="/compte/mot-de-passe"

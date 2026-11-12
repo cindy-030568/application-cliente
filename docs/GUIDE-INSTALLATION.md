@@ -165,7 +165,7 @@ L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready*
 - Il **s'ouvre 3 jours avant** la date prévue (réglable dans **Réglages → Le bilan**). La cliente voit « Ton bilan est ouvert » sur son accueil et dans **Suivi**.
 - En retard, il reste envoyable pendant la moitié de l'intervalle (7 jours pour un rythme de 14 jours).
 - Entre deux bilans, elle peut **noter une mesure** quand elle veut (« saisie libre ») : elle apparaît dans ses graphiques, mais pas dans ta file à traiter.
-- Les relances automatiques par email et notification arrivent en phase 8. En attendant, le rappel est affiché dans l'app.
+- Les rappels par email et notification sont en place depuis la phase 8 (voir plus bas).
 
 ## Tester la phase 3
 
@@ -375,3 +375,55 @@ Connecte-toi avec ta **cliente test** (sur ton téléphone, c'est encore mieux),
    - « Ajouter autre chose » pour le pain, le café… ;
    - **Envoyer ma liste** : sur téléphone, elle s'envoie par WhatsApp, SMS, Notes… ;
    - « Retirer » une recette, « Retirer les articles cochés », « Vider la liste ».
+
+---
+
+# Phase 8 — L'app sur le téléphone et les rappels de bilan
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0008_rappels.sql`](../supabase/migrations/0008_rappels.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. La clé Brevo (pour les emails)
+
+1. Sur [brevo.com](https://app.brevo.com), clique sur ton nom en haut à droite → **SMTP & API** → onglet **API Keys** → **Generate a new API key**.
+2. Nom : `application` → **Generate** → **copie** la clé (elle commence par `xkeysib-`). Ne la colle nulle part ailleurs que dans Vercel.
+3. Vercel → ton projet → **Settings** → **Environment Variables** → **Add** :
+   - Key : `BREVO_API_KEY`, Value : la clé, coche **Sensitive** → **Save**.
+
+## 3. Les clés des rappels (notifications + envoi du matin)
+
+1. Dans l'app : **Réglages** → carte **Rappels de bilan** → **Créer mes clés**.
+2. Pour chacune des 3 lignes (`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`) : **Copier** → Vercel → **Add** → colle le nom et la valeur.
+   - Coche **Sensitive** pour `VAPID_PRIVATE_KEY` et `CRON_SECRET` (pas pour la clé publique).
+3. Vercel → **Deployments** → sur le dernier : **⋯** → **Redeploy**. Patiente 2 minutes.
+4. Recharge **Réglages** : les 3 pastilles « Emails », « Notifications », « Envoi automatique » sont vertes ✓.
+
+> Les clés sont créées dans ton navigateur : elles ne passent par aucun serveur, ni par moi.
+
+## 4. Tester
+
+**Les emails**
+- **Réglages** → **M'envoyer un email de test** → regarde ta boîte (et les spams).
+- Si Brevo refuse la clé : dans Brevo, menu **Sécurité** → **IP autorisées** → désactive le blocage des adresses IP inconnues (Vercel change d'adresse à chaque envoi).
+
+**Le téléphone de ta cliente test**
+1. Ouvre l'app sur le téléphone et connecte-toi avec ta cliente test.
+2. Sur l'accueil, la carte **Installe l'app sur ton téléphone** explique comment faire :
+   - iPhone : Safari → **Partager** → **Sur l'écran d'accueil** → **Ajouter** ;
+   - Android : bouton **Installer l'app**, ou Chrome → **⋮** → **Ajouter à l'écran d'accueil**.
+3. Ouvre l'app **depuis la nouvelle icône** → **Profil** (en haut à droite) → **Mes rappels de bilan** :
+   - **Activer les notifications** → autorise ;
+   - **M'envoyer un test** : la notification arrive en quelques secondes.
+4. Dans ta fiche cliente, la carte **Rappels de bilan** indique si elle a activé les notifications et les rappels envoyés.
+
+## Comment partent les rappels
+
+- **Chaque matin** (entre 8 h et 10 h), l'app regarde chaque cliente active :
+  - son bilan vient de s'ouvrir → « Ton bilan est prêt » ;
+  - toujours pas envoyé **2 jours après** → une seule relance.
+- Jamais deux fois le même rappel, et rien si le bilan est déjà envoyé.
+- Tu règles le délai et les deux messages dans **Réglages** ; tu peux aussi tout mettre en pause.
+- **Envoyer les rappels du jour maintenant** fait la même chose tout de suite (pratique pour tester).
+- Tant qu'il n'y a pas de nom de domaine (phase 9), les emails peuvent arriver dans les spams : c'est normal.

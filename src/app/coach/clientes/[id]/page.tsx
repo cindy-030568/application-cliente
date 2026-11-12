@@ -60,6 +60,17 @@ export default async function PageFicheCliente({
     chargerCategoriesAliment(supabase),
   ]);
   if (!c) notFound();
+  // Rappels (phase 8) : lus à part, la fiche reste utilisable avant la mise à jour de la base.
+  const [{ data: prefRappels, error: sansRappels }, { data: rappels }, { count: appareils }] = await Promise.all([
+    supabase.from("clientes").select("rappels_email").eq("id", id).maybeSingle<{ rappels_email: boolean }>(),
+    supabase
+      .from("rappels_envoyes")
+      .select("id, echeance, type, canaux, envoye_le")
+      .eq("cliente_id", id)
+      .order("envoye_le", { ascending: false })
+      .limit(5),
+    supabase.from("abonnements_push").select("id", { count: "exact", head: true }).eq("cliente_id", id),
+  ]);
 
   const bilan =
     c.statut === "active" ? prochainBilan(c.date_debut, c.frequence_bilan_jours, aujourdhuiParis()) : null;
@@ -183,6 +194,36 @@ export default async function PageFicheCliente({
           <Section titre="Statut">
             <BlocStatut id={c.id} statut={c.statut} />
           </Section>
+          {!sansRappels && (
+            <Section titre="Rappels de bilan">
+              <ul className="flex flex-col gap-1 text-[14px]">
+                <li>Emails : {prefRappels?.rappels_email === false ? "coupés par elle" : "oui"}</li>
+                <li>
+                  Notifications :{" "}
+                  {appareils ? `activées sur ${appareils} appareil${appareils > 1 ? "s" : ""}` : "pas activées"}
+                </li>
+              </ul>
+              {rappels && rappels.length > 0 ? (
+                <ul className="flex flex-col divide-y divide-ligne text-[13.5px]">
+                  {rappels.map((r) => (
+                    <li key={r.id as string} className="flex justify-between gap-3 py-2">
+                      <span>
+                        {r.type === "relance" ? "Relance" : "Bilan ouvert"} ·{" "}
+                        <span className="text-texte-2">{dateCourte.format(new Date(r.envoye_le as string))}</span>
+                      </span>
+                      <span className="text-texte-2">
+                        {(r.canaux as string[]).length
+                          ? (r.canaux as string[]).map((x) => (x === "push" ? "notification" : x)).join(" + ")
+                          : "aucun canal"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[13.5px] text-texte-2">Aucun rappel envoyé pour l’instant.</p>
+              )}
+            </Section>
+          )}
           <Carte className="flex flex-col gap-3">
             <h2 className="font-titre text-xl font-bold">Ses recettes</h2>
             <p className="text-[14px] text-texte-2">

@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
-import { Carte, Surtitre } from "@/components/ui";
+import { Carte, Message, Surtitre } from "@/components/ui";
 import { exigerCoach, lireReglages } from "@/lib/auth";
 import { chargerChamps } from "@/lib/suivi";
 import { GestionChamps } from "./champs";
 import { FormulaireReglages } from "./formulaire";
 import { FormulaireTolerance } from "./tolerance";
+import { FormulaireRappels } from "./rappels";
+import { configurationRappels, lireReglagesRappels } from "@/lib/envoi-rappels";
 
 export const metadata: Metadata = { title: "Réglages" };
 
 export default async function PageReglages() {
   const { supabase } = await exigerCoach();
-  const [reglages, champs] = await Promise.all([lireReglages(), chargerChamps(supabase, true)]);
+  const [reglages, champs, rappels] = await Promise.all([
+    lireReglages(),
+    chargerChamps(supabase, true),
+    lireReglagesRappels(supabase),
+  ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div>
@@ -19,6 +25,21 @@ export default async function PageReglages() {
       </div>
       <Carte>
         <FormulaireReglages reglages={reglages} />
+      </Carte>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Rappels de bilan</h2>
+          <p className="text-[14px] text-texte-2">
+            Par email et en notification sur le téléphone de tes clientes (si elles l’ont activé dans leur profil).
+          </p>
+        </div>
+        {rappels ? (
+          <FormulaireRappels reglages={rappels} config={configurationRappels()} />
+        ) : (
+          <Message ton="info">
+            Fais d’abord la mise à jour de la base : fichier 0008_rappels.sql (voir le guide, phase 8).
+          </Message>
+        )}
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

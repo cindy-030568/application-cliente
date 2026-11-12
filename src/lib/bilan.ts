@@ -54,7 +54,7 @@ export function formaterDate(iso: string | null, options?: Intl.DateTimeFormatOp
   }).format(versDate(iso));
 }
 
-function ajouterJours(iso: string, jours: number): string {
+export function ajouterJours(iso: string, jours: number): string {
   return versIso(new Date(versDate(iso).getTime() + jours * JOUR));
 }
 

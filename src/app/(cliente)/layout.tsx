@@ -1,5 +1,6 @@
 import { exigerCliente } from "@/lib/auth";
 import { visiteANoter } from "@/lib/bilan";
+import { EnregistrementServiceWorker } from "@/components/pwa";
 import { BarreOnglets } from "./barre-onglets";
 
 export default async function LayoutCliente({ children }: { children: React.ReactNode }) {
@@ -10,6 +11,7 @@ export default async function LayoutCliente({ children }: { children: React.Reac
     <>
       <div className="pb-onglets mx-auto min-h-dvh w-full max-w-lg">{children}</div>
       <BarreOnglets />
+      <EnregistrementServiceWorker />
     </>
   );
 }

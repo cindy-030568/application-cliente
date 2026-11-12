@@ -15,6 +15,7 @@ import {
 import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
+import { CarteInstallation } from "@/components/pwa";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -99,6 +100,8 @@ export default async function PageAccueil() {
             <IconeFleche className="size-5 shrink-0" />
           </Link>
         )}
+
+        <CarteInstallation />
 
         {rdv && (
           <div className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce apparition">
