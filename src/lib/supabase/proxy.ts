@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_RESTER, appliquerPreference } from "@/lib/session-preference";
 
 const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm"];
+// /compte/mot-de-passe exige une session : il n'est pas public.
 
 /** Rafraîchit la session et renvoie vers /connexion si personne n'est connecté. */
 export async function updateSession(request: NextRequest) {
@@ -11,6 +13,7 @@ export async function updateSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return response; // configuration absente : la page affichera l'erreur
 
+  const rester = request.cookies.get(COOKIE_RESTER)?.value !== "0";
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll() {
@@ -20,7 +23,7 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
+          response.cookies.set(name, value, appliquerPreference(options, rester)),
         );
       },
     },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { IconeDeconnexion } from "@/components/icones";
 import { Logo } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
@@ -29,6 +30,9 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
         <NavigationCoach aTraiter={aTraiter} />
         <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
           <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>
+          <Link href="/compte/mot-de-passe" className="text-[14px] text-texte-2 hover:text-chocolat">
+            Mon mot de passe
+          </Link>
           <form action="/auth/deconnexion" method="post">
             <button
               type="submit"

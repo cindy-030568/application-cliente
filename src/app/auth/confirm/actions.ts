@@ -11,10 +11,12 @@ export async function confirmerConnexion(formData: FormData) {
     redirect("/auth/confirm?erreur=1");
   }
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     token_hash: tokenHash,
     type: type as EmailOtpType,
   });
   if (error) redirect("/auth/confirm?erreur=1");
+  // Pas encore de mot de passe : on propose d'en créer un (facultatif).
+  if (!data.user?.user_metadata?.mot_de_passe_defini) redirect("/compte/mot-de-passe?bienvenue=1");
   redirect("/");
 }

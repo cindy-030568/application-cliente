@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { IconeDeconnexion, IconeRetour } from "@/components/icones";
+import { IconeDeconnexion, IconeFleche, IconeRetour } from "@/components/icones";
 import { Carte } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
 import { formaterDate } from "@/lib/bilan";
@@ -24,6 +24,17 @@ export default async function PageProfil() {
         {fiche.date_debut && <Ligne label="Début" valeur={formaterDate(fiche.date_debut)} />}
         {fiche.date_fin && <Ligne label="Fin prévue" valeur={formaterDate(fiche.date_fin)} />}
       </Carte>
+
+      <Link
+        href="/compte/mot-de-passe"
+        className="flex items-center justify-between rounded-carte bg-blanc-casse p-4 shadow-douce"
+      >
+        <span className="flex flex-col">
+          <span className="font-medium">Mon mot de passe</span>
+          <span className="text-[13.5px] text-texte-2">Pour te connecter sans attendre de code</span>
+        </span>
+        <IconeFleche className="size-5 text-texte-2" />
+      </Link>
 
       <p className="text-[14px] text-texte-2">
         Une info à corriger ? Écris simplement à Cindy, elle s’en occupe.

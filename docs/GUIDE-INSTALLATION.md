@@ -255,3 +255,15 @@ Les anciennes questions de ressenti (faim, confort digestif, cycle) sont masqué
    - ajoute une question « Réponse libre ».
    Dans un texte, `{jours}` s'affiche avec le rythme de bilan de chaque cliente.
 4. Entre deux bilans, « Noter une mesure » ne propose que les mesures, pas tout le questionnaire.
+
+---
+
+# Connexion par mot de passe
+
+- L'écran de connexion propose **email + mot de passe**. En dessous, « Première connexion ou mot de passe oublié ? » envoie un **code par email**, comme avant.
+- Après une connexion par code (ou par lien), l'app propose de **créer un mot de passe**. C'est facultatif : « Plus tard » est toujours possible.
+- **Changer son mot de passe** : côté cliente, Profil → « Mon mot de passe » ; côté coach, « Mon mot de passe » en bas du menu.
+- **Rester connectée** (cochée par défaut) : la connexion reste ouverte sur l'appareil. Décochée, elle se ferme quand le navigateur est fermé.
+
+> Rien à régler dans Supabase : la connexion par mot de passe est déjà active.
+> Pour tester côté cliente, la fenêtre de navigation privée oublie toujours la connexion à sa fermeture : c'est normal.
