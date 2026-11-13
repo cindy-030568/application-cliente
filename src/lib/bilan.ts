@@ -11,6 +11,18 @@ export function versIso(d: Date): string {
 }
 
 /**
+ * Les bilans se comptent comme dans un tableau : le jour du démarrage est le jour 1.
+ * Démarrage le lundi 7 sept., bilan toutes les 2 semaines → dimanche 20 sept., 4 oct., 18 oct.…
+ * Les échéances tombent donc à (veille du démarrage) + k × fréquence.
+ */
+const ancrage = (dateDebut: string) => ajouterJours(dateDebut, -1);
+
+/** Date du 1er bilan : le dernier jour de la première période. */
+export function premiereEcheance(dateDebut: string, frequenceJours: number): string {
+  return ajouterJours(dateDebut, frequenceJours - 1);
+}
+
+/**
  * Prochaine date de bilan (aujourd'hui inclus), calée sur la date de début
  * et la fréquence en jours. Null si pas de date de début.
  */
@@ -20,7 +32,7 @@ export function prochainBilan(
   aujourdhui: string,
 ): string | null {
   if (!dateDebut || frequenceJours < 1) return null;
-  const debut = versDate(dateDebut).getTime();
+  const debut = versDate(ancrage(dateDebut)).getTime();
   const auj = versDate(aujourdhui).getTime();
   if (auj <= debut) return versIso(new Date(debut + frequenceJours * JOUR));
   const ecoules = Math.floor((auj - debut) / JOUR);
@@ -37,7 +49,7 @@ export const PHOTOS_TOUS_LES_JOURS = 28;
  */
 export function bilanAvecPhotos(dateDebut: string | null, frequenceJours: number, echeance: string): boolean {
   if (!dateDebut || frequenceJours < 1) return false;
-  const k = Math.round(joursEntre(dateDebut, echeance) / frequenceJours);
+  const k = Math.round(joursEntre(ancrage(dateDebut), echeance) / frequenceJours);
   if (k < 1) return false;
   return Math.floor((k * frequenceJours) / PHOTOS_TOUS_LES_JOURS) > Math.floor(((k - 1) * frequenceJours) / PHOTOS_TOUS_LES_JOURS);
 }
@@ -100,7 +112,7 @@ export function echeanceOuverte(
     return { echeance: prochaine, statut: "ouverte", fermeLe: ajouterJours(prochaine, tolerance) };
   }
   const precedente = ajouterJours(prochaine, -frequence);
-  if (precedente >= ajouterJours(dateDebut, frequence) && joursEntre(precedente, aujourdhui) <= tolerance) {
+  if (precedente >= premiereEcheance(dateDebut, frequence) && joursEntre(precedente, aujourdhui) <= tolerance) {
     return {
       echeance: precedente,
       statut: aujourdhui === precedente ? "ouverte" : "en_retard",
@@ -120,7 +132,7 @@ export function derniereEcheancePassee(
   const prochaine = prochainBilan(dateDebut, frequence, aujourdhui);
   if (!prochaine) return null;
   const derniere = ajouterJours(prochaine, -frequence);
-  return derniere >= ajouterJours(dateDebut, frequence) && derniere < aujourdhui ? derniere : null;
+  return derniere >= premiereEcheance(dateDebut, frequence) && derniere < aujourdhui ? derniere : null;
 }
 
 /** Les n dernières échéances passées, de la plus récente à la plus ancienne. */
@@ -132,7 +144,7 @@ export function echeancesPassees(
 ): string[] {
   const resultat: string[] = [];
   let e = derniereEcheancePassee(dateDebut, frequence, aujourdhui);
-  while (e && dateDebut && resultat.length < n && e >= ajouterJours(dateDebut, frequence)) {
+  while (e && dateDebut && resultat.length < n && e >= premiereEcheance(dateDebut, frequence)) {
     resultat.push(e);
     e = ajouterJours(e, -frequence);
   }

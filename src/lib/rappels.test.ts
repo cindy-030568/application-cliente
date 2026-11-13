@@ -4,7 +4,7 @@ import { cleRappel, emailRappel, personnaliser, rappelDu, type SituationRappel }
 // Début le 1er nov., bilan tous les 14 jours → échéance le 15 nov., ouverte 3 jours avant (le 12).
 const base = (o: Partial<SituationRappel> = {}): SituationRappel => ({
   statut: "active",
-  date_debut: "2026-11-01",
+  date_debut: "2026-11-02",
   frequence_bilan_jours: 14,
   fenetre: 3,
   relanceJours: 2,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   bilanAvecPhotos,
+  premiereEcheance,
   alertesCliente,
   conservationDepassee,
   derniereEcheancePassee,
@@ -15,20 +16,20 @@ import {
 
 describe("prochainBilan", () => {
   it("premier bilan 14 jours après le début", () => {
-    expect(prochainBilan("2026-11-01", 14, "2026-11-01")).toBe("2026-11-15");
-    expect(prochainBilan("2026-11-01", 14, "2026-11-05")).toBe("2026-11-15");
+    expect(prochainBilan("2026-11-02", 14, "2026-11-01")).toBe("2026-11-15");
+    expect(prochainBilan("2026-11-02", 14, "2026-11-05")).toBe("2026-11-15");
   });
   it("le jour du bilan, c'est aujourd'hui", () => {
-    expect(prochainBilan("2026-11-01", 14, "2026-11-15")).toBe("2026-11-15");
+    expect(prochainBilan("2026-11-02", 14, "2026-11-15")).toBe("2026-11-15");
   });
   it("le lendemain d'un bilan, on passe au suivant", () => {
-    expect(prochainBilan("2026-11-01", 14, "2026-11-16")).toBe("2026-11-29");
+    expect(prochainBilan("2026-11-02", 14, "2026-11-16")).toBe("2026-11-29");
   });
   it("début dans le futur", () => {
-    expect(prochainBilan("2026-12-01", 7, "2026-11-09")).toBe("2026-12-08");
+    expect(prochainBilan("2026-12-01", 7, "2026-11-09")).toBe("2026-12-07");
   });
   it("traverse les changements d'heure et d'année", () => {
-    expect(prochainBilan("2026-12-20", 14, "2027-01-02")).toBe("2027-01-03");
+    expect(prochainBilan("2026-12-21", 14, "2027-01-02")).toBe("2027-01-03");
   });
   it("sans date de début : pas de bilan", () => {
     expect(prochainBilan(null, 14, "2026-11-09")).toBeNull();
@@ -45,8 +46,8 @@ describe("utilitaires de date", () => {
 });
 
 
-describe("echeanceOuverte (début le 1er nov., bilan tous les 14 jours, fenêtre de 3 jours)", () => {
-  const ouv = (auj: string) => echeanceOuverte("2026-11-01", 14, 3, auj);
+describe("echeanceOuverte (début le 2 nov., bilan tous les 14 jours, fenêtre de 3 jours)", () => {
+  const ouv = (auj: string) => echeanceOuverte("2026-11-02", 14, 3, auj);
   it("fermé tant qu'on n'est pas à 3 jours de l'échéance", () => {
     expect(ouv("2026-11-05")).toBeNull();
     expect(ouv("2026-11-11")).toBeNull();
@@ -69,28 +70,28 @@ describe("echeanceOuverte (début le 1er nov., bilan tous les 14 jours, fenêtre
     expect(echeanceOuverte(null, 14, 3, "2026-11-12")).toBeNull();
   });
   it("fenêtre de 0 jour : seulement le jour J (puis rattrapage)", () => {
-    expect(echeanceOuverte("2026-11-01", 7, 0, "2026-11-07")).toBeNull();
-    expect(echeanceOuverte("2026-11-01", 7, 0, "2026-11-08")?.statut).toBe("ouverte");
+    expect(echeanceOuverte("2026-11-02", 7, 0, "2026-11-07")).toBeNull();
+    expect(echeanceOuverte("2026-11-02", 7, 0, "2026-11-08")?.statut).toBe("ouverte");
   });
 });
 
 describe("échéances passées", () => {
   it("aucune avant le premier bilan", () => {
-    expect(derniereEcheancePassee("2026-11-01", 14, "2026-11-15")).toBeNull();
+    expect(derniereEcheancePassee("2026-11-02", 14, "2026-11-15")).toBeNull();
   });
   it("la dernière échéance strictement passée", () => {
-    expect(derniereEcheancePassee("2026-11-01", 14, "2026-11-16")).toBe("2026-11-15");
-    expect(derniereEcheancePassee("2026-11-01", 14, "2026-11-29")).toBe("2026-11-15");
+    expect(derniereEcheancePassee("2026-11-02", 14, "2026-11-16")).toBe("2026-11-15");
+    expect(derniereEcheancePassee("2026-11-02", 14, "2026-11-29")).toBe("2026-11-15");
   });
   it("les deux dernières", () => {
-    expect(echeancesPassees("2026-11-01", 14, "2026-12-01", 2)).toEqual(["2026-11-29", "2026-11-15"]);
+    expect(echeancesPassees("2026-11-02", 14, "2026-12-01", 2)).toEqual(["2026-11-29", "2026-11-15"]);
   });
 });
 
 describe("alertesCliente", () => {
   const base = {
     statut: "active",
-    date_debut: "2026-10-01",
+    date_debut: "2026-10-02",
     date_fin: null as string | null,
     frequence_bilan_jours: 14,
     derniere_visite: "2026-11-10T08:00:00Z" as string | null,
@@ -151,20 +152,30 @@ describe("conservationDepassee", () => {
 
 describe("bilanAvecPhotos (photos de suivi toutes les 4 semaines)", () => {
   it("bilan tous les 14 jours : un sur deux, à 4, 8, 12 semaines", () => {
-    const debut = "2026-11-01";
+    const debut = "2026-11-02";
     expect(bilanAvecPhotos(debut, 14, "2026-11-15")).toBe(false);
     expect(bilanAvecPhotos(debut, 14, "2026-11-29")).toBe(true);
     expect(bilanAvecPhotos(debut, 14, "2026-12-13")).toBe(false);
     expect(bilanAvecPhotos(debut, 14, "2026-12-27")).toBe(true);
   });
   it("bilan toutes les semaines : un sur quatre", () => {
-    const r = [7, 14, 21, 28, 35, 42, 49, 56].map((j) => bilanAvecPhotos("2026-11-01", 7, `2026-${j < 30 ? "11" : "12"}-${String(j < 30 ? 1 + j : j - 29).padStart(2, "0")}`));
+    const r = [7, 14, 21, 28, 35, 42, 49, 56].map((j) => bilanAvecPhotos("2026-11-02", 7, `2026-${j < 30 ? "11" : "12"}-${String(j < 30 ? 1 + j : j - 29).padStart(2, "0")}`));
     expect(r).toEqual([false, false, false, true, false, false, false, true]);
   });
   it("bilan tous les 30 jours : à chaque bilan", () => {
-    expect(bilanAvecPhotos("2026-11-01", 30, "2026-12-01")).toBe(true);
+    expect(bilanAvecPhotos("2026-11-02", 30, "2026-12-01")).toBe(true);
   });
   it("sans date de début : jamais", () => {
     expect(bilanAvecPhotos(null, 14, "2026-11-15")).toBe(false);
+  });
+});
+
+describe("comptage comme dans un tableau (le jour du démarrage = jour 1)", () => {
+  it("démarrage le lundi 7 sept., toutes les 2 semaines : 20/09, 04/10, 18/10, 01/11, 15/11", () => {
+    expect(premiereEcheance("2026-09-07", 14)).toBe("2026-09-20");
+    expect(echeancesPassees("2026-09-07", 14, "2026-11-13", 4)).toEqual(["2026-11-01", "2026-10-18", "2026-10-04", "2026-09-20"]);
+    expect(prochainBilan("2026-09-07", 14, "2026-11-13")).toBe("2026-11-15");
+    expect(bilanAvecPhotos("2026-09-07", 14, "2026-11-15")).toBe(false);
+    expect(bilanAvecPhotos("2026-09-07", 14, "2026-11-29")).toBe(true);
   });
 });
