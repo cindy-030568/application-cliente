@@ -40,7 +40,7 @@ export function BarreOnglets({ communaute }: { communaute?: { nonLus: number } |
       aria-label="Navigation principale"
       className="pb-encoche fixed inset-x-0 bottom-0 z-30 border-t border-ligne bg-blanc-casse/90 backdrop-blur-md"
     >
-      <ul className={cx("mx-auto grid max-w-lg pt-2", communaute ? "grid-cols-6 px-1" : "grid-cols-5 px-2")}>
+      <ul className={cx("mx-auto grid max-w-lg pt-2", communaute ? "grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.35fr)] px-1.5" : "grid-cols-5 px-2")}>
         {onglets.map(({ href, label, Icone }) => {
           const actif = href === "/" ? chemin === "/" : chemin.startsWith(href);
           const pastille = href === COMMUNAUTE.href && !actif ? (communaute?.nonLus ?? 0) : 0;
@@ -52,7 +52,7 @@ export function BarreOnglets({ communaute }: { communaute?: { nonLus: number } |
                 aria-label={pastille ? `${label}, ${pastille} nouveau${pastille > 1 ? "x" : ""} message${pastille > 1 ? "s" : ""}` : undefined}
                 className={cx(
                   "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl transition-colors",
-                  communaute ? "text-[10.5px] tracking-tight" : "text-[11.5px]",
+                  communaute ? "text-[11px]" : "text-[11.5px]",
                   actif ? "font-medium text-chocolat" : "text-texte-2 hover:text-chocolat",
                 )}
               >

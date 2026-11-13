@@ -103,7 +103,7 @@ export default async function PageRecettes({
           <h2 id="titre-repas" className="font-titre text-lg font-bold">
             Quel repas veux-tu remplacer ?
           </h2>
-          <nav className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" aria-label="Repas">
+          <nav className="defilement -mx-5 flex gap-2.5 overflow-x-auto px-5 py-0.5" aria-label="Repas">
             {repas.map((r, i) => (
               <Puce key={i} href={lien({ repas: String(i) })} actif={vue.type === "repas" && vue.index === i}>
                 {r.repas.libelle}
@@ -132,7 +132,7 @@ export default async function PageRecettes({
               className="min-h-12 w-full rounded-full border border-ligne bg-white pl-11 pr-4 text-[16px] focus:border-chocolat focus:outline-none focus:ring-2 focus:ring-accent-pale"
             />
           </label>
-          <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
+          <div className="defilement -mx-5 flex gap-2.5 overflow-x-auto px-5 py-0.5">
             {tags.map((t) => (
               <Link
                 key={t.id}

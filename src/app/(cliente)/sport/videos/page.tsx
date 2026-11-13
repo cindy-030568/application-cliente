@@ -79,7 +79,7 @@ export default async function PageVideos({ searchParams }: { searchParams: Promi
               return (
                 <div key={valeur} className="flex flex-col gap-1.5">
                   <p className="px-5 text-[12px] font-medium uppercase tracking-[0.12em] text-caramel-texte">{libelle}</p>
-                  <div className="flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+                  <div className="defilement flex gap-2.5 overflow-x-auto px-5 py-0.5">
                     <Puce href={lien({ [param]: undefined })} actif={!choisis[valeur]}>
                       Tous
                     </Puce>

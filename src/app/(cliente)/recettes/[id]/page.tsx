@@ -94,7 +94,7 @@ export default async function PageRecette({
             <h2 id="titre-pour" className="text-[14px] font-medium">
               Quantités calculées pour ton…
             </h2>
-            <div className="-mx-5 flex gap-2 overflow-x-auto px-5">
+            <div className="defilement -mx-5 flex gap-2.5 overflow-x-auto px-5 py-0.5">
               {repasPossibles.map((i) => (
                 <Choix key={i} href={lien({ repas: i })} actif={i === index}>
                   {repas[i].repas.libelle}

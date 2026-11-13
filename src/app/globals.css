@@ -105,3 +105,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .apparition { animation: none; }
 }
+
+/* Rangées de puces qui défilent à l'horizontale : pas de barre de défilement,
+   un léger fondu à droite indique qu'il y a une suite. */
+.defilement {
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+.defilement::-webkit-scrollbar {
+  display: none;
+}
