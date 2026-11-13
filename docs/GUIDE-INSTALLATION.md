@@ -496,7 +496,8 @@ Active la **double authentification** (code sur ton téléphone en plus du mot d
 
 ### RGPD : ce que l'app fait déjà
 - Consentement explicite de chaque cliente à la première connexion (données de santé).
-- Données hébergées dans l'Union européenne (Supabase, Paris) ; emails par Brevo (France).
+- Données hébergées dans l'Union européenne (Supabase, Paris) ; serveurs de l'app à Paris (Vercel) ; emails par Brevo (France).
+- Après 3 ans d'accès fermé, le tableau de bord t'indique les clientes dont il faut supprimer les données.
 - Chaque cliente ne voit que ses propres données ; tes notes restent privées ; ses listes de courses ne sont visibles que par elle.
 - Export de ses mesures (Excel / CSV) depuis son suivi, suppression définitive depuis sa fiche.
 
@@ -506,7 +507,7 @@ Active la **double authentification** (code sur ton téléphone en plus du mot d
   - pourquoi : le suivi de ton accompagnement ;
   - sur quelle base : le consentement de la cliente ;
   - combien de temps : 3 ans après la fin de l'accompagnement ;
-  - qui les héberge : Supabase (UE), Vercel (hébergement de l'app, États-Unis), Brevo (emails, France), YouTube (vidéos d'exercices, sans cookie avant clic) ;
+  - qui les héberge : Supabase (base de données, Paris), Vercel (hébergement de l'app, serveurs à Paris, société américaine), Brevo (emails, France), YouTube (vidéos d'exercices, sans cookie avant clic) ;
   - ses droits : accès, rectification, suppression, portabilité, retrait du consentement, réclamation à la CNIL ;
   - comment te contacter.
 - [ ] Le lien de cette politique est dans **Réglages → Lien de ta politique de confidentialité**.

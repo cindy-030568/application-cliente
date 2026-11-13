@@ -214,3 +214,14 @@ export function isoVersHeureParis(iso: string | null): string {
   );
   return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
 }
+
+/** Durée de conservation après la fermeture de l'accès (RGPD). */
+export const CONSERVATION_ANS = 3;
+
+/** Vrai si l'accès est fermé depuis au moins 3 ans : les données doivent être supprimées. */
+export function conservationDepassee(statut: string, fermeLe: string | null, aujourdhui: string): boolean {
+  if (statut !== "fermee" || !fermeLe) return false;
+  const [a, m, j] = fermeLe.slice(0, 10).split("-").map(Number);
+  const limite = versIso(new Date(Date.UTC(a + CONSERVATION_ANS, m - 1, j)));
+  return aujourdhui >= limite;
+}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { IconePlus } from "@/components/icones";
 import { Carte, Etiquette, LienBouton, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
+import { aujourdhuiParis, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
 import { chargerFile } from "./bilans/donnees";
 
 export default async function TableauDeBord() {
@@ -17,6 +17,7 @@ export default async function TableauDeBord() {
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 8);
 
+  const aSupprimer = clientes.filter((c) => conservationDepassee(c.statut, c.ferme_le, auj));
   // Une ligne par cliente ; « 2 bilans manqués » remplace « bilan manquant ».
   const parCliente = clientes
     .map((cliente) => {
@@ -105,6 +106,28 @@ export default async function TableauDeBord() {
           </Link>
         </Carte>
       </div>
+
+      {aSupprimer.length > 0 && (
+        <Carte className="flex flex-col gap-3 border border-erreur/30">
+          <h2 className="font-titre text-xl font-bold">Données à supprimer</h2>
+          <p className="text-[14px] text-texte-2">
+            L’accès de ces clientes est fermé depuis plus de 3 ans : le délai de conservation (RGPD) est dépassé.
+            Ouvre leur fiche → <strong>Zone sensible</strong> → Supprimer définitivement.
+          </p>
+          <ul className="flex flex-col divide-y divide-ligne">
+            {aSupprimer.map((c) => (
+              <li key={c.id}>
+                <Link href={`/coach/clientes/${c.id}`} className="flex justify-between gap-3 py-2.5 hover:text-accent">
+                  <span className="font-medium">
+                    {c.profils.prenom} {c.profils.nom}
+                  </span>
+                  <span className="text-[13.5px] text-texte-2">accès fermé le {formaterDate(c.ferme_le!.slice(0, 10))}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Carte>
+      )}
 
       <Carte className="flex flex-col gap-4">
         <h2 className="font-titre text-xl font-bold">À surveiller</h2>

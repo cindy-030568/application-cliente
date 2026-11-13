@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   alertesCliente,
+  conservationDepassee,
   derniereEcheancePassee,
   echeanceOuverte,
   echeancesPassees,
@@ -132,5 +133,17 @@ describe("heure de Paris", () => {
   });
   it("valeur invalide", () => {
     expect(heureParisVersIso("demain")).toBeNull();
+  });
+});
+
+describe("conservationDepassee", () => {
+  it("3 ans après la fermeture de l'accès, jour pour jour", () => {
+    expect(conservationDepassee("fermee", "2026-11-13T10:00:00Z", "2029-11-12")).toBe(false);
+    expect(conservationDepassee("fermee", "2026-11-13T10:00:00Z", "2029-11-13")).toBe(true);
+  });
+  it("jamais pour une cliente active ou en fin de suivi", () => {
+    expect(conservationDepassee("active", "2020-01-01", "2029-11-13")).toBe(false);
+    expect(conservationDepassee("terminee", "2020-01-01", "2029-11-13")).toBe(false);
+    expect(conservationDepassee("fermee", null, "2029-11-13")).toBe(false);
   });
 });

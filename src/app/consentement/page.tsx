@@ -28,25 +28,31 @@ export default async function PageConsentement({
 
       <ul className="flex flex-col gap-4 rounded-bloc bg-blanc-casse p-5 text-[15px] shadow-douce">
         <li>
-          <strong className="font-medium">Ce que l’app conserve :</strong> ton prénom, ton nom,
-          ton email, tes plans, et plus tard tes mesures, photos de progression et préférences
-          alimentaires.
+          <strong className="font-medium">Ce que l’app conserve :</strong> ton prénom, ton nom, ton email, tes
+          plans, tes bilans (mesures, photos de progression, ressentis, habitudes) et tes préférences
+          alimentaires. Certaines de ces informations sont des données de santé.
         </li>
         <li>
-          <strong className="font-medium">Pourquoi :</strong> uniquement pour ton suivi de
-          coaching avec Cindy. Rien n’est vendu ni partagé.
+          <strong className="font-medium">Pourquoi :</strong> uniquement pour ton suivi de coaching avec Cindy.
+          Rien n’est vendu, ni utilisé pour de la publicité.
         </li>
         <li>
-          <strong className="font-medium">Qui y a accès :</strong> toi et Cindy, personne
-          d’autre. Les autres clientes ne voient jamais tes données.
+          <strong className="font-medium">Qui y a accès :</strong> toi et Cindy, personne d’autre. Les autres
+          clientes ne voient jamais tes données. Ta liste de courses n’est visible que par toi.
         </li>
         <li>
-          <strong className="font-medium">Où :</strong> tes données sont stockées en France
-          (Paris), sur des serveurs sécurisés.
+          <strong className="font-medium">Où :</strong> tes données sont stockées dans l’Union européenne (Paris),
+          sur des serveurs sécurisés. Quelques prestataires techniques font fonctionner l’app (hébergement du site,
+          envoi des emails) sans pouvoir utiliser tes données pour autre chose.
         </li>
         <li>
-          <strong className="font-medium">Tes droits :</strong> tu peux demander à tout moment à
-          consulter, corriger ou supprimer tes données en écrivant à Cindy.
+          <strong className="font-medium">Combien de temps :</strong> pendant ton accompagnement, puis 3 ans
+          après la fermeture de ton accès. Ensuite, elles sont supprimées.
+        </li>
+        <li>
+          <strong className="font-medium">Tes droits :</strong> tu peux à tout moment consulter, corriger,
+          récupérer ou faire supprimer tes données, et retirer ton accord, en écrivant à Cindy. Tu peux aussi
+          contacter la CNIL.
         </li>
       </ul>
 
