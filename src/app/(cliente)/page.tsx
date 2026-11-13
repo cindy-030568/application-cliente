@@ -16,6 +16,7 @@ import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
+import { compterNonLus, lireEtatCommunaute, lireMembre } from "@/lib/communaute-serveur";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -49,6 +50,7 @@ export default async function PageAccueil() {
     timeZone: "Europe/Paris",
   });
   const formationOuverte = fiche.acces_formation && Boolean(reglages.lien_formation);
+  const communaute = await carteCommunaute(supabase, profil.id);
 
   return (
     <>
@@ -165,6 +167,27 @@ export default async function PageAccueil() {
           </span>
         </Link>
 
+        {communaute && (
+          <Link
+            href="/communaute"
+            className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce apparition"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-pale text-xl" aria-hidden>
+              💬
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-titre text-[17px] font-bold">La communauté</span>
+              <span className="text-[14px] text-texte-2">{communaute.texte}</span>
+            </span>
+            {communaute.nonLus > 0 && (
+              <span className="rounded-full bg-accent px-2.5 py-1 text-[12px] font-medium text-white tabular-nums">
+                {communaute.nonLus > 99 ? "99+" : communaute.nonLus}
+              </span>
+            )}
+            <IconeFleche className="size-5 shrink-0 text-texte-2" />
+          </Link>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <Tuile href="/sport/videos" icone={<IconeVideo className="size-6" />} titre="Vidéos d’exercices" />
           <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
@@ -210,6 +233,20 @@ export default async function PageAccueil() {
       </div>
     </>
   );
+}
+
+/** Carte « Communauté » de l'accueil (rien si elle est fermée, si la cliente a été retirée ou avant la mise à jour 0009). */
+async function carteCommunaute(supabase: Parameters<typeof lireEtatCommunaute>[0], moi: string) {
+  const etat = await lireEtatCommunaute(supabase);
+  if (!etat?.ouverte) return null;
+  const membre = await lireMembre(supabase, moi);
+  if (membre?.statut === "exclue") return null;
+  if (!membre) return { nonLus: 0, texte: "Échange avec les autres clientes de Cindy" };
+  const nonLus = await compterNonLus(supabase, moi, membre.dernier_vu);
+  return {
+    nonLus,
+    texte: nonLus === 0 ? "Pas de nouveau message" : nonLus === 1 ? "1 nouveau message" : `${nonLus > 99 ? "99+" : nonLus} nouveaux messages`,
+  };
 }
 
 function Tuile({

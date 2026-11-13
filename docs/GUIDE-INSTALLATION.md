@@ -522,3 +522,44 @@ Active la **double authentification** (code sur ton téléphone en plus du mot d
 - [ ] Fais une première **sauvegarde** (Réglages → Télécharger une sauvegarde).
 
 Ensuite, crée tes vraies clientes depuis **Clientes → Nouvelle cliente** : elles reçoivent leur email de bienvenue de la part de `cindy@fitw-cindy.fr`.
+
+---
+
+# Phase 10 — La communauté
+
+Un seul groupe d'échange entre tes clientes : messages, photos, réactions (❤️ 👏 💪 😂). Chaque cliente choisit de rejoindre ou non, après avoir accepté ta charte. Les autres voient **seulement son prénom** et ce qu'elle publie : jamais son suivi (poids, mesures, bilans, plans).
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0009_communaute.sql`](../supabase/migrations/0009_communaute.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+Rien à ajouter dans Vercel : les notifications utilisent les clés de la phase 8.
+
+## 2. Ouvrir la communauté
+
+1. Dashboard → **Communauté** (dans le menu).
+2. Relis et adapte la **charte** (le texte que chaque cliente accepte avant d'entrer).
+3. Coche **Communauté ouverte** → **Enregistrer**. La carte « La communauté » apparaît sur l'accueil de tes clientes.
+
+Décocher « Communauté ouverte » la cache aux clientes sans rien effacer.
+
+## 3. Tester avec ta cliente test
+
+1. Accueil → carte **La communauté** → lis la charte → coche la case → **Rejoindre**.
+2. Écris un message, ajoute une **photo** (elle est réduite et ses informations cachées, comme la position GPS, sont retirées) → **Publier**.
+3. Mets une réaction, puis **Supprimer** ton message.
+4. Dans **Mes réglages** (en bas) : « Me prévenir des nouveaux messages » (une notification au plus par heure, sans le contenu du message ; il faut aussi avoir activé les notifications dans le profil).
+5. De ton côté, publie un message : il apparaît avec le badge **Coach**. Tu peux l'**épingler** pour qu'il reste en haut (pratique pour un message de bienvenue).
+
+## La modération
+
+- **Signaler** : une cliente peut signaler le message d'une autre. Un nombre apparaît à côté de « Communauté » dans ton menu. Pour chaque signalement : **Supprimer le message** ou **Garder le message**.
+- **Supprimer** : tu peux supprimer n'importe quel message ; chaque cliente peut supprimer les siens.
+- **Retirer** une cliente (liste des membres, en bas) : elle ne voit plus la communauté et ne peut pas revenir seule. **Réintégrer** la fait revenir ; **Lui permettre de revenir** efface son adhésion (elle pourra de nouveau rejoindre seule).
+- Une cliente dont l'accompagnement est **terminé** perd l'accès automatiquement. Si tu la **supprimes définitivement**, ses messages et ses photos partent avec elle.
+
+## RGPD
+
+- [ ] Ajoute la partie « Communauté » à ta politique de confidentialité (je l'ai rédigée dans ton document).
+- La communauté est facultative : la cliente donne son accord en acceptant la charte, et peut partir quand elle veut (« Quitter la communauté »).

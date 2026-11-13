@@ -20,6 +20,11 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
     const r = b.retours_bilan as unknown;
     return (Array.isArray(r) ? r.length === 0 : !r) && b.saisi_par !== profil.id;
   }).length;
+  // Signalements non traités (0 si la mise à jour 0009 n'est pas encore faite).
+  const { count: signalements } = await supabase
+    .from("signalements_communaute")
+    .select("message_id", { count: "exact", head: true })
+    .eq("traite", false);
   return (
     <div className="min-h-dvh md:flex">
       <aside className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
@@ -35,7 +40,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
             <IconeDeconnexion className="size-4" /> Déconnexion
           </button>
         </form>
-        <NavigationCoach aTraiter={aTraiter} />
+        <NavigationCoach aTraiter={aTraiter} signalements={signalements ?? 0} />
         <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
           <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>
           <Link href="/compte/mot-de-passe" className="text-[14px] text-texte-2 hover:text-chocolat">

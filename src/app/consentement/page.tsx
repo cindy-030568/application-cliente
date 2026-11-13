@@ -39,6 +39,8 @@ export default async function PageConsentement({
         <li>
           <strong className="font-medium">Qui y a accès :</strong> toi et Cindy, personne d’autre. Les autres
           clientes ne voient jamais tes données. Ta liste de courses n’est visible que par toi.
+          Si tu rejoins la communauté (facultatif), les membres voient seulement ton prénom et ce que tu choisis
+          d’y publier.
         </li>
         <li>
           <strong className="font-medium">Où :</strong> tes données sont stockées dans l’Union européenne (Paris),

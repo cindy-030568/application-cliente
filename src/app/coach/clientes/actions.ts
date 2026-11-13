@@ -223,6 +223,9 @@ export async function supprimerCliente(
       await admin.storage.from("photos").remove(fichiers.map((f) => `${id}/${d.name}/${f.name}`));
     }
   }
+  // Photos partagées dans la communauté : <id>/<fichier>
+  const { data: partagees } = await admin.storage.from("communaute").list(id, { limit: 1000 });
+  if (partagees?.length) await admin.storage.from("communaute").remove(partagees.map((f) => `${id}/${f.name}`));
   // 2. Le compte : profil, fiche, plans, bilans, notes et consentements partent en cascade.
   const { error } = await admin.auth.admin.deleteUser(id);
   if (error) return { erreur: "La suppression a échoué. Réessaie dans un instant." };

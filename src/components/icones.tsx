@@ -92,3 +92,6 @@ export const IconeCoche = (p: P) => (
 export const IconeRecherche = (p: P) => (
   <svg {...base} {...p}><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
 );
+export const IconeCommunaute = (p: P) => (
+  <svg {...base} {...p}><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h7A2.5 2.5 0 0 1 16 6.5v4a2.5 2.5 0 0 1-2.5 2.5H9l-3.5 3v-3A2.5 2.5 0 0 1 4 10.5z" /><path d="M16 8.5h1.5A2.5 2.5 0 0 1 20 11v4a2.5 2.5 0 0 1-1.5 2.3V20l-3-2.5H12a2.5 2.5 0 0 1-2.4-1.8" /></svg>
+);
