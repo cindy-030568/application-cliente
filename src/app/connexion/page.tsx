@@ -25,7 +25,7 @@ export default async function PageConnexion() {
           <h1 className="font-titre text-[34px] font-bold leading-[1.1]">
             Ton espace <span className="text-accent">coaching</span>
           </h1>
-          <p className="font-main text-[26px] leading-tight text-caramel">
+          <p className="font-main text-[26px] leading-tight text-caramel-texte">
             Comprendre. Appliquer. Durer.
           </p>
         </div>

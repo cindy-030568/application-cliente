@@ -66,7 +66,7 @@ export function ListeCourses({ sections, recettes }: { sections: SectionCourses[
 
           {affichees.map((s) => (
             <section key={s.rayon} className="flex flex-col gap-2" aria-labelledby={`rayon-${s.rayon}`}>
-              <h2 id={`rayon-${s.rayon}`} className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-caramel">
+              <h2 id={`rayon-${s.rayon}`} className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-caramel-texte">
                 {s.rayon}
               </h2>
               <ul className="flex flex-col divide-y divide-ligne rounded-carte bg-blanc-casse shadow-douce">

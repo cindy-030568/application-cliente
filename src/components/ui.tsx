@@ -189,7 +189,7 @@ export function Message({
 
 export function Surtitre({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <p className={cx("text-[12px] font-medium uppercase tracking-[0.14em] text-caramel", className)}>
+    <p className={cx("text-[12px] font-medium uppercase tracking-[0.14em] text-caramel-texte", className)}>
       {children}
     </p>
   );

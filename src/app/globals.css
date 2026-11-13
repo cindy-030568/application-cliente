@@ -10,6 +10,8 @@
   --texte-2: #6e5440;
   --caramel: #c17f3a;
   --caramel-clair: #e0b47a;
+  /* Caramel foncé pour le texte : lisible sur fond crème (contraste ≥ 4,5:1). */
+  --caramel-texte: #94581c;
   --sable: #e9d7b5;
   --blanc-casse: #fffaf0;
   --accent: #d6336c;
@@ -34,6 +36,7 @@
   --color-chocolat: var(--chocolat);
   --color-texte-2: var(--texte-2);
   --color-caramel: var(--caramel);
+  --color-caramel-texte: var(--caramel-texte);
   --color-caramel-clair: var(--caramel-clair);
   --color-sable: var(--sable);
   --color-blanc-casse: var(--blanc-casse);

@@ -25,7 +25,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
       <aside className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
         <div className="flex flex-col gap-0.5 md:px-3">
           <Logo className="text-xl" />
-          <span className="hidden font-main text-[19px] text-caramel md:block">Espace coach</span>
+          <span className="hidden font-main text-[19px] text-caramel-texte md:block">Espace coach</span>
         </div>
         <form action="/auth/deconnexion" method="post" className="md:hidden">
           <button

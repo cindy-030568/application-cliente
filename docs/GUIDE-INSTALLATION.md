@@ -484,3 +484,40 @@ Après 5 à 30 minutes, Vercel passe en « Valid Configuration » ✅ et le cade
 3. L'app utilisera automatiquement cet expéditeur pour les rappels.
 
 **C. Les emails de connexion (codes)** : Supabase → **Authentication** → **Emails** → **SMTP Settings** → remplace l'adresse d'expéditeur par `cindy@fitw-cindy.fr` → **Save**.
+
+## Étape 3 : avant d'inviter tes vraies clientes
+
+### Sécurité de tes comptes (10 minutes, une fois)
+Active la **double authentification** (code sur ton téléphone en plus du mot de passe) sur les comptes qui donnent accès aux données :
+- [ ] Supabase (Account → Security)
+- [ ] Vercel (Account Settings → Authentication)
+- [ ] GitHub (Settings → Password and authentication)
+- [ ] Brevo et OVH (paramètres du compte → Sécurité)
+
+### RGPD : ce que l'app fait déjà
+- Consentement explicite de chaque cliente à la première connexion (données de santé).
+- Données hébergées dans l'Union européenne (Supabase, Paris) ; emails par Brevo (France).
+- Chaque cliente ne voit que ses propres données ; tes notes restent privées ; ses listes de courses ne sont visibles que par elle.
+- Export de ses mesures (Excel / CSV) depuis son suivi, suppression définitive depuis sa fiche.
+
+### RGPD : ce que tu dois vérifier de ton côté
+- [ ] **Ta politique de confidentialité** (sur ton site) mentionne :
+  - les données collectées : identité, email, mesures, photos, ressentis, habitudes alimentaires (données de santé) ;
+  - pourquoi : le suivi de ton accompagnement ;
+  - sur quelle base : le consentement de la cliente ;
+  - combien de temps : 3 ans après la fin de l'accompagnement ;
+  - qui les héberge : Supabase (UE), Vercel (hébergement de l'app, États-Unis), Brevo (emails, France), YouTube (vidéos d'exercices, sans cookie avant clic) ;
+  - ses droits : accès, rectification, suppression, portabilité, retrait du consentement, réclamation à la CNIL ;
+  - comment te contacter.
+- [ ] Le lien de cette politique est dans **Réglages → Lien de ta politique de confidentialité**.
+- [ ] Supabase : télécharge et garde le **DPA** (accord de traitement des données), dans Supabase → Organization → **Legal Documents**.
+- [ ] Un **registre des traitements** simple (un tableau d'une page) : le modèle de la CNIL suffit.
+- [ ] Données de santé : comme tu n'es pas professionnelle de santé, l'hébergement « HDS » ne s'applique en principe pas. En cas de doute, une vérification rapide auprès de la CNIL ou d'un juriste est une bonne idée.
+
+### Nettoyer les données de test
+- [ ] **Clientes** → chaque cliente test → **Supprimer définitivement** (supprime aussi ses bilans, photos et plans).
+- [ ] **Recettes** : supprime les recettes de test éventuelles.
+- [ ] **Supabase → Authentication → URL Configuration** : tu peux retirer l'ancienne adresse `vercel.app` des Redirect URLs.
+- [ ] Fais une première **sauvegarde** (Réglages → Télécharger une sauvegarde).
+
+Ensuite, crée tes vraies clientes depuis **Clientes → Nouvelle cliente** : elles reçoivent leur email de bienvenue de la part de `cindy@fitw-cindy.fr`.

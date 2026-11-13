@@ -59,7 +59,7 @@ export default async function PageAccueil() {
           </>
         }
         sousTitre={
-          <span className="font-main text-[24px] leading-tight text-caramel">
+          <span className="font-main text-[24px] leading-tight text-caramel-texte">
             On avance ensemble, à ton rythme.
           </span>
         }
