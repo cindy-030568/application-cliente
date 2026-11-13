@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { IconeRetour } from "@/components/icones";
 import { Carte, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, formaterDate, prochainBilan } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, formaterDate, prochainBilan } from "@/lib/bilan";
 import type { ClienteListe } from "../../donnees";
 import { BadgeStatut } from "../../badge-statut";
 import { modifierCliente } from "../actions";
@@ -113,7 +113,7 @@ export default async function PageFicheCliente({
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-[14px] text-texte-2">
             <BadgeStatut statut={c.statut} />
-            {bilan && <span>Prochain bilan : {formaterDate(bilan)}</span>}
+            {bilan && <span>Prochain bilan : {formaterDate(bilan)}{bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, bilan) ? " · avec photos 📸" : ""}</span>}
             {c.ferme_le && <span>Accès fermé le {formaterDate(c.ferme_le)}</span>}
           </div>
         </div>

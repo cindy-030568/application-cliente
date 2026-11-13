@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bilanAvecPhotos,
   alertesCliente,
   conservationDepassee,
   derniereEcheancePassee,
@@ -145,5 +146,25 @@ describe("conservationDepassee", () => {
     expect(conservationDepassee("active", "2020-01-01", "2029-11-13")).toBe(false);
     expect(conservationDepassee("terminee", "2020-01-01", "2029-11-13")).toBe(false);
     expect(conservationDepassee("fermee", null, "2029-11-13")).toBe(false);
+  });
+});
+
+describe("bilanAvecPhotos (photos de suivi toutes les 4 semaines)", () => {
+  it("bilan tous les 14 jours : un sur deux, à 4, 8, 12 semaines", () => {
+    const debut = "2026-11-01";
+    expect(bilanAvecPhotos(debut, 14, "2026-11-15")).toBe(false);
+    expect(bilanAvecPhotos(debut, 14, "2026-11-29")).toBe(true);
+    expect(bilanAvecPhotos(debut, 14, "2026-12-13")).toBe(false);
+    expect(bilanAvecPhotos(debut, 14, "2026-12-27")).toBe(true);
+  });
+  it("bilan toutes les semaines : un sur quatre", () => {
+    const r = [7, 14, 21, 28, 35, 42, 49, 56].map((j) => bilanAvecPhotos("2026-11-01", 7, `2026-${j < 30 ? "11" : "12"}-${String(j < 30 ? 1 + j : j - 29).padStart(2, "0")}`));
+    expect(r).toEqual([false, false, false, true, false, false, false, true]);
+  });
+  it("bilan tous les 30 jours : à chaque bilan", () => {
+    expect(bilanAvecPhotos("2026-11-01", 30, "2026-12-01")).toBe(true);
+  });
+  it("sans date de début : jamais", () => {
+    expect(bilanAvecPhotos(null, 14, "2026-11-15")).toBe(false);
   });
 });

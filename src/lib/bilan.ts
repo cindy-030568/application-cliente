@@ -28,6 +28,20 @@ export function prochainBilan(
   return versIso(new Date(debut + Math.max(n, 1) * frequenceJours * JOUR));
 }
 
+/** Les photos de suivi sont demandées environ toutes les 4 semaines. */
+export const PHOTOS_TOUS_LES_JOURS = 28;
+
+/**
+ * Vrai si le bilan de cette échéance est un « bilan + photos » : celui qui franchit
+ * chaque palier de 4 semaines depuis le début (bilan tous les 14 jours → un sur deux).
+ */
+export function bilanAvecPhotos(dateDebut: string | null, frequenceJours: number, echeance: string): boolean {
+  if (!dateDebut || frequenceJours < 1) return false;
+  const k = Math.round(joursEntre(dateDebut, echeance) / frequenceJours);
+  if (k < 1) return false;
+  return Math.floor((k * frequenceJours) / PHOTOS_TOUS_LES_JOURS) > Math.floor(((k - 1) * frequenceJours) / PHOTOS_TOUS_LES_JOURS);
+}
+
 /** Nombre de jours entre deux dates ISO (b - a). */
 export function joursEntre(a: string, b: string): number {
   return Math.round((versDate(b).getTime() - versDate(a).getTime()) / JOUR);

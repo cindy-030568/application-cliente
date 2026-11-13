@@ -2,7 +2,7 @@ import Link from "next/link";
 import { IconePlus } from "@/components/icones";
 import { Carte, Etiquette, LienBouton, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
 import { chargerFile } from "./bilans/donnees";
 
 export default async function TableauDeBord() {
@@ -72,7 +72,10 @@ export default async function TableauDeBord() {
                       <span className="font-medium">
                         {c.profils.prenom} {c.profils.nom}
                       </span>
-                      <span className="text-[14px] text-texte-2">
+                      <span className="flex items-center gap-2 text-[14px] text-texte-2">
+                        {bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, date) && (
+                          <span className="rounded-full bg-sable px-2 py-0.5 text-[12px] text-chocolat">+ photos</span>
+                        )}
                         {j === 0 ? "aujourd’hui" : j === 1 ? "demain" : formaterDate(date, { year: undefined })}
                       </span>
                     </Link>

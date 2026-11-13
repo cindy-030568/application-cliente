@@ -14,7 +14,7 @@ import {
 } from "@/components/icones";
 import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
 import { accesCommunaute } from "@/lib/communaute-serveur";
 import { EnTete } from "./composants";
@@ -92,6 +92,7 @@ export default async function PageAccueil() {
             <span className="flex flex-1 flex-col">
               <span className="font-medium">
                 {bilanAFaire.statut === "ouverte" ? "Ton bilan est ouvert" : "Ton bilan t’attend"}
+                {bilanAvecPhotos(fiche.date_debut, fiche.frequence_bilan_jours, bilanAFaire.echeance) && " · avec tes photos 📸"}
               </span>
               <span className="text-[14px] text-texte-2">
                 {bilanAFaire.statut === "ouverte"

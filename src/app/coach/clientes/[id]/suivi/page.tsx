@@ -5,7 +5,7 @@ import { IconePlus, IconeRetour } from "@/components/icones";
 import { Carte, Etiquette, LienBouton, Surtitre, classesBouton } from "@/components/ui";
 import { VueSuivi } from "@/components/suivi/vue-suivi";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, formaterDate, isoVersHeureParis, prochainBilan } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, formaterDate, isoVersHeureParis, prochainBilan } from "@/lib/bilan";
 import { chargerBilans, chargerChamps, urlsPhotos } from "@/lib/suivi";
 import { COLONNES_FICHE } from "@/lib/types";
 import type { ClienteListe } from "../../../donnees";
@@ -48,7 +48,7 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
             {c.profils.prenom} {c.profils.nom}
           </h1>
           <div className="mt-1 flex flex-wrap items-center gap-3 text-[14px] text-texte-2">
-            {prochain && <span>Prochain bilan : {formaterDate(prochain)}</span>}
+            {prochain && <span>Prochain bilan : {formaterDate(prochain)}{bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, prochain) ? " · avec photos 📸" : ""}</span>}
             <span>Bilan tous les {c.frequence_bilan_jours} jours</span>
             <span>{derniereVisite ? `Dernière visite : ${derniereVisite}` : "Jamais connectée"}</span>
             {c.mode_sans_chiffres && <Etiquette ton="sable">Mode sans chiffres</Etiquette>}

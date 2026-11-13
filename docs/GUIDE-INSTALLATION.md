@@ -161,7 +161,8 @@ L'app se met à jour toute seule sur Vercel (onglet **Deployments** → **Ready*
 
 ## Comment fonctionnent les bilans
 
-- Le bilan d'une cliente est prévu tous les **N jours** à partir de sa **date de début** (réglable dans sa fiche, 14 par défaut).
+- Le bilan d'une cliente est prévu tous les **N jours** à partir de sa **date de début** (réglable dans sa fiche, 14 par défaut). Le 1er bilan tombe à la date de début + N jours.
+- **Photos de suivi toutes les 4 semaines** : avec un bilan tous les 14 jours, un bilan sur deux est un « bilan + photos ». La cliente le voit sur son accueil, la partie photos est mise en avant dans le formulaire, et le rappel le mentionne. Dans ton tableau de bord, ces bilans portent l'étiquette « + photos ». Les bilans simples gardent un bouton « Ajouter des photos (facultatif) ».
 - Il **s'ouvre 3 jours avant** la date prévue (réglable dans **Réglages → Le bilan**). La cliente voit « Ton bilan est ouvert » sur son accueil et dans **Suivi**.
 - En retard, il reste envoyable pendant la moitié de l'intervalle (7 jours pour un rythme de 14 jours).
 - Entre deux bilans, elle peut **noter une mesure** quand elle veut (« saisie libre ») : elle apparaît dans ses graphiques, mais pas dans ta file à traiter.

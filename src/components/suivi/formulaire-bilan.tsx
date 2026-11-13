@@ -34,6 +34,7 @@ export function FormulaireBilan({
   commentaireInitial = "",
   avecCommentaire = false,
   sansPhotos = false,
+  photos: modePhotos = "facultatives",
   redirection,
   libelleEnvoi,
   libelleCommentaire = "Un mot pour Cindy (facultatif)",
@@ -52,6 +53,11 @@ export function FormulaireBilan({
   commentaireInitial?: string;
   avecCommentaire?: boolean;
   sansPhotos?: boolean;
+  /**
+   * « demandees » : bilan + photos (toutes les 4 semaines), section mise en avant ;
+   * « repliees » : bilan simple, photos possibles derrière un bouton ; « facultatives » : section affichée.
+   */
+  photos?: "demandees" | "facultatives" | "repliees";
   /** Adresse après l'envoi ; « {id} » est remplacé par l'identifiant du bilan. */
   redirection: string;
   libelleEnvoi: string;
@@ -63,6 +69,7 @@ export function FormulaireBilan({
   const [ouvertes, setOuvertes] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(Object.keys(precisionsInitiales).map((k) => [k, true])),
   );
+  const [photosDepliees, setPhotosDepliees] = useState(modePhotos !== "repliees");
   const [photos, setPhotos] = useState<Record<AnglePhoto, EtatPhoto>>(() => ({
     face: { apercu: photosInitiales.face ?? null, fichier: null, supprimer: false },
     profil: { apercu: photosInitiales.profil ?? null, fichier: null, supprimer: false },
@@ -97,6 +104,15 @@ export function FormulaireBilan({
 
   function envoyer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (
+      modePhotos === "demandees" &&
+      !sansPhotos &&
+      aDesMesures &&
+      ANGLES.every(({ valeur }) => !photos[valeur].apercu || photos[valeur].supprimer) &&
+      !window.confirm("Tu n’as pas ajouté tes photos de suivi. Envoyer ton bilan quand même ?")
+    ) {
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     fd.set("champs_presentes", champs.map((c) => c.id).join(","));
     for (const [id, v] of Object.entries(valeurs)) fd.set(`champ_${id}`, v);
@@ -286,10 +302,31 @@ export function FormulaireBilan({
         );
       })}
 
-      {!sansPhotos && aDesMesures && (
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-1 font-titre text-[22px] font-bold">Mes photos</legend>
-          <p className="-mt-2 text-[14px] text-texte-2">Facultatif. Visibles uniquement par toi et Cindy.</p>
+      {!sansPhotos && aDesMesures && !photosDepliees && (
+        <button
+          type="button"
+          onClick={() => setPhotosDepliees(true)}
+          className="inline-flex items-center gap-2 self-start text-[15px] font-medium text-chocolat underline underline-offset-4"
+        >
+          <IconePlus className="size-4" /> Ajouter des photos (facultatif)
+        </button>
+      )}
+
+      {!sansPhotos && aDesMesures && photosDepliees && (
+        <fieldset
+          className={cx(
+            "flex flex-col gap-3",
+            modePhotos === "demandees" && "rounded-carte border-2 border-accent-pale bg-blanc-casse p-4",
+          )}
+        >
+          <legend className={cx("mb-1 font-titre text-[22px] font-bold", modePhotos === "demandees" && "px-1")}>
+            {modePhotos === "demandees" ? "Mes photos de suivi 📸" : "Mes photos"}
+          </legend>
+          <p className="-mt-2 text-[14px] text-texte-2">
+            {modePhotos === "demandees"
+              ? "Toutes les 4 semaines : face, profil et dos, dans la même tenue et la même lumière si possible. Visibles uniquement par toi et Cindy."
+              : "Facultatif. Visibles uniquement par toi et Cindy."}
+          </p>
           <div className="grid grid-cols-3 gap-3">
             {ANGLES.map(({ valeur: angle, libelle }) => {
               const p = photos[angle];

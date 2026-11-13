@@ -3,7 +3,7 @@ import Link from "next/link";
 import { IconeRetour } from "@/components/icones";
 import { FormulaireBilan } from "@/components/suivi/formulaire-bilan";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis, echeanceOuverte } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte } from "@/lib/bilan";
 import { redirect } from "next/navigation";
 import { avecJours } from "@/lib/champs";
 import { chargerChamps, champsVisibles } from "@/lib/suivi";
@@ -32,6 +32,7 @@ export default async function PageNouveauBilan() {
   const champs = estBilan ? tous : tous.filter((c) => c.groupe === "mesure");
   if (champs.length === 0) redirect("/suivi");
   const jours = fiche.frequence_bilan_jours;
+  const avecPhotos = estBilan && ouverte ? bilanAvecPhotos(fiche.date_debut, jours, ouverte.echeance) : false;
 
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
@@ -44,7 +45,9 @@ export default async function PageNouveauBilan() {
         </h1>
         <p className="text-[15px] text-texte-2">
           {estBilan
-            ? `Trame de bilan · tous les ${jours} jours`
+            ? avecPhotos
+              ? "Bilan + photos de suivi · toutes les 4 semaines"
+              : `Trame de bilan · tous les ${jours} jours`
             : "Une mesure en plus de tes bilans, quand tu en as envie."}
         </p>
       </div>
@@ -56,6 +59,7 @@ export default async function PageNouveauBilan() {
         dateInitiale={auj}
         dateMax={auj}
         sansPhotos={fiche.mode_sans_chiffres}
+        photos={avecPhotos ? "demandees" : "repliees"}
         redirection="/suivi/{id}?envoye=1"
         libelleEnvoi={estBilan ? "Envoyer mon bilan à Cindy" : "Enregistrer"}
       />

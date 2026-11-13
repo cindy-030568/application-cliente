@@ -4,7 +4,7 @@ import { IconeCalendrier, IconeFleche } from "@/components/icones";
 import { LienBouton } from "@/components/ui";
 import { VueSuivi } from "@/components/suivi/vue-suivi";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis, echeanceOuverte, formaterDate, prochainBilan } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, prochainBilan } from "@/lib/bilan";
 import { chargerBilans, chargerChamps, champsVisibles, urlsPhotos } from "@/lib/suivi";
 import { EnTete } from "../composants";
 
@@ -60,6 +60,8 @@ export default async function PageSuivi() {
                 ? `C’est le moment de faire le point pour le ${formaterDate(ouverte.echeance, { year: undefined })}.`
                 : "Pas de souci, il est encore temps de l’envoyer."}{" "}
               Quelques minutes suffisent.
+              {bilanAvecPhotos(fiche.date_debut, fiche.frequence_bilan_jours, ouverte.echeance) &&
+                " Cette fois, c’est aussi le moment de tes photos de suivi 📸"}
             </p>
             <LienBouton href="/suivi/bilan" pleineLargeur>
               Faire mon bilan
@@ -81,7 +83,9 @@ export default async function PageSuivi() {
               ) : (
                 <>
                   <span className="font-medium">
-                    {prochain ? `Prochain bilan le ${formaterDate(prochain, { year: undefined })}` : "Ton suivi"}
+                    {prochain
+                      ? `Prochain bilan le ${formaterDate(prochain, { year: undefined })}${bilanAvecPhotos(fiche.date_debut, fiche.frequence_bilan_jours, prochain) ? " · avec photos 📸" : ""}`
+                      : "Ton suivi"}
                   </span>
                   <span className="text-[14px] text-texte-2">
                     {prochain ? "Il s’ouvrira quelques jours avant." : "Tu peux noter une mesure quand tu veux."}

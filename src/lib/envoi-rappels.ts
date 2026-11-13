@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
-import { aujourdhuiParis } from "@/lib/bilan";
+import { aujourdhuiParis, bilanAvecPhotos } from "@/lib/bilan";
 import { SITE_URL } from "@/lib/env";
 import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappel } from "@/lib/rappels";
 
@@ -197,7 +197,9 @@ export async function executerRappels(admin: SupabaseClient, aujourdhui = aujour
     if (error || !ligne) continue;
     bilan.rappels++;
 
-    const message = personnaliser(rappel.type === "ouverture" ? reglages.texte_rappel : reglages.texte_relance, p?.prenom ?? "");
+    const message =
+      personnaliser(rappel.type === "ouverture" ? reglages.texte_rappel : reglages.texte_relance, p?.prenom ?? "") +
+      (bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, rappel.echeance) ? " Cette fois, pense aussi à tes photos de suivi 📸" : "");
     const canaux: string[] = [];
     if (config.push) {
       for (const a of appareils) {
