@@ -94,7 +94,7 @@ export function CarteInstallation() {
     <div className="flex flex-col gap-3 rounded-carte border border-caramel-clair bg-blanc-casse p-4 apparition">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-192.png" alt="" className="size-11 shrink-0 rounded-xl" />
+        <img src="/icons/icone-v2-192.png" alt="" className="size-11 shrink-0 rounded-xl" />
         <div className="flex flex-col gap-0.5">
           <span className="font-medium">Installe l’app sur ton téléphone</span>
           <span className="text-[14px] text-texte-2">

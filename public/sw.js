@@ -12,8 +12,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "fitw_cindy", {
       body: data.body || "",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/badge-96.png",
+      icon: "/icons/icone-v2-192.png",
+      badge: "/icons/badge-v2-96.png",
       lang: "fr",
       tag: data.tag || "rappel-bilan",
       data: { url: data.url || "/" },

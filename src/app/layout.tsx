@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   description: "Ton espace de coaching nutrition et sport avec Cindy.",
   robots: { index: false, follow: false },
   appleWebApp: { capable: true, title: "fitw_cindy", statusBarStyle: "default" },
+  // Noms de fichiers versionnés : un changement de logo n'est jamais masqué par un cache.
+  icons: { apple: "/icons/icone-v2-apple.png" },
 };
 
 export const viewport: Viewport = {
