@@ -104,7 +104,7 @@ export function NavigationCoach({ aTraiter = 0, signalements = 0 }: { aTraiter?:
       </div>
 
       {/* Ordinateur */}
-      <nav aria-label="Navigation coach" className="hidden flex-col gap-1 md:flex">
+      <nav aria-label="Navigation coach" className="hidden shrink-0 flex-col gap-0.5 md:flex">
         {LIENS.map((l) => lien(l, false))}
       </nav>
     </>

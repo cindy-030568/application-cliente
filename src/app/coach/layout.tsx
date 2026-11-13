@@ -27,7 +27,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
     .eq("traite", false);
   return (
     <div className="min-h-dvh md:flex">
-      <aside className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:items-stretch md:justify-start md:gap-8 md:border-b-0 md:border-r md:px-4 md:py-6">
+      <aside className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-ligne bg-blanc-casse/95 px-4 py-3 backdrop-blur md:h-dvh md:w-64 md:shrink-0 md:flex-col md:flex-nowrap md:items-stretch md:justify-start md:gap-6 md:overflow-y-auto md:border-b-0 md:border-r md:px-4 md:py-6">
         <div className="flex flex-col gap-0.5 md:px-3">
           <Logo className="text-xl" />
           <span className="hidden font-main text-[19px] text-caramel-texte md:block">Espace coach</span>
@@ -41,7 +41,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
           </button>
         </form>
         <NavigationCoach aTraiter={aTraiter} signalements={signalements ?? 0} />
-        <div className="hidden md:mt-auto md:flex md:flex-col md:gap-2 md:px-3">
+        <div className="hidden md:mt-auto md:flex md:shrink-0 md:flex-col md:gap-2 md:px-3">
           <p className="text-[13px] text-texte-2">Connectée : {profil.prenom || profil.email}</p>
           <Link href="/compte/mot-de-passe" className="text-[14px] text-texte-2 hover:text-chocolat">
             Mon mot de passe
