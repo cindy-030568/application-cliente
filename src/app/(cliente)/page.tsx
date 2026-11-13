@@ -16,7 +16,7 @@ import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
-import { compterNonLus, lireEtatCommunaute, lireMembre } from "@/lib/communaute-serveur";
+import { accesCommunaute } from "@/lib/communaute-serveur";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -236,17 +236,12 @@ export default async function PageAccueil() {
 }
 
 /** Carte « Communauté » de l'accueil (rien si elle est fermée, si la cliente a été retirée ou avant la mise à jour 0009). */
-async function carteCommunaute(supabase: Parameters<typeof lireEtatCommunaute>[0], moi: string) {
-  const etat = await lireEtatCommunaute(supabase);
-  if (!etat?.ouverte) return null;
-  const membre = await lireMembre(supabase, moi);
-  if (membre?.statut === "exclue") return null;
-  if (!membre) return { nonLus: 0, texte: "Échange avec les autres clientes de Cindy" };
-  const nonLus = await compterNonLus(supabase, moi, membre.dernier_vu);
-  return {
-    nonLus,
-    texte: nonLus === 0 ? "Pas de nouveau message" : nonLus === 1 ? "1 nouveau message" : `${nonLus > 99 ? "99+" : nonLus} nouveaux messages`,
-  };
+async function carteCommunaute(supabase: Parameters<typeof accesCommunaute>[0], moi: string) {
+  const acces = await accesCommunaute(supabase, moi);
+  if (!acces) return null;
+  if (!acces.membre) return { nonLus: 0, texte: "Échange avec les autres clientes de Cindy" };
+  const n = acces.nonLus;
+  return { nonLus: n, texte: n === 0 ? "Pas de nouveau message" : n === 1 ? "1 nouveau message" : `${n > 99 ? "99+" : n} nouveaux messages` };
 }
 
 function Tuile({

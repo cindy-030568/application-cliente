@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { IconePlus } from "@/components/icones";
 import { Bouton, Message, cx } from "@/components/ui";
 import {
@@ -40,6 +41,11 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
   const [erreur, setErreur] = useState<string>();
   const [info, setInfo] = useState<string>();
   const [chargement, demarrer] = useTransition();
+  const router = useRouter();
+  // La visite vient d'être notée : met à jour la pastille de l'onglet Communauté.
+  useEffect(() => {
+    if (!coach) router.refresh();
+  }, [coach, router]);
   const nbRef = useRef(messages.length);
   useEffect(() => {
     nbRef.current = messages.length;

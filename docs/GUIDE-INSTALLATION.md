@@ -527,7 +527,7 @@ Ensuite, crée tes vraies clientes depuis **Clientes → Nouvelle cliente** : el
 
 # Phase 10 — La communauté
 
-Un seul groupe d'échange entre tes clientes : messages, photos, réactions (❤️ 👏 💪 😂). Chaque cliente choisit de rejoindre ou non, après avoir accepté ta charte. Les autres voient **seulement son prénom** et ce qu'elle publie : jamais son suivi (poids, mesures, bilans, plans).
+Un seul groupe d'échange entre tes clientes : messages, photos, réactions (❤️ 👏 💪 😂). Quand elle est ouverte, tes clientes ont un onglet **Communauté** dans la barre du bas, avec le nombre de nouveaux messages. Chaque cliente choisit de rejoindre ou non, après avoir accepté ta charte. Les autres voient **seulement son prénom** et ce qu'elle publie : jamais son suivi (poids, mesures, bilans, plans).
 
 ## 1. Mettre à jour la base de données (une seule fois)
 
@@ -538,7 +538,7 @@ Rien à ajouter dans Vercel : les notifications utilisent les clés de la phase 
 
 ## 2. Ouvrir la communauté
 
-1. Dashboard → **Communauté** (dans le menu).
+1. Dashboard → **Communauté** (dans le menu ; sur téléphone, touche d'abord le bouton **Menu** en haut).
 2. Relis et adapte la **charte** (le texte que chaque cliente accepte avant d'entrer).
 3. Coche **Communauté ouverte** → **Enregistrer**. La carte « La communauté » apparaît sur l'accueil de tes clientes.
 

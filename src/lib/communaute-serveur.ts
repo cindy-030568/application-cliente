@@ -154,3 +154,16 @@ export async function notifierMembres(auteurId: string) {
     console.warn("Communauté : notifications non envoyées", e instanceof Error ? e.message.slice(0, 120) : "");
   }
 }
+
+/**
+ * Accès à la communauté pour une cliente : null si elle est fermée, si la cliente a été retirée
+ * ou avant la mise à jour 0009 ; sinon si elle est membre et combien de messages elle n'a pas lus.
+ */
+export async function accesCommunaute(supabase: SupabaseClient, moi: string) {
+  const etat = await lireEtatCommunaute(supabase);
+  if (!etat?.ouverte) return null;
+  const membre = await lireMembre(supabase, moi);
+  if (membre?.statut === "exclue") return null;
+  if (!membre) return { membre: false, nonLus: 0 };
+  return { membre: true, nonLus: await compterNonLus(supabase, moi, membre.dernier_vu) };
+}
