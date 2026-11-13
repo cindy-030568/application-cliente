@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
 import { CaseACocher, Champ, Message } from "@/components/ui";
 import type { EtatAction } from "./actions";
+import { ChampsPaiement } from "./champs-paiement";
 
 export type ValeursInfos = {
   prenom: string;
@@ -20,10 +21,16 @@ export function FormulaireInfos({
   action,
   valeurs,
   creation = false,
+  suiviSport = true,
+  formules = [],
 }: {
   action: (etat: EtatAction, formData: FormData) => Promise<EtatAction>;
   valeurs?: ValeursInfos;
   creation?: boolean;
+  /** null : la mise à jour 0010 n'est pas encore faite (case masquée en modification). */
+  suiviSport?: boolean | null;
+  /** Formules déjà utilisées, proposées à la création. */
+  formules?: string[];
 }) {
   const [etat, envoyer] = useActionState(action, {});
   return (
@@ -60,6 +67,17 @@ export function FormulaireInfos({
           aide="Sinon, la carte Formation apparaît verrouillée avec ton message doux."
           defaultChecked={valeurs?.acces_formation ?? true}
         />
+        {(creation || suiviSport !== null) && (
+          <>
+            {!creation && <input type="hidden" name="suivi_sport_present" value="1" />}
+            <CaseACocher
+              name="suivi_sport"
+              label="Suivi sportif inclus"
+              aide="Décoché : l’onglet Sport, son programme et les vidéos d’exercices sont masqués dans son app."
+              defaultChecked={suiviSport ?? true}
+            />
+          </>
+        )}
         <CaseACocher
           name="masquer_graph_poids"
           label="Masquer le graphique du poids"
@@ -75,6 +93,13 @@ export function FormulaireInfos({
           />
         )}
       </div>
+      {creation && (
+        <fieldset className="flex flex-col gap-3 rounded-xl border border-ligne p-4">
+          <legend className="px-1 font-titre text-lg font-bold">Formule et paiement</legend>
+          <p className="-mt-1 text-[13.5px] text-texte-2">Facultatif · visible par toi seule, jamais par ta cliente.</p>
+          <ChampsPaiement premiereParDefaut="" formules={formules} />
+        </fieldset>
+      )}
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
       <div>

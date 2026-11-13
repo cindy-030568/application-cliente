@@ -14,7 +14,7 @@ const TABLES = [
   "filtres_video", "videos", "videos_filtres",
   "categories_aliment", "aliments", "aliments_categories", "repas_cibles", "exclusions",
   "tags", "recettes", "recettes_repas", "recettes_tags", "recette_ingredients", "favoris",
-  "rappels_envoyes",
+  "rappels_envoyes", "paiements_clientes", "echeances_paiement",
 ] as const;
 
 export async function GET() {

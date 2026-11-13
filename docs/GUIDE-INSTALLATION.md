@@ -564,3 +564,20 @@ Décocher « Communauté ouverte » la cache aux clientes sans rien effacer.
 
 - [ ] Ajoute la partie « Communauté » à ta politique de confidentialité (je l'ai rédigée dans ton document).
 - La communauté est facultative : la cliente donne son accord en acceptant la charte, et peut partir quand elle veut (« Quitter la communauté »).
+
+---
+
+# Formule, paiement et suivi sportif
+
+## Mettre à jour la base de données (une seule fois)
+
+1. Ouvre [`supabase/migrations/0010_formule_paiement_sport.sql`](../supabase/migrations/0010_formule_paiement_sport.sql) → **Copy raw file**.
+2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## Utilisation
+
+- **Nouvelle cliente** ou **fiche d'une cliente** → **Formule et paiement** : formule (les formules déjà utilisées te sont proposées), montant total, moyen de paiement, payé en 1 à 12 fois, date du 1er paiement.
+- En plusieurs fois, l'app crée l'**échéancier** : une mensualité par mois, à la même date. Coche **Marquer payée** quand tu reçois un paiement. Si tu modifies ensuite le montant ou le nombre de fois, les échéances déjà payées sont gardées et les autres recalculées.
+- Ton **tableau de bord** affiche les échéances **en retard** et celles des **14 prochains jours**.
+- Ces informations sont visibles **par toi seule** : tes clientes ne les voient jamais. Elles sont dans ta sauvegarde mensuelle et supprimées avec la cliente.
+- **Suivi sportif inclus** (fiche → Infos et accès) : décoché, ta cliente ne voit plus l'onglet Sport, son programme sportif ni les vidéos d'exercices.

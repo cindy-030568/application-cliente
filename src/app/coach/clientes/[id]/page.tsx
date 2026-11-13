@@ -13,6 +13,8 @@ import { FormulaireInfos } from "../formulaire-infos";
 import { BlocConnexion, BlocNotes, BlocStatut, BlocSuppression } from "./blocs";
 import { BlocPlan, type PlanAffiche } from "./bloc-plans";
 import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
+import { BlocPaiement } from "./bloc-paiement";
+import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
 import { chargerCategoriesAliment } from "@/lib/aliments";
 import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
@@ -25,10 +27,10 @@ export default async function PageFicheCliente({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ creee?: string; email?: string }>;
+  searchParams: Promise<{ creee?: string; email?: string; paiement?: string }>;
 }) {
   const { id } = await params;
-  const { creee, email } = await searchParams;
+  const { creee, email, paiement: paiementEchec } = await searchParams;
   if (!UUID.test(id)) notFound();
 
   const { supabase } = await exigerCoach();
@@ -71,6 +73,14 @@ export default async function PageFicheCliente({
       .limit(5),
     supabase.from("abonnements_push").select("id", { count: "exact", head: true }).eq("cliente_id", id),
   ]);
+
+  // Formule, paiement, suivi sportif (0010) : lus à part, null tant que la mise à jour n'est pas faite.
+  const [paiement, formules, { data: sport, error: sansSport }] = await Promise.all([
+    lirePaiement(supabase, id),
+    formulesUtilisees(supabase),
+    supabase.from("clientes").select("suivi_sport").eq("id", id).maybeSingle<{ suivi_sport: boolean }>(),
+  ]);
+  const auj = aujourdhuiParis();
 
   const bilan =
     c.statut === "active" ? prochainBilan(c.date_debut, c.frequence_bilan_jours, aujourdhuiParis()) : null;
@@ -121,6 +131,11 @@ export default async function PageFicheCliente({
 
       {creee && <Message ton="succes">Cliente créée 🎉</Message>}
       {email === "ok" && <Message ton="succes">L’email de connexion lui a été envoyé.</Message>}
+      {paiementEchec === "echec" && (
+        <Message ton="erreur">
+          La formule et le paiement n’ont pas pu être enregistrés (mise à jour 0010 faite ?). Tu peux les saisir ci-dessous.
+        </Message>
+      )}
       {email === "echec" && (
         <Message ton="erreur">
           L’email n’a pas pu partir. Utilise « Créer un lien à partager » ci-dessous.
@@ -133,7 +148,24 @@ export default async function PageFicheCliente({
             <FormulaireInfos
               action={modifierCliente.bind(null, c.id)}
               valeurs={{ ...c.profils, ...c }}
+              suiviSport={sansSport ? null : (sport?.suivi_sport ?? true)}
             />
+          </Section>
+          <Section titre="Formule et paiement" sousTitre="Visible par toi seule, jamais par ta cliente.">
+            {paiement ? (
+              <BlocPaiement
+                clienteId={c.id}
+                paiement={paiement.paiement}
+                echeances={paiement.echeances}
+                formules={formules}
+                premiereParDefaut={paiement.echeances[0]?.date_echeance ?? c.date_debut ?? auj}
+                aujourdhui={auj}
+              />
+            ) : (
+              <Message ton="info">
+                Fais d’abord la mise à jour de la base : fichier 0010_formule_paiement_sport.sql (voir le guide).
+              </Message>
+            )}
           </Section>
           <Section titre="Plans" sousTitre="PDF dans l’app, lien Drive ou Nutrium. Les anciennes versions restent consultables.">
             <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />

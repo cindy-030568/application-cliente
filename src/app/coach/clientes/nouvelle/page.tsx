@@ -5,11 +5,13 @@ import { Carte, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
 import { creerCliente } from "../actions";
 import { FormulaireInfos } from "../formulaire-infos";
+import { formulesUtilisees } from "@/lib/paiements-serveur";
 
 export const metadata: Metadata = { title: "Nouvelle cliente" };
 
 export default async function PageNouvelleCliente() {
-  await exigerCoach();
+  const { supabase } = await exigerCoach();
+  const formules = await formulesUtilisees(supabase);
   return (
     <div className="flex max-w-2xl flex-col gap-6">
       <Link href="/coach/clientes" className="inline-flex items-center gap-1 text-[14px] text-texte-2">
@@ -20,7 +22,7 @@ export default async function PageNouvelleCliente() {
         <h1 className="font-titre text-[34px] font-bold leading-tight">Bienvenue à elle ✨</h1>
       </div>
       <Carte>
-        <FormulaireInfos action={creerCliente} creation />
+        <FormulaireInfos action={creerCliente} creation formules={formules} />
       </Carte>
     </div>
   );

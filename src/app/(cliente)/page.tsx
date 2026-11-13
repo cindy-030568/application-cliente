@@ -17,6 +17,7 @@ import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
 import { accesCommunaute } from "@/lib/communaute-serveur";
+import { lireSuiviSport } from "@/lib/paiements-serveur";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -50,7 +51,7 @@ export default async function PageAccueil() {
     timeZone: "Europe/Paris",
   });
   const formationOuverte = fiche.acces_formation && Boolean(reglages.lien_formation);
-  const communaute = await carteCommunaute(supabase, profil.id);
+  const [communaute, sport] = await Promise.all([carteCommunaute(supabase, profil.id), lireSuiviSport(supabase, profil.id)]);
 
   return (
     <>
@@ -135,12 +136,16 @@ export default async function PageAccueil() {
             titre="Mon plan alimentaire"
             nouveau={nouveau("nutrition")}
           />
-          <Tuile
-            href="/sport"
-            icone={<IconeSport className="size-6" />}
-            titre="Mon programme sportif"
-            nouveau={nouveau("sport")}
-          />
+          {sport ? (
+            <Tuile
+              href="/sport"
+              icone={<IconeSport className="size-6" />}
+              titre="Mon programme sportif"
+              nouveau={nouveau("sport")}
+            />
+          ) : (
+            <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
+          )}
         </div>
 
         <Link
@@ -189,10 +194,12 @@ export default async function PageAccueil() {
           </Link>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <Tuile href="/sport/videos" icone={<IconeVideo className="size-6" />} titre="Vidéos d’exercices" />
-          <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
-        </div>
+        {sport && (
+          <div className="grid grid-cols-2 gap-3">
+            <Tuile href="/sport/videos" icone={<IconeVideo className="size-6" />} titre="Vidéos d’exercices" />
+            <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
+          </div>
+        )}
 
         {formationOuverte ? (
           <a

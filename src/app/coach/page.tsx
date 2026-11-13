@@ -2,11 +2,12 @@ import Link from "next/link";
 import { IconePlus } from "@/components/icones";
 import { Carte, Etiquette, LienBouton, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, bilanAvecPhotos, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
+import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
 import { chargerFile } from "./bilans/donnees";
+import { formaterEuros } from "@/lib/paiements";
 
 export default async function TableauDeBord() {
-  const { profil } = await exigerCoach();
+  const { profil, supabase } = await exigerCoach();
   const { clientes, aTraiter, alertes } = await chargerFile();
   const auj = aujourdhuiParis();
 
@@ -16,6 +17,19 @@ export default async function TableauDeBord() {
     .filter((b): b is { c: (typeof actives)[number]; date: string } => b.date !== null)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 8);
+
+  // Échéances de paiement en retard ou dans les 14 jours (rien avant la mise à jour 0010).
+  const { data: echeancesBrutes } = await supabase
+    .from("echeances_paiement")
+    .select("id, cliente_id, date_echeance, montant")
+    .is("payee_le", null)
+    .lte("date_echeance", ajouterJours(auj, 14))
+    .order("date_echeance")
+    .limit(30);
+  const paiements = (echeancesBrutes ?? []).flatMap((e) => {
+    const cliente = clientes.find((c) => c.id === e.cliente_id);
+    return cliente ? [{ ...e, montant: Number(e.montant), cliente, retard: e.date_echeance < auj }] : [];
+  });
 
   const aSupprimer = clientes.filter((c) => conservationDepassee(c.statut, c.ferme_le, auj));
   // Une ligne par cliente ; « 2 bilans manqués » remplace « bilan manquant ».
@@ -109,6 +123,40 @@ export default async function TableauDeBord() {
           </Link>
         </Carte>
       </div>
+
+      {paiements.length > 0 && (
+        <Carte className="flex flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Paiements</h2>
+            <p className="text-[14px] text-texte-2">En retard et à venir dans les 14 jours.</p>
+          </div>
+          <ul className="flex flex-col divide-y divide-ligne">
+            {paiements.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/coach/clientes/${p.cliente.id}`}
+                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 hover:text-accent"
+                >
+                  <span className="font-medium">
+                    {p.cliente.profils.prenom} {p.cliente.profils.nom}
+                  </span>
+                  <span className="flex items-center gap-3 text-[14px]">
+                    <span className="tabular-nums">{formaterEuros(p.montant)}</span>
+                    {p.retard ? (
+                      <span className="rounded-full bg-accent-pale px-3 py-1 text-[12.5px] font-medium text-erreur">
+                        en retard · {formaterDate(p.date_echeance, { year: undefined })}
+                      </span>
+                    ) : (
+                      <span className="text-texte-2">{formaterDate(p.date_echeance, { year: undefined })}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[13px] text-texte-2">Pour cocher une échéance payée : ouvre la fiche de la cliente.</p>
+        </Carte>
+      )}
 
       {aSupprimer.length > 0 && (
         <Carte className="flex flex-col gap-3 border border-erreur/30">

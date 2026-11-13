@@ -32,15 +32,18 @@ const libelle = (label: string) =>
   );
 
 /** Barre du bas. L'onglet Communauté n'apparaît que si elle est ouverte (et la cliente pas retirée). */
-export function BarreOnglets({ communaute }: { communaute?: { nonLus: number } | null }) {
+export function BarreOnglets({ communaute, sport = true }: { communaute?: { nonLus: number } | null; sport?: boolean }) {
   const chemin = usePathname();
-  const onglets = communaute ? [...ONGLETS, COMMUNAUTE] : ONGLETS;
+  const base = sport ? ONGLETS : ONGLETS.filter((o) => o.href !== "/sport");
+  const onglets = communaute ? [...base, COMMUNAUTE] : base;
+  // L'onglet Communauté, au libellé plus long, est un peu plus large.
+  const colonnes = `repeat(${onglets.length - 1}, minmax(0, 1fr)) minmax(0, ${communaute ? 1.35 : 1}fr)`;
   return (
     <nav
       aria-label="Navigation principale"
       className="pb-encoche fixed inset-x-0 bottom-0 z-30 border-t border-ligne bg-blanc-casse/90 backdrop-blur-md"
     >
-      <ul className={cx("mx-auto grid max-w-lg pt-2", communaute ? "grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.35fr)] px-1.5" : "grid-cols-5 px-2")}>
+      <ul className={cx("mx-auto grid max-w-lg pt-2", onglets.length > 5 ? "px-1.5" : "px-2")} style={{ gridTemplateColumns: colonnes }}>
         {onglets.map(({ href, label, Icone }) => {
           const actif = href === "/" ? chemin === "/" : chemin.startsWith(href);
           const pastille = href === COMMUNAUTE.href && !actif ? (communaute?.nonLus ?? 0) : 0;
@@ -52,7 +55,7 @@ export function BarreOnglets({ communaute }: { communaute?: { nonLus: number } |
                 aria-label={pastille ? `${label}, ${pastille} nouveau${pastille > 1 ? "x" : ""} message${pastille > 1 ? "s" : ""}` : undefined}
                 className={cx(
                   "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl transition-colors",
-                  communaute ? "text-[11px]" : "text-[11.5px]",
+                  onglets.length > 5 ? "text-[11px]" : "text-[11.5px]",
                   actif ? "font-medium text-chocolat" : "text-texte-2 hover:text-chocolat",
                 )}
               >

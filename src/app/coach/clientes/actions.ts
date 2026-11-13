@@ -6,6 +6,7 @@ import { SESSION_PERDUE, UUID, sessionCoach, verifierCliente } from "./verificat
 import { SITE_URL } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createEmailClient } from "@/lib/supabase/server";
+import { lireSaisiePaiement, sauverPaiement } from "@/lib/paiements-serveur";
 import type { StatutCliente } from "@/lib/types";
 
 export type EtatAction = { erreur?: string; succes?: string; lien?: string };
@@ -59,6 +60,8 @@ export async function creerCliente(_e: EtatAction, formData: FormData): Promise<
   const { supabase } = session;
   const { erreur, profil, fiche } = lireInfos(formData);
   if (erreur) return { erreur };
+  const paiement = lireSaisiePaiement(formData);
+  if (paiement.erreur) return { erreur: paiement.erreur };
 
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.createUser({
@@ -83,6 +86,9 @@ export async function creerCliente(_e: EtatAction, formData: FormData): Promise<
   }
 
   let suite = "creee=1";
+  // Lus à part : la création fonctionne même avant la mise à jour 0010.
+  if (formData.get("suivi_sport") !== "on") await supabase.from("clientes").update({ suivi_sport: false }).eq("id", id);
+  if (!paiement.vide && !(await sauverPaiement(supabase, id, paiement.saisie))) suite += "&paiement=echec";
   if (formData.get("envoyer_email") === "on") {
     const { error: erreurEmail } = await envoyerEmail(profil.email);
     suite = erreurEmail ? "creee=1&email=echec" : "creee=1&email=ok";
@@ -113,6 +119,13 @@ export async function modifierCliente(
   const { error: e1 } = await supabase.from("profils").update(profil).eq("id", id);
   const { error: e2 } = await supabase.from("clientes").update(fiche).eq("id", id);
   if (e1 || e2) return { erreur: "L’enregistrement a échoué. Réessaie dans un instant." };
+  if (formData.has("suivi_sport_present")) {
+    const { error: e3 } = await supabase
+      .from("clientes")
+      .update({ suivi_sport: formData.get("suivi_sport") === "on" })
+      .eq("id", id);
+    if (e3) return { erreur: "Le suivi sportif n’a pas pu être enregistré : fais d’abord la mise à jour 0010 dans Supabase." };
+  }
 
   revalidatePath("/coach", "layout");
   return { succes: "Modifications enregistrées." };
