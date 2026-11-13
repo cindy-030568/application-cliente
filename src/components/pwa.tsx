@@ -54,8 +54,11 @@ export function EnregistrementServiceWorker() {
 type InvitationInstallation = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 const CLE_MASQUEE = "fitw_installation_masquee";
 
-/** Carte « Installe l'app » sur l'accueil : instructions iPhone, bouton direct sur Android. */
-export function CarteInstallation() {
+/**
+ * Carte « Installe l'app » : instructions iPhone, bouton direct sur Android.
+ * Sur l'accueil, elle peut être masquée (« Plus tard ») ; dans le profil (`toujours`), elle reste.
+ */
+export function CarteInstallation({ toujours = false }: { toujours?: boolean }) {
   const appareil = useAppareil();
   const [invitation, setInvitation] = useState<InvitationInstallation | null>(null);
   const masqueeAuDepart = useSyncExternalStore(
@@ -80,7 +83,7 @@ export function CarteInstallation() {
     return () => window.removeEventListener("beforeinstallprompt", surInvitation);
   }, []);
 
-  if (!appareil || appareil.installee || masquee || masqueeAuDepart) return null;
+  if (!appareil || appareil.installee || (!toujours && (masquee || masqueeAuDepart))) return null;
   if (!appareil.ios && !appareil.android && !invitation) return null;
 
   const masquer = () => {
@@ -128,9 +131,11 @@ export function CarteInstallation() {
           Dans Chrome, touche le menu <strong>⋮</strong> puis « Ajouter à l’écran d’accueil » (ou « Installer l’application »).
         </p>
       )}
-      <button type="button" onClick={masquer} className="self-start text-[13.5px] text-texte-2 underline underline-offset-4">
-        Plus tard
-      </button>
+      {!toujours && (
+        <button type="button" onClick={masquer} className="self-start text-[13.5px] text-texte-2 underline underline-offset-4">
+          Plus tard
+        </button>
+      )}
     </div>
   );
 }

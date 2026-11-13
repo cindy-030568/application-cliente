@@ -6,6 +6,7 @@ import { exigerCliente } from "@/lib/auth";
 import { formaterDate } from "@/lib/bilan";
 import { LIBELLES_STATUT } from "@/lib/types";
 import { ReglagesRappels } from "./rappels";
+import { CarteInstallation } from "@/components/pwa";
 
 export const metadata: Metadata = { title: "Mon profil" };
 
@@ -31,6 +32,8 @@ export default async function PageProfil() {
         {fiche.date_debut && <Ligne label="Début" valeur={formaterDate(fiche.date_debut)} />}
         {fiche.date_fin && <Ligne label="Fin prévue" valeur={formaterDate(fiche.date_fin)} />}
       </Carte>
+
+      <CarteInstallation toujours />
 
       {!sansRappels && fiche.statut === "active" && (
         <Carte className="flex flex-col gap-4">
