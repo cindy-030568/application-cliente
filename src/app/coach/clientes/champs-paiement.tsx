@@ -133,7 +133,7 @@ export function ChampsPaiement({
         defaultChecked={valeurs?.rappels ?? true}
       />
       <ZoneTexte
-        label="Note (facultatif)"
+        label="Note privée (facultatif)"
         name="pai_note"
         defaultValue={valeurs?.note ?? ""}
         maxLength={500}

@@ -151,7 +151,7 @@ export default async function PageFicheCliente({
               suiviSport={sansSport ? null : (sport?.suivi_sport ?? true)}
             />
           </Section>
-          <Section titre="Formule et paiement" sousTitre="Visible par toi seule, jamais par ta cliente.">
+          <Section titre="Formule et paiement" sousTitre="Ta cliente voit sa formule et son échéancier dans son profil. Ta note reste privée.">
             {paiement ? (
               <BlocPaiement
                 clienteId={c.id}

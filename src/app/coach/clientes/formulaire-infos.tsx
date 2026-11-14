@@ -96,7 +96,7 @@ export function FormulaireInfos({
       {creation && (
         <fieldset className="flex flex-col gap-3 rounded-xl border border-ligne p-4">
           <legend className="px-1 font-titre text-lg font-bold">Formule et paiement</legend>
-          <p className="-mt-1 text-[13.5px] text-texte-2">Facultatif · visible par toi seule, jamais par ta cliente.</p>
+          <p className="-mt-1 text-[13.5px] text-texte-2">Facultatif · ta cliente verra sa formule et son échéancier dans son profil (pas ta note).</p>
           <ChampsPaiement premiereParDefaut="" formules={formules} />
         </fieldset>
       )}
