@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { nomIngredient } from "@/lib/noms-aliments";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconeRetour } from "@/components/icones";
@@ -147,7 +148,7 @@ function CarteRecette({ a, approximative = false }: { a: RecetteAdaptee<RecetteP
             .sort((x, y) => x.ordre - y.ordre)
             .map((i) => (
               <li key={i.id} className="flex justify-between gap-3">
-                <span className="text-texte-2">{i.aliment.nom}</span>
+                <span className="text-texte-2" title={i.aliment.nom}>{nomIngredient(i.aliment.nom)}</span>
                 <span className="shrink-0 font-medium tabular-nums">
                   {formaterQuantite(quantites.get(i.id) ?? i.qte_base, i.unite, i.aliment.nom_unite)}
                 </span>

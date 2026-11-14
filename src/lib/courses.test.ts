@@ -35,9 +35,11 @@ describe("rayonPour", () => {
 describe("nomCourt", () => {
   it("garde l'essentiel du nom Ciqual", () => {
     expect(nomCourt("Avocat, pulpe, cru")).toBe("Avocat");
-    expect(nomCourt("Poulet, filet, sans peau, cru")).toBe("Poulet, filet");
+    expect(nomCourt("Poulet, filet, sans peau, cru")).toBe("Filet de poulet");
     expect(nomCourt("Lait demi-écrémé, UHT")).toBe("Lait demi-écrémé");
-    expect(nomCourt("Pain complet ou intégral (à la farine T150)")).toBe("Pain complet ou intégral");
+    expect(nomCourt("Pain complet ou intégral (à la farine T150)")).toBe("Pain complet");
+    expect(nomCourt("Persil, frais")).toBe("Persil");
+    expect(nomCourt("Tomate, pulpe, appertisée")).toBe("Tomate");
     expect(nomCourt("Fruits rouges, crus (framboises, fraises, groseilles, cassis)")).toBe("Fruits rouges");
     expect(nomCourt("Skyr nature 0 %")).toBe("Skyr nature 0 %");
   });

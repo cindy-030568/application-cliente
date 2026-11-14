@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { nomIngredient } from "@/lib/noms-aliments";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconeHorloge, IconeRecettes, IconeRetour } from "@/components/icones";
@@ -145,7 +146,7 @@ export default async function PageRecette({
                 return (
                   <li key={i.id} className="flex items-baseline justify-between gap-3 py-3">
                     <span className="flex flex-col">
-                      <span className="text-[15px]">{i.aliment.nom}</span>
+                      <span className="text-[15px]">{nomIngredient(i.aliment.nom)}</span>
                       {i.note && <span className="text-[13px] text-texte-2">{i.note}</span>}
                     </span>
                     <span className="shrink-0 text-[15px] font-semibold tabular-nums">

@@ -16,6 +16,7 @@ import {
   type Unite,
 } from "@/lib/nutrition";
 import { clientDepot } from "@/lib/supabase/navigateur";
+import { nomIngredient } from "@/lib/noms-aliments";
 import type { Aliment, Recette, Tag } from "@/lib/types";
 import { chercherAliments } from "../aliments/actions";
 import { enregistrerRecette, preparerPhotoRecette, supprimerRecette } from "./actions";
@@ -328,7 +329,10 @@ export function EditeurRecette({ recette, tags, urlPhoto }: { recette?: Recette;
                 return (
                   <tr key={l.cle} className="border-t border-ligne align-middle">
                     <td className="px-3 py-2">
-                      <span className="block max-w-64 leading-snug">{l.aliment.nom}</span>
+                      <span className="block max-w-64 leading-snug">{nomIngredient(l.aliment.nom)}</span>
+                      {nomIngredient(l.aliment.nom) !== l.aliment.nom && (
+                        <span className="block max-w-64 text-[12px] leading-snug text-texte-2">{l.aliment.nom}</span>
+                      )}
                       <span className="text-[12px] tabular-nums text-texte-2">
                         {Math.round(m.kcal)} kcal · P {arrondir(m.proteines, 1)} · G {arrondir(m.glucides, 1)} · L {arrondir(m.lipides, 1)}
                       </span>

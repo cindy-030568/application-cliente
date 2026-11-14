@@ -1,3 +1,4 @@
+import { nomIngredient } from "@/lib/noms-aliments";
 /**
  * Liste de courses : rayons, regroupement des articles, texte à partager.
  * Module pur, sans base de données : entièrement testable.
@@ -138,17 +139,8 @@ export function texteCourses(sections: SectionCourses[]): string {
   return blocs.length ? ["Ma liste de courses", "", blocs.join("\n\n")].join("\n") : "";
 }
 
-const PRECISIONS_INUTILES =
-  /^(crue?s?|cuite?s?|séchée?s?|sèche|préemballée?s?|nature|uht|surgelée?s?|pulpe|graine|sans peau|avec peau|appertisée?s?|égouttée?s?|non sucrée?|non enrichie?)\b/i;
 
-/** Nom court et lisible d'un aliment Ciqual pour une liste de courses (« Avocat, pulpe, cru » → « Avocat »). */
+/** Nom court d'un aliment pour une liste de courses (« Avocat, pulpe, cru » → « Avocat »). */
 export function nomCourt(nom: string): string {
-  const sansParentheses = nom.replace(/\s*\(.*?\)/g, "");
-  const garde: string[] = [];
-  for (const morceau of sansParentheses.split(",").map((m) => m.trim()).filter(Boolean)) {
-    if (garde.length && (garde.length >= 2 || PRECISIONS_INUTILES.test(morceau))) break;
-    garde.push(morceau);
-  }
-  const court = garde.join(", ");
-  return court.length >= 2 ? court : nom;
+  return nomIngredient(nom).replace(/\s+(crue?s?|cuite?s?)$/i, "");
 }
