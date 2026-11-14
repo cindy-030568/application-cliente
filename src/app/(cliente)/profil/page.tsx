@@ -3,7 +3,9 @@ import Link from "next/link";
 import { IconeDeconnexion, IconeFleche, IconeRetour } from "@/components/icones";
 import { Carte } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
-import { formaterDate } from "@/lib/bilan";
+import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
+import { lireMonPaiement } from "@/lib/paiements-serveur";
+import { CarteMonPaiement } from "@/components/mon-paiement";
 import { LIBELLES_STATUT } from "@/lib/types";
 import { ReglagesRappels } from "./rappels";
 import { CarteInstallation } from "@/components/pwa";
@@ -12,6 +14,7 @@ export const metadata: Metadata = { title: "Mon profil" };
 
 export default async function PageProfil() {
   const { supabase, profil, fiche, reglages } = await exigerCliente();
+  const monPaiement = await lireMonPaiement(supabase);
   // Lue à part : la page reste utilisable avant la mise à jour de la base (0008).
   const { data: pref, error: sansRappels } = await supabase
     .from("clientes")
@@ -32,6 +35,8 @@ export default async function PageProfil() {
         {fiche.date_debut && <Ligne label="Début" valeur={formaterDate(fiche.date_debut)} />}
         {fiche.date_fin && <Ligne label="Fin prévue" valeur={formaterDate(fiche.date_fin)} />}
       </Carte>
+
+      {monPaiement && <CarteMonPaiement p={monPaiement} aujourdhui={aujourdhuiParis()} />}
 
       <CarteInstallation toujours />
 

@@ -17,7 +17,8 @@ import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
 import { accesCommunaute } from "@/lib/communaute-serveur";
-import { lireSuiviSport } from "@/lib/paiements-serveur";
+import { lireMonPaiement, lireSuiviSport } from "@/lib/paiements-serveur";
+import { mensualiteASignaler } from "@/components/mon-paiement";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -51,7 +52,12 @@ export default async function PageAccueil() {
     timeZone: "Europe/Paris",
   });
   const formationOuverte = fiche.acces_formation && Boolean(reglages.lien_formation);
-  const [communaute, sport] = await Promise.all([carteCommunaute(supabase, profil.id), lireSuiviSport(supabase, profil.id)]);
+  const [communaute, sport, monPaiement] = await Promise.all([
+    carteCommunaute(supabase, profil.id),
+    lireSuiviSport(supabase, profil.id),
+    lireMonPaiement(supabase),
+  ]);
+  const mensualite = mensualiteASignaler(monPaiement, auj);
 
   return (
     <>
@@ -102,6 +108,19 @@ export default async function PageAccueil() {
               </span>
             </span>
             <IconeFleche className="size-5 shrink-0" />
+          </Link>
+        )}
+
+        {mensualite && (
+          <Link href="/profil" className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce apparition">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sable text-xl" aria-hidden>
+              💳
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">{mensualite.titre}</span>
+              <span className="text-[14px] text-texte-2">{mensualite.texte}</span>
+            </span>
+            <IconeFleche className="size-5 shrink-0 text-texte-2" />
           </Link>
         )}
 

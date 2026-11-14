@@ -1,3 +1,5 @@
+import { formaterDate } from "@/lib/bilan";
+
 /** Formule et paiement des clientes : fonctions pures (testées). Visible par la coach seule. */
 
 export const MOYENS = {
@@ -18,7 +20,15 @@ export type Paiement = {
   moyen: Moyen | null;
   nb_fois: number;
   note: string | null;
+  /** 1er paiement en plusieurs fois (null = 50 % du total). */
+  premier_montant: number | null;
+  /** Rappel à la cliente le jour de chaque échéance. */
+  rappels: boolean;
 };
+
+/** Part du 1er paiement par défaut quand on paie en plusieurs fois. */
+export const PART_PREMIER_PAIEMENT = 0.5;
+export const premierParDefaut = (totalCentimes: number) => Math.round(totalCentimes * PART_PREMIER_PAIEMENT);
 export type Echeance = { id: string; date_echeance: string; montant: number; payee_le: string | null };
 
 /** « 450 », « 149,90 », « 1 200 € » → centimes ; null si vide ; NaN si illisible. */
@@ -47,18 +57,25 @@ export function ajouterMois(iso: string, n: number): string {
   return cible.toISOString().slice(0, 10);
 }
 
-/**
- * Échéancier mensuel : `nbFois` mensualités égales à partir de `premiere`.
- * Les centimes qui ne se divisent pas sont ajoutés à la première.
- */
-export function genererEcheances(totalCentimes: number, nbFois: number, premiere: string) {
-  const n = Math.max(1, Math.floor(nbFois));
+/** `n` mensualités égales à partir de `debut` ; les centimes en trop vont sur la première. */
+function mensualites(totalCentimes: number, n: number, debut: string, decalage = 0) {
   const base = Math.floor(totalCentimes / n);
   const reste = totalCentimes - base * n;
   return Array.from({ length: n }, (_, i) => ({
-    date_echeance: ajouterMois(premiere, i),
+    date_echeance: ajouterMois(debut, decalage + i),
     montant: (base + (i === 0 ? reste : 0)) / 100,
   }));
+}
+
+/**
+ * Échéancier mensuel à partir de `premiere`. En plusieurs fois, le 1er paiement vaut
+ * `premierCentimes` (par défaut 50 % du total) et le reste est réparti en mensualités égales.
+ */
+export function genererEcheances(totalCentimes: number, nbFois: number, premiere: string, premierCentimes?: number | null) {
+  const n = Math.max(1, Math.floor(nbFois));
+  if (n === 1) return [{ date_echeance: premiere, montant: totalCentimes / 100 }];
+  const premier = Math.min(totalCentimes, Math.max(0, premierCentimes ?? premierParDefaut(totalCentimes)));
+  return [{ date_echeance: premiere, montant: premier / 100 }, ...mensualites(totalCentimes - premier, n - 1, premiere, 1)];
 }
 
 /**
@@ -71,12 +88,14 @@ export function echeancesARecreer(
   nbFois: number,
   premiere: string,
   payees: { montant: number }[],
+  premierCentimes?: number | null,
 ) {
+  if (payees.length === 0) return genererEcheances(totalCentimes, nbFois, premiere, premierCentimes);
   const dejaPaye = payees.reduce((s, e) => s + Math.round(e.montant * 100), 0);
   const reste = totalCentimes - dejaPaye;
   const nbReste = nbFois - payees.length;
   if (reste <= 0 || nbReste <= 0) return [];
-  return genererEcheances(reste, nbReste, ajouterMois(premiere, payees.length));
+  return mensualites(reste, nbReste, premiere, payees.length);
 }
 
 export type EtatEcheance = "payee" | "en_retard" | "a_venir";
@@ -92,3 +111,11 @@ export function bilanPaiement(echeances: Pick<Echeance, "montant" | "payee_le">[
   const total = echeances.reduce((s, e) => s + c(e.montant), 0);
   return { paye: paye / 100, reste: (total - paye) / 100 };
 }
+
+/** Texte du rappel de paiement (sans détail bancaire). */
+export function messagePaiement(prenom: string, montant: number, date: string, aujourdhui: string) {
+  const somme = formaterEuros(montant);
+  const quand = date === aujourdhui ? "est prévue aujourd’hui" : `était prévue le ${formaterDate(date, { year: undefined })}`;
+  return `${prenom ? `Coucou ${prenom} ! ` : "Coucou ! "}Petit rappel : ta mensualité de ${somme} pour ton accompagnement ${quand}. Merci 💛`;
+}
+

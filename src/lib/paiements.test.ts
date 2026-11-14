@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ajouterMois, bilanPaiement, echeancesARecreer, etatEcheance, formaterEuros, genererEcheances, lireCentimes } from "./paiements";
+import { ajouterMois, bilanPaiement, echeancesARecreer, etatEcheance, formaterEuros, genererEcheances, lireCentimes, messagePaiement } from "./paiements";
 
 describe("paiements", () => {
   it("lit les montants tapés à la française", () => {
@@ -18,15 +18,19 @@ describe("paiements", () => {
     expect(ajouterMois("2026-11-15", 3)).toBe("2027-02-15");
   });
 
-  it("crée un échéancier mensuel, les centimes en plus sur la 1re", () => {
+  it("en plusieurs fois : 1er paiement de 50 % par défaut, puis mensualités égales", () => {
     expect(genererEcheances(45000, 3, "2026-09-07")).toEqual([
-      { date_echeance: "2026-09-07", montant: 150 },
-      { date_echeance: "2026-10-07", montant: 150 },
-      { date_echeance: "2026-11-07", montant: 150 },
+      { date_echeance: "2026-09-07", montant: 225 },
+      { date_echeance: "2026-10-07", montant: 112.5 },
+      { date_echeance: "2026-11-07", montant: 112.5 },
     ]);
-    const e = genererEcheances(10000, 3, "2026-09-07");
-    expect(e.map((x) => x.montant)).toEqual([33.34, 33.33, 33.33]);
+    expect(genererEcheances(10000, 4, "2026-09-07").map((x) => x.montant)).toEqual([50, 16.68, 16.66, 16.66]);
     expect(genererEcheances(29900, 1, "2026-09-07")).toEqual([{ date_echeance: "2026-09-07", montant: 299 }]);
+  });
+
+  it("1er paiement choisi par la coach", () => {
+    expect(genererEcheances(45000, 3, "2026-09-07", 15000).map((x) => x.montant)).toEqual([150, 150, 150]);
+    expect(genererEcheances(45000, 2, "2026-09-07", 50000).map((x) => x.montant)).toEqual([450, 0]);
   });
 
   it("garde les échéances payées et répartit le reste", () => {
@@ -35,6 +39,8 @@ describe("paiements", () => {
       { date_echeance: "2026-10-07", montant: 150 },
       { date_echeance: "2026-11-07", montant: 150 },
     ]);
+    // rien de payé : échéancier complet avec le 1er paiement à 50 %
+    expect(echeancesARecreer(45000, 3, "2026-09-07", []).map((e) => e.montant)).toEqual([225, 112.5, 112.5]);
     // passage à 4 fois après une échéance payée → 3 × 100 €
     expect(echeancesARecreer(45000, 4, "2026-09-07", [{ montant: 150 }]).map((e) => e.montant)).toEqual([100, 100, 100]);
     // tout est payé
@@ -48,5 +54,12 @@ describe("paiements", () => {
     expect(bilanPaiement([{ montant: 150, payee_le: "2026-09-07" }, { montant: 150, payee_le: null }])).toEqual({ paye: 150, reste: 150 });
     expect(formaterEuros(150).replace(/\s/g, " ")).toBe("150 €");
     expect(formaterEuros(33.34).replace(/\s/g, " ")).toBe("33,34 €");
+  });
+
+  it("message du rappel de paiement", () => {
+    expect(messagePaiement("Léa", 112.5, "2026-12-07", "2026-12-07").replace(/\s/g, " ")).toBe(
+      "Coucou Léa ! Petit rappel : ta mensualité de 112,50 € pour ton accompagnement est prévue aujourd’hui. Merci 💛",
+    );
+    expect(messagePaiement("", 150, "2026-12-05", "2026-12-07")).toContain("était prévue le 5 décembre");
   });
 });

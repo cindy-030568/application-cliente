@@ -571,13 +571,17 @@ Décocher « Communauté ouverte » la cache aux clientes sans rien effacer.
 
 ## Mettre à jour la base de données (une seule fois)
 
-1. Ouvre [`supabase/migrations/0010_formule_paiement_sport.sql`](../supabase/migrations/0010_formule_paiement_sport.sql) → **Copy raw file**.
-2. Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+Deux fichiers, **dans cet ordre** (ignore le 1er s'il est déjà fait) :
+
+1. [`0010_formule_paiement_sport.sql`](../supabase/migrations/0010_formule_paiement_sport.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+2. [`0011_paiement_cote_cliente.sql`](../supabase/migrations/0011_paiement_cote_cliente.sql) → même chose.
 
 ## Utilisation
 
 - **Nouvelle cliente** ou **fiche d'une cliente** → **Formule et paiement** : formule (les formules déjà utilisées te sont proposées), montant total, moyen de paiement, payé en 1 à 12 fois, date du 1er paiement.
-- En plusieurs fois, l'app crée l'**échéancier** : une mensualité par mois, à la même date. Coche **Marquer payée** quand tu reçois un paiement. Si tu modifies ensuite le montant ou le nombre de fois, les échéances déjà payées sont gardées et les autres recalculées.
+- En plusieurs fois, le **1er paiement vaut 50 %** du total (modifiable : « Montant du 1er paiement »), puis le reste est réparti en **mensualités égales**, une par mois à la même date. Coche **Marquer payée** quand tu reçois un paiement. Si tu modifies ensuite le montant ou le nombre de fois, les échéances déjà payées sont gardées et les autres recalculées.
 - Ton **tableau de bord** affiche les échéances **en retard** et celles des **14 prochains jours**.
-- Ces informations sont visibles **par toi seule** : tes clientes ne les voient jamais. Elles sont dans ta sauvegarde mensuelle et supprimées avec la cliente.
+- **Côté cliente** : dans son **profil**, carte « Ma formule et mes paiements » (formule, montant, échéancier, réglé / à venir). Ta **note** reste privée. Sur son accueil, une carte apparaît 3 jours avant une mensualité.
+- **Rappel** : le matin de chaque échéance non cochée, elle reçoit un email et une notification (« Lui envoyer un rappel le jour de chaque échéance », cochée par défaut, à décocher cliente par cliente).
+- Ces informations sont dans ta sauvegarde mensuelle et supprimées avec la cliente.
 - **Suivi sportif inclus** (fiche → Infos et accès) : décoché, ta cliente ne voit plus l'onglet Sport, son programme sportif ni les vidéos d'exercices.

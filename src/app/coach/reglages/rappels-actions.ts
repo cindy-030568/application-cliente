@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
-import { ErreurBrevo, configurationRappels, envoyerEmail, executerRappels } from "@/lib/envoi-rappels";
+import { ErreurBrevo, configurationRappels, envoyerEmail, executerTachesDuMatin } from "@/lib/envoi-rappels";
 import { SUJETS, emailRappel, personnaliser } from "@/lib/rappels";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -74,13 +74,18 @@ export async function lancerRappelsMaintenant(): Promise<EtatRappelsCoach> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
   try {
-    const b = await executerRappels(createAdminClient());
+    const t = await executerTachesDuMatin(createAdminClient());
     revalidatePath("/coach", "layout");
-    if (!b.actifs) return { succes: "Les rappels sont en pause : rien n’a été envoyé." };
-    if (b.rappels === 0) return { succes: "Aucun rappel à envoyer aujourd’hui : tout le monde est à jour." };
+    const p = t.paiements;
+    const rappels = t.rappels + p.rappels;
+    const emails = t.emails + p.emails;
+    const notifications = t.notifications + p.notifications;
+    const erreurs = t.erreurs + p.erreurs;
+    const pause = t.actifs ? "" : " (rappels de bilan en pause)";
+    if (rappels === 0) return { succes: `Aucun rappel à envoyer aujourd’hui${pause}.` };
     return {
-      succes: `${b.rappels} rappel${b.rappels > 1 ? "s" : ""} : ${b.emails} email${b.emails > 1 ? "s" : ""}, ${b.notifications} notification${b.notifications > 1 ? "s" : ""}.`,
-      erreur: b.erreurs ? `${b.erreurs} envoi${b.erreurs > 1 ? "s ont" : " a"} échoué.` : undefined,
+      succes: `${rappels} rappel${rappels > 1 ? "s" : ""}${p.rappels ? ` dont ${p.rappels} de paiement` : ""} : ${emails} email${emails > 1 ? "s" : ""}, ${notifications} notification${notifications > 1 ? "s" : ""}${pause}.`,
+      erreur: erreurs ? `${erreurs} envoi${erreurs > 1 ? "s ont" : " a"} échoué.` : undefined,
     };
   } catch {
     return { erreur: "La tâche n’a pas pu tourner. As-tu bien fait la mise à jour de la base (0008) ?" };

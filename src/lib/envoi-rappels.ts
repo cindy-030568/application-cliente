@@ -1,7 +1,8 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
-import { aujourdhuiParis, bilanAvecPhotos } from "@/lib/bilan";
+import { ajouterJours, aujourdhuiParis, bilanAvecPhotos } from "@/lib/bilan";
+import { messagePaiement } from "@/lib/paiements";
 import { SITE_URL } from "@/lib/env";
 import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappel } from "@/lib/rappels";
 
@@ -249,4 +250,97 @@ export async function lireReglagesRappels(supabase: SupabaseClient): Promise<Reg
     .select("rappels_actifs, relance_jours, texte_rappel, texte_relance")
     .maybeSingle<ReglagesRappels>();
   return error ? null : data;
+}
+
+// ---------------------------------------------------------------- Rappels de paiement
+
+export type BilanPaiements = { rappels: number; emails: number; notifications: number; erreurs: number };
+
+/**
+ * Le matin de chaque échéance non payée, prévient la cliente (email + notification),
+ * si la coach a laissé le rappel activé pour elle. Rattrapage de 2 jours si la tâche
+ * n'a pas tourné. Chaque échéance n'est rappelée qu'une fois.
+ */
+export async function executerRappelsPaiement(admin: SupabaseClient, aujourdhui = aujourdhuiParis()): Promise<BilanPaiements> {
+  const bilan: BilanPaiements = { rappels: 0, emails: 0, notifications: 0, erreurs: 0 };
+  const { data: echeances, error } = await admin
+    .from("echeances_paiement")
+    .select("id, cliente_id, date_echeance, montant")
+    .is("payee_le", null)
+    .is("rappel_envoye_le", null)
+    .gte("date_echeance", ajouterJours(aujourdhui, -2))
+    .lte("date_echeance", aujourdhui);
+  if (error || !echeances?.length) return bilan; // rien à faire (ou mise à jour 0011 pas encore faite)
+  const ids = [...new Set(echeances.map((e) => e.cliente_id as string))];
+  const [{ data: reglagesPaiement }, { data: clientes }, { data: abonnements }] = await Promise.all([
+    admin.from("paiements_clientes").select("cliente_id, rappels").in("cliente_id", ids),
+    admin
+      .from("clientes")
+      .select("id, statut, rappels_email, profils!inner(prenom, email)")
+      .in("id", ids)
+      .neq("statut", "fermee")
+      .returns<Pick<ClienteRappel, "id" | "statut" | "rappels_email" | "profils">[]>(),
+    admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids),
+  ]);
+  const config = configurationRappels();
+  for (const e of echeances) {
+    if (reglagesPaiement?.find((r) => r.cliente_id === e.cliente_id)?.rappels === false) continue;
+    const c = clientes?.find((x) => x.id === e.cliente_id);
+    if (!c) continue;
+    const p = Array.isArray(c.profils) ? c.profils[0] : c.profils;
+    const appareils = (abonnements ?? []).filter((a) => a.cliente_id === c.id) as AbonnementPush[];
+    const emailPossible = config.email && c.rappels_email && Boolean(p?.email);
+    if (!emailPossible && !(config.push && appareils.length)) continue;
+
+    // Réservation avant l'envoi : jamais deux rappels pour la même échéance.
+    const { data: reservee } = await admin
+      .from("echeances_paiement")
+      .update({ rappel_envoye_le: new Date().toISOString() })
+      .eq("id", e.id)
+      .is("rappel_envoye_le", null)
+      .select("id")
+      .maybeSingle();
+    if (!reservee) continue;
+    bilan.rappels++;
+
+    const message = messagePaiement(p?.prenom ?? "", Number(e.montant), e.date_echeance as string, aujourdhui);
+    let parti = false;
+    if (config.push) {
+      for (const a of appareils) {
+        const r = await envoyerPush(a, { titre: "Ta mensualité", texte: message, url: "/profil" });
+        if (r === "ok") {
+          parti = true;
+          bilan.notifications++;
+        } else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+        else bilan.erreurs++;
+      }
+    }
+    if (emailPossible && p?.email) {
+      try {
+        const { html, texte } = emailRappel(message, `${SITE_URL()}/profil`, `${SITE_URL()}/profil`, "Voir mon échéancier");
+        await envoyerEmail({ email: p.email, nom: p.prenom, sujet: "Rappel : ta mensualité fitw_cindy", html, texte });
+        parti = true;
+        bilan.emails++;
+      } catch {
+        bilan.erreurs++;
+      }
+    }
+    if (!parti) {
+      await admin.from("echeances_paiement").update({ rappel_envoye_le: null }).eq("id", e.id);
+      bilan.rappels--;
+    }
+  }
+  return bilan;
+}
+
+/** Tâche du matin complète : rappels de bilan puis rappels de paiement. */
+export async function executerTachesDuMatin(admin: SupabaseClient, aujourdhui = aujourdhuiParis()) {
+  const bilans = await executerRappels(admin, aujourdhui);
+  let paiements: BilanPaiements = { rappels: 0, emails: 0, notifications: 0, erreurs: 0 };
+  try {
+    paiements = await executerRappelsPaiement(admin, aujourdhui);
+  } catch (e) {
+    console.warn("Rappels de paiement : échec", e instanceof Error ? e.message.slice(0, 120) : "");
+  }
+  return { ...bilans, paiements };
 }
