@@ -601,3 +601,9 @@ Deux fichiers, **dans cet ordre** (ignore le 1er s'il est déjà fait) :
    - **iPhone** : installe d'abord l'app sur l'écran d'accueil (Safari → Partager → « Sur l'écran d'accueil »), ouvre-la depuis l'icône, connecte-toi avec ton compte coach, puis va dans Réglages.
    - **Ordinateur** : Chrome, Edge ou Safari ; autorise les notifications quand le navigateur le demande.
 3. Une cliente envoie son bilan → tu reçois « Nouveau bilan 📝 · Prénom vient d'envoyer son bilan » ; toucher la notification ouvre le bilan.
+
+---
+
+# Photos de départ (avant / après)
+
+Pour une cliente qui a commencé avant l'app : fiche → **Suivi et bilans** → **Photos de départ**. La date proposée est son démarrage ; ajoute ses photos face / profil / dos (et ses mesures du début si tu les as) → **Enregistrer le point de départ**. Elles deviennent l'« avant » du comparatif, pour toi et pour elle. Ce point de départ ne compte pas comme un bilan prévu et n'arrive pas dans ta file à traiter.

@@ -116,13 +116,12 @@ export async function enregistrerBilan(
       .maybeSingle();
     if (error || !data) return { erreur: "Ce bilan ne peut pas être modifié." };
   } else {
+    // « Point de départ » saisi par la coach (photos et mesures du début) : jamais rattaché à un bilan prévu.
+    const depart = ctx.coach && formData.get("depart") === "1";
     const { data: reglages } = await supabase.from("reglages").select("fenetre_bilan_jours").single();
-    const ouverte = echeanceOuverte(
-      fiche.date_debut,
-      fiche.frequence_bilan_jours,
-      reglages?.fenetre_bilan_jours ?? 3,
-      aujourdhui,
-    );
+    const ouverte = depart
+      ? null
+      : echeanceOuverte(fiche.date_debut, fiche.frequence_bilan_jours, reglages?.fenetre_bilan_jours ?? 3, aujourdhui);
     let echeance: string | null = null;
     if (ouverte) {
       const { data: existant } = await supabase

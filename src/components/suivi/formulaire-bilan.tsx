@@ -35,6 +35,8 @@ export function FormulaireBilan({
   avecCommentaire = false,
   sansPhotos = false,
   photos: modePhotos = "facultatives",
+  champsCaches = {},
+  libelleDate = "Date du bilan",
   redirection,
   libelleEnvoi,
   libelleCommentaire = "Un mot pour Cindy (facultatif)",
@@ -58,6 +60,9 @@ export function FormulaireBilan({
    * « repliees » : bilan simple, photos possibles derrière un bouton ; « facultatives » : section affichée.
    */
   photos?: "demandees" | "facultatives" | "repliees";
+  /** Champs cachés ajoutés au formulaire (ex. depart=1). */
+  champsCaches?: Record<string, string>;
+  libelleDate?: string;
   /** Adresse après l'envoi ; « {id} » est remplacé par l'identifiant du bilan. */
   redirection: string;
   libelleEnvoi: string;
@@ -287,7 +292,10 @@ export function FormulaireBilan({
         </p>
       )}
 
-      <Champ label="Date du bilan" name="date_mesure" type="date" required defaultValue={dateInitiale} max={dateMax} />
+      <Champ label={libelleDate} name="date_mesure" type="date" required defaultValue={dateInitiale} max={dateMax} />
+      {Object.entries(champsCaches).map(([nom, valeur]) => (
+        <input key={nom} type="hidden" name={nom} value={valeur} />
+      ))}
 
       {sections.map(({ section, champs: liste }) => {
         const mesures = liste.every((c) => c.groupe === "mesure");

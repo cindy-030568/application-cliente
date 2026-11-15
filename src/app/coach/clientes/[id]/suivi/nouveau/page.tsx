@@ -11,17 +11,26 @@ import { chargerChamps, champsVisibles } from "@/lib/suivi";
 export const metadata: Metadata = { title: "Saisir un bilan" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default async function PageSaisieCoach({ params }: { params: Promise<{ id: string }> }) {
+export default async function PageSaisieCoach({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ depart?: string }>;
+}) {
   const { id } = await params;
+  const depart = (await searchParams).depart === "1";
   if (!UUID.test(id)) notFound();
   const { supabase } = await exigerCoach();
   const { data: c } = await supabase
     .from("clientes")
-    .select("mode_sans_chiffres, frequence_bilan_jours, profils!inner(prenom)")
+    .select("mode_sans_chiffres, frequence_bilan_jours, date_debut, profils!inner(prenom)")
     .eq("id", id)
-    .maybeSingle<{ mode_sans_chiffres: boolean; frequence_bilan_jours: number; profils: { prenom: string } }>();
+    .maybeSingle<{ mode_sans_chiffres: boolean; frequence_bilan_jours: number; date_debut: string | null; profils: { prenom: string } }>();
   if (!c) notFound();
-  const champs = champsVisibles(await chargerChamps(supabase), c.mode_sans_chiffres);
+  const tous = champsVisibles(await chargerChamps(supabase), c.mode_sans_chiffres);
+  // Point de départ : seulement les mesures (et les photos).
+  const champs = depart ? tous.filter((ch) => ch.groupe === "mesure") : tous;
   const auj = aujourdhuiParis();
 
   return (
@@ -31,22 +40,28 @@ export default async function PageSaisieCoach({ params }: { params: Promise<{ id
       </Link>
       <div>
         <Surtitre>Saisie par la coach</Surtitre>
-        <h1 className="font-titre text-[32px] font-bold leading-tight">Bilan de {c.profils.prenom}</h1>
+        <h1 className="font-titre text-[32px] font-bold leading-tight">
+          {depart ? `Point de départ de ${c.profils.prenom}` : `Bilan de ${c.profils.prenom}`}
+        </h1>
         <p className="text-[15px] text-texte-2">
-          Pratique pendant un bilan en visio. Elle le retrouvera dans son historique.
+          {depart
+            ? "Ses premières photos et mesures, à la date de son démarrage : elles serviront d’« avant » dans le comparatif avant / après. Elle les verra dans son suivi."
+            : "Pratique pendant un bilan en visio. Elle le retrouvera dans son historique."}
         </p>
       </div>
       <Carte>
         <FormulaireBilan
           champs={champs}
           jours={c.frequence_bilan_jours}
-          avecCommentaire
+          avecCommentaire={!depart}
           clienteCible={id}
-          dateInitiale={auj}
+          dateInitiale={depart ? (c.date_debut && c.date_debut <= auj ? c.date_debut : auj) : auj}
+          libelleDate={depart ? "Date des photos (son démarrage)" : "Date du bilan"}
+          champsCaches={depart ? { depart: "1" } : {}}
           dateMax={auj}
           sansPhotos={c.mode_sans_chiffres}
-          redirection={`/coach/bilans/{id}`}
-          libelleEnvoi="Enregistrer le bilan"
+          redirection={depart ? `/coach/clientes/${id}/suivi` : `/coach/bilans/{id}`}
+          libelleEnvoi={depart ? "Enregistrer le point de départ" : "Enregistrer le bilan"}
           libelleCommentaire="Tes notes de l’échange (visibles par elle)"
         />
       </Carte>

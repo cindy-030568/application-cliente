@@ -58,6 +58,9 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
           <a href={`/coach/clientes/${id}/suivi/export`} className={classesBouton("contour")} download>
             Exporter (Excel / CSV)
           </a>
+          <LienBouton href={`/coach/clientes/${id}/suivi/nouveau?depart=1`} variante="contour">
+            <IconePlus className="size-5" /> Photos de départ
+          </LienBouton>
           <LienBouton href={`/coach/clientes/${id}/suivi/nouveau`}>
             <IconePlus className="size-5" /> Saisir un bilan
           </LienBouton>
