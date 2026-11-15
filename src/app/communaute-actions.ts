@@ -6,6 +6,7 @@ import { after } from "next/server";
 import { lireSession } from "@/lib/auth";
 import { estReaction, nettoyerTexte, photoDe, type MessageCommunaute } from "@/lib/communaute";
 import { chargerMessages, lireEtatCommunaute, notifierMembres } from "@/lib/communaute-serveur";
+import { notifierCoach } from "@/lib/notifications-coach";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SESSION_EXPIREE = "Ta session a expiré. Reconnecte-toi, puis réessaie.";
@@ -95,6 +96,7 @@ export async function publierMessage(texteBrut: string, chemin: string | null): 
   }
   const auteur = s.profil.id;
   after(() => notifierMembres(auteur));
+  if (!s.coach) after(() => notifierCoach({ type: "message", clienteId: auteur }));
   rafraichir();
   return {};
 }
@@ -141,6 +143,7 @@ export async function signalerMessage(id: string, motifBrut: string): Promise<Et
   const motif = nettoyerTexte(String(motifBrut ?? "")).slice(0, 300) || null;
   const { error } = await s.supabase.from("signalements_communaute").insert({ message_id: id, motif });
   if (error && error.code !== "23505") return { erreur: "Le signalement n’a pas pu être envoyé. Réessaie." };
+  if (!error) after(() => notifierCoach({ type: "signalement" }));
   revalidatePath("/coach/communaute");
   revalidatePath("/coach", "layout");
   return { succes: "Merci, Cindy a été prévenue. Elle regardera ce message." };

@@ -7,15 +7,19 @@ import { FormulaireReglages } from "./formulaire";
 import { FormulaireTolerance } from "./tolerance";
 import { FormulaireRappels } from "./rappels";
 import { configurationRappels, lireReglagesRappels } from "@/lib/envoi-rappels";
+import { lirePrefsNotifCoach } from "@/lib/notifications-coach";
+import { NotificationsCoach } from "./notifications";
 
 export const metadata: Metadata = { title: "Réglages" };
 
 export default async function PageReglages() {
   const { supabase } = await exigerCoach();
-  const [reglages, champs, rappels] = await Promise.all([
+  const [reglages, champs, rappels, prefsNotif, { count: nbAppareils }] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
     lireReglagesRappels(supabase),
+    lirePrefsNotifCoach(supabase),
+    supabase.from("abonnements_coach").select("id", { count: "exact", head: true }),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -23,6 +27,21 @@ export default async function PageReglages() {
         <Surtitre>Réglages</Surtitre>
         <h1 className="font-titre text-[34px] font-bold leading-tight">Réglages de l’app</h1>
       </div>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Mes notifications</h2>
+          <p className="text-[14px] text-texte-2">Pour être prévenue quand il se passe quelque chose dans l’app.</p>
+        </div>
+        {prefsNotif ? (
+          <NotificationsCoach
+            prefs={prefsNotif}
+            clePublique={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
+            nbAppareils={nbAppareils ?? 0}
+          />
+        ) : (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0012_notifications_coach.sql (voir le guide).</Message>
+        )}
+      </Carte>
       <Carte>
         <FormulaireReglages reglages={reglages} />
       </Carte>

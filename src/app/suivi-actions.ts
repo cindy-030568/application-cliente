@@ -2,6 +2,8 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifierCoach } from "@/lib/notifications-coach";
 import { lireSession } from "@/lib/auth";
 import { aujourdhuiParis, echeanceOuverte } from "@/lib/bilan";
 import { chargerChamps } from "@/lib/suivi";
@@ -138,6 +140,11 @@ export async function enregistrerBilan(
       .single();
     if (error || !data) return { erreur: "Le bilan n’a pas pu être enregistré. Réessaie dans un instant." };
     id = data.id as string;
+    // Bilan envoyé par la cliente elle-même (pas une simple mesure) : on prévient la coach.
+    if (!ctx.coach && echeance) {
+      const evenement = { type: "bilan" as const, clienteId, bilanId: id };
+      after(() => notifierCoach(evenement));
+    }
   }
 
   // Remplace les valeurs des champs proposés dans le formulaire (les champs masqués gardent leur historique).

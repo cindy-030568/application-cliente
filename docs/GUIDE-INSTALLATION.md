@@ -585,3 +585,19 @@ Deux fichiers, **dans cet ordre** (ignore le 1er s'il est déjà fait) :
 - **Rappel** : le matin de chaque échéance non cochée, elle reçoit un email et une notification (« Lui envoyer un rappel le jour de chaque échéance », cochée par défaut, à décocher cliente par cliente).
 - Ces informations sont dans ta sauvegarde mensuelle et supprimées avec la cliente.
 - **Suivi sportif inclus** (fiche → Infos et accès) : décoché, ta cliente ne voit plus l'onglet Sport, son programme sportif ni les vidéos d'exercices.
+
+---
+
+# Tes notifications (coach)
+
+## Mettre à jour la base de données (une seule fois)
+
+[`0012_notifications_coach.sql`](../supabase/migrations/0012_notifications_coach.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## Activer
+
+1. **Réglages** → **Mes notifications** : choisis ce qui te prévient (bilan envoyé et message signalé sont activés ; nouveau message de la communauté, au plus 1 par heure, est désactivé), et si tu veux aussi un **email**.
+2. Sur **chaque appareil** (ordinateur et téléphone), ouvre Réglages et touche **Activer les notifications ici**, puis **M'envoyer un test**.
+   - **iPhone** : installe d'abord l'app sur l'écran d'accueil (Safari → Partager → « Sur l'écran d'accueil »), ouvre-la depuis l'icône, connecte-toi avec ton compte coach, puis va dans Réglages.
+   - **Ordinateur** : Chrome, Edge ou Safari ; autorise les notifications quand le navigateur le demande.
+3. Une cliente envoie son bilan → tu reçois « Nouveau bilan 📝 · Prénom vient d'envoyer son bilan » ; toucher la notification ouvre le bilan.

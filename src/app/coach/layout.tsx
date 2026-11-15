@@ -4,6 +4,7 @@ import { IconeDeconnexion } from "@/components/icones";
 import { Logo } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
 import { NavigationCoach } from "./navigation";
+import { EnregistrementServiceWorker } from "@/components/pwa";
 
 export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Dashboard" } };
 
@@ -56,6 +57,7 @@ export default async function LayoutCoach({ children }: { children: React.ReactN
           </form>
         </div>
       </aside>
+      <EnregistrementServiceWorker />
       <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
         <div className="mx-auto max-w-5xl">{children}</div>
       </main>
