@@ -10,6 +10,8 @@ import { chargerBilan, chargerBilans, chargerChamps, urlsPhotos } from "@/lib/su
 import { ANGLES } from "@/lib/types";
 import { chargerFile } from "../donnees";
 import { FormulaireRetour } from "./formulaire-retour";
+import { CopierPourClaude } from "./copier-claude";
+import { texteBilanPourClaude } from "@/lib/bilan-claude";
 
 export const metadata: Metadata = { title: "Traiter un bilan" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -26,9 +28,14 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
     chargerBilans(supabase, bilan.cliente_id),
     supabase
       .from("clientes")
-      .select("mode_sans_chiffres, frequence_bilan_jours, profils!inner(prenom, nom)")
+      .select("mode_sans_chiffres, frequence_bilan_jours, date_debut, profils!inner(prenom, nom)")
       .eq("id", bilan.cliente_id)
-      .single<{ mode_sans_chiffres: boolean; frequence_bilan_jours: number; profils: { prenom: string; nom: string } }>(),
+      .single<{
+        mode_sans_chiffres: boolean;
+        frequence_bilan_jours: number;
+        date_debut: string | null;
+        profils: { prenom: string; nom: string };
+      }>(),
     chargerFile(),
   ]);
   const index = historique.findIndex((b) => b.id === bilan.id);
@@ -39,6 +46,15 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
   );
   const suivant = file.aTraiter.find((b) => b.id !== bilan.id)?.id ?? null;
   const prenom = c?.profils.prenom ?? "";
+  const pourClaude = texteBilanPourClaude({
+    bilan,
+    precedent,
+    champs,
+    jours: c?.frequence_bilan_jours ?? 14,
+    dateDebut: c?.date_debut ?? null,
+    identite: [prenom, ...(c?.profils.nom ?? "").split(/\s+/)],
+    avecPhotos: bilan.photos.length > 0,
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,6 +119,7 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
           )}
         </div>
         <Carte className="flex h-fit flex-col gap-4 lg:sticky lg:top-6">
+          <CopierPourClaude texte={pourClaude} />
           <FormulaireRetour
             key={bilan.id}
             bilanId={bilan.id}
