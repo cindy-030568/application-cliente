@@ -601,7 +601,7 @@ if __name__ == "__main__":
     # Photos fournies avec l'app : public/recettes-depart/<titre-simplifie>.webp
     import os, unicodedata, re as _re
     def slug(t):
-        t = unicodedata.normalize("NFKD", t.replace("œ", "oe")).encode("ascii", "ignore").decode().lower()
+        t = unicodedata.normalize("NFKD", t.replace("œ", "oe").replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
         return _re.sub(r"[^a-z0-9]+", "-", t).strip("-")
     def photo(t):
         f = slug(t) + ".webp"
