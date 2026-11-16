@@ -5,6 +5,7 @@ import { exigerCoach } from "@/lib/auth";
 import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
 import { chargerFile } from "./bilans/donnees";
 import { formaterEuros } from "@/lib/paiements";
+import { CarteAnnonce } from "./annonce";
 
 export default async function TableauDeBord() {
   const { profil, supabase } = await exigerCoach();
@@ -30,6 +31,13 @@ export default async function TableauDeBord() {
     const cliente = clientes.find((c) => c.id === e.cliente_id);
     return cliente ? [{ ...e, montant: Number(e.montant), cliente, retard: e.date_echeance < auj }] : [];
   });
+
+  // Annonces en cours (rien avant la mise à jour 0014).
+  const { data: annonces, error: sansAnnonces } = await supabase
+    .from("annonces")
+    .select("id, texte, expire_le")
+    .gt("expire_le", new Date().toISOString())
+    .order("cree_le", { ascending: false });
 
   const aSupprimer = clientes.filter((c) => conservationDepassee(c.statut, c.ferme_le, auj));
   // Une ligne par cliente ; « 2 bilans manqués » remplace « bilan manquant ».
@@ -123,6 +131,16 @@ export default async function TableauDeBord() {
           </Link>
         </Carte>
       </div>
+
+      {!sansAnnonces && (
+        <Carte className="flex flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Un message à toutes mes clientes</h2>
+            <p className="text-[14px] text-texte-2">Une notification, et un mot sur leur accueil pendant 24 h.</p>
+          </div>
+          <CarteAnnonce enCours={annonces ?? []} />
+        </Carte>
+      )}
 
       {paiements.length > 0 && (
         <Carte className="flex flex-col gap-4">

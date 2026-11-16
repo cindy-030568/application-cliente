@@ -5,6 +5,7 @@ import { IconeRetour } from "@/components/icones";
 import { Carte } from "@/components/ui";
 import { FormulaireJournee } from "@/components/journal/formulaire-journee";
 import { VueJournal } from "@/components/journal/vue-journal";
+import { RappelJournal } from "@/components/journal/rappel-journal";
 import { exigerCliente } from "@/lib/auth";
 import { ajouterJours, aujourdhuiParis } from "@/lib/bilan";
 import { numeroSemaine } from "@/lib/journal";
@@ -17,7 +18,12 @@ const jourPuce = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "nume
 
 export default async function PageJournal({ searchParams }: { searchParams: Promise<{ jour?: string }> }) {
   const { supabase, profil, fiche } = await exigerCliente();
-  const [entrees, actif] = await Promise.all([lireJournal(supabase, profil.id), journalActif(supabase, profil.id)]);
+  const [entrees, actif, { data: rappel, error: sansRappel }, { count: appareils }] = await Promise.all([
+    lireJournal(supabase, profil.id),
+    journalActif(supabase, profil.id),
+    supabase.from("clientes").select("rappel_journal_heure").eq("id", profil.id).maybeSingle<{ rappel_journal_heure: string | null }>(),
+    supabase.from("abonnements_push").select("id", { count: "exact", head: true }).eq("cliente_id", profil.id),
+  ]);
   if (!entrees || !actif) redirect("/suivi");
 
   const auj = aujourdhuiParis();
@@ -117,6 +123,8 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
           })()}
         />
       </Carte>
+
+      {!sansRappel && <RappelJournal heure={rappel?.rappel_journal_heure ?? null} appareil={(appareils ?? 0) > 0} />}
 
       <VueJournal entrees={entrees} debut={debut} aujourdhui={auj} sansChiffres={fiche.mode_sans_chiffres} />
     </div>

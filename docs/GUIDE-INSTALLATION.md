@@ -630,3 +630,24 @@ Pour une cliente qui a commencé avant l'app : fiche → **Suivi et bilans** →
 - **Les courbes** des moyennes hebdomadaires.
 - Toi : fiche → **Suivi et bilans** → **Journal quotidien**, avec **Exporter le journal (Excel / CSV)**.
 - Fiche → **Infos et accès** → case **Journal quotidien** (cochée par défaut) pour l'activer ou non par cliente.
+
+---
+
+# Message à toutes tes clientes et rappel quotidien du journal
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0014_annonces_rappel_journal.sql`](../supabase/migrations/0014_annonces_rappel_journal.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Mettre l'horloge en route (une seule fois)
+
+Les rappels du journal partent à l'heure choisie par chaque cliente : Supabase appelle l'app toutes les 15 minutes.
+
+[`horloge-rappels.sql`](../supabase/horloge-rappels.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → colle → **Run** → « Success ». Supabase crée lui-même la clé qui protège cet appel : rien à copier ailleurs.
+
+Pour vérifier, le lendemain : Supabase → **Integrations** → **Cron** (ou Database → Cron Jobs) → « rappels-journal » doit avoir des exécutions réussies.
+
+## Utilisation
+
+- **Message à toutes** : tableau de bord → **Un message à toutes mes clientes** → ton texte, la page où elle arrive en touchant le message (communauté, journal…) → **Envoyer**. Notification à celles qui les ont activées, et un mot « Un mot de Cindy » sur l'accueil de toutes pendant 24 h (elles peuvent le fermer). **Retirer** l'enlève avant la fin.
+- **Rappel du journal** : chaque cliente le règle dans **Mon journal** → « Me le rappeler chaque jour » (20 h 30 par défaut, ou l'heure qu'elle veut, ou coupé). Notification seulement (pas d'email), une fois par jour, et rien si sa journée est déjà remplie. Il faut qu'elle ait activé les notifications dans son profil.

@@ -49,3 +49,14 @@ export async function enregistrerJournee(_e: EtatJournal, formData: FormData): P
   revalidatePath("/");
   return { succes: "Journée enregistrée ✓" };
 }
+
+/** Heure du rappel quotidien du journal (« 20:30 »), ou null pour le couper. */
+export async function definirRappelJournal(heure: string | null): Promise<EtatJournal> {
+  const session = await lireSession();
+  if (!session || session.profil.role !== "cliente") return { erreur: "Ta session a expiré. Reconnecte-toi, puis réessaie." };
+  if (heure !== null && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(heure))) return { erreur: "L’heure n’est pas valide." };
+  const { error } = await session.supabase.rpc("definir_rappel_journal", { p_heure: heure });
+  if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
+  revalidatePath("/suivi/journal");
+  return { succes: heure ? `C’est noté : rappel chaque jour à ${heure.replace(":", " h ")}.` : "Rappel quotidien coupé." };
+}

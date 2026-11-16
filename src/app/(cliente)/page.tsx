@@ -20,6 +20,7 @@ import { accesCommunaute } from "@/lib/communaute-serveur";
 import { lireMonPaiement, lireSuiviSport } from "@/lib/paiements-serveur";
 import { mensualiteASignaler } from "@/components/mon-paiement";
 import { journalActif } from "@/lib/journal-serveur";
+import { AnnoncesAccueil } from "@/components/annonces";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -65,6 +66,7 @@ export default async function PageAccueil() {
     supabase.from("journal_quotidien").select("jour").eq("cliente_id", profil.id).eq("jour", auj).maybeSingle(),
   ]);
   const rappelJournal = avecJournal && !sansJournal && !journeeDuJour;
+  const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
 
   return (
     <>
@@ -82,6 +84,8 @@ export default async function PageAccueil() {
       />
 
       <div className="flex flex-col gap-4 px-5 pt-4">
+        <AnnoncesAccueil annonces={annonces ?? []} />
+
         {retourNonLu && (
           <Link
             href={`/suivi/${retourNonLu}`}

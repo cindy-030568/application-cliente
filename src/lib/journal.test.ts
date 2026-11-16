@@ -72,3 +72,21 @@ describe("journal quotidien", () => {
     expect(Number.isNaN(lireNombre("abc"))).toBe(true);
   });
 });
+
+import { heureParis, rappelJournalDu } from "./journal";
+describe("rappel du journal", () => {
+  const base = { heure: "20:30:00", maintenant: "20:35", envoyeLe: null, aujourdhui: "2026-11-16", journeeRemplie: false };
+  it("part après l'heure choisie, une fois par jour, si la journée n'est pas remplie", () => {
+    expect(rappelJournalDu(base)).toBe(true);
+    expect(rappelJournalDu({ ...base, maintenant: "20:29" })).toBe(false);
+    expect(rappelJournalDu({ ...base, maintenant: "23:40" })).toBe(false);
+    expect(rappelJournalDu({ ...base, envoyeLe: "2026-11-16" })).toBe(false);
+    expect(rappelJournalDu({ ...base, envoyeLe: "2026-11-15" })).toBe(true);
+    expect(rappelJournalDu({ ...base, journeeRemplie: true })).toBe(false);
+    expect(rappelJournalDu({ ...base, heure: null })).toBe(false);
+  });
+  it("heure de Paris", () => {
+    expect(heureParis(new Date("2026-11-16T19:30:00Z"))).toBe("20:30");
+    expect(heureParis(new Date("2026-07-01T05:05:00Z"))).toBe("07:05");
+  });
+});

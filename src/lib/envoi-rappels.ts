@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { ajouterJours, aujourdhuiParis, bilanAvecPhotos } from "@/lib/bilan";
 import { messagePaiement } from "@/lib/paiements";
+import { heureParis, rappelJournalDu } from "@/lib/journal";
 import { SITE_URL } from "@/lib/env";
 import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappel } from "@/lib/rappels";
 
@@ -343,4 +344,84 @@ export async function executerTachesDuMatin(admin: SupabaseClient, aujourdhui = 
     console.warn("Rappels de paiement : échec", e instanceof Error ? e.message.slice(0, 120) : "");
   }
   return { ...bilans, paiements };
+}
+
+// ---------------------------------------------------------------- Rappel du journal (toutes les 15 min)
+
+/**
+ * Envoie le rappel du journal aux clientes dont l'heure choisie vient de passer
+ * (notification seulement, jamais d'email : c'est quotidien). Une fois par jour,
+ * et pas si la journée est déjà remplie. Appelée toutes les 15 minutes par Supabase.
+ */
+export async function executerRappelsJournal(admin: SupabaseClient, maintenant = new Date()) {
+  const bilan = { examinees: 0, rappels: 0, erreurs: 0 };
+  if (!configurationRappels().push) return bilan;
+  const aujourdhui = aujourdhuiParis();
+  const heure = heureParis(maintenant);
+  const { data: clientes, error } = await admin
+    .from("clientes")
+    .select("id, rappel_journal_heure, rappel_journal_envoye")
+    .neq("statut", "fermee")
+    .eq("journal_actif", true)
+    .not("rappel_journal_heure", "is", null);
+  if (error || !clientes?.length) return bilan; // rien à faire (ou mise à jour 0014 pas encore faite)
+  const ids = clientes.map((c) => c.id as string);
+  const [{ data: remplies }, { data: appareils }] = await Promise.all([
+    admin.from("journal_quotidien").select("cliente_id").eq("jour", aujourdhui).in("cliente_id", ids),
+    admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids),
+  ]);
+  const faites = new Set((remplies ?? []).map((r) => r.cliente_id as string));
+  for (const c of clientes) {
+    bilan.examinees++;
+    const siens = (appareils ?? []).filter((a) => a.cliente_id === c.id) as AbonnementPush[];
+    if (!siens.length) continue;
+    const du = rappelJournalDu({
+      heure: c.rappel_journal_heure as string | null,
+      maintenant: heure,
+      envoyeLe: c.rappel_journal_envoye as string | null,
+      aujourdhui,
+      journeeRemplie: faites.has(c.id as string),
+    });
+    if (!du) continue;
+    // Réservation avant l'envoi : jamais deux rappels le même jour.
+    const { data: reserve } = await admin
+      .from("clientes")
+      .update({ rappel_journal_envoye: aujourdhui })
+      .eq("id", c.id)
+      .or(`rappel_journal_envoye.is.null,rappel_journal_envoye.lt.${aujourdhui}`)
+      .select("id")
+      .maybeSingle();
+    if (!reserve) continue;
+    let parti = false;
+    for (const a of siens) {
+      const r = await envoyerPush(a, { titre: "Ton journal du jour 📒", texte: "1 minute pour noter ta journée : sommeil, eau, pas, ressenti 💛", url: "/suivi/journal" });
+      if (r === "ok") parti = true;
+      else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+      else bilan.erreurs++;
+    }
+    if (parti) bilan.rappels++;
+  }
+  return bilan;
+}
+
+// ---------------------------------------------------------------- Annonce à toutes les clientes
+
+/** Notification à toutes les clientes qui ont accès à l'app et ont activé les notifications. */
+export async function envoyerAnnonce(admin: SupabaseClient, texte: string, url: string) {
+  const res = { clientes: 0, notifications: 0 };
+  if (!configurationRappels().push) return res;
+  const { data: appareils } = await admin
+    .from("abonnements_push")
+    .select("id, cliente_id, endpoint, p256dh, auth, clientes!inner(statut)")
+    .neq("clientes.statut", "fermee");
+  const touchees = new Set<string>();
+  for (const a of (appareils ?? []) as (AbonnementPush & { cliente_id: string })[]) {
+    const r = await envoyerPush(a, { titre: "Un mot de Cindy 💛", texte, url });
+    if (r === "ok") {
+      res.notifications++;
+      touchees.add(a.cliente_id);
+    } else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+  }
+  res.clientes = touchees.size;
+  return res;
 }

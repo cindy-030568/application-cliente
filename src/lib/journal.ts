@@ -154,3 +154,29 @@ export function tonValeur(cle: CleIndicateur, v: number | null): "bon" | "moyen"
       return null;
   }
 }
+
+/** Heure et minute à Paris (« 20:30 ») d'un instant. */
+export function heureParis(d: Date): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+}
+
+const enMinutes = (h: string) => {
+  const [a, b] = h.split(":").map(Number);
+  return a * 60 + (b || 0);
+};
+
+/**
+ * Faut-il envoyer le rappel du journal maintenant ? Oui si l'heure choisie est passée depuis
+ * moins de 3 h, qu'il n'est pas déjà parti aujourd'hui et que la journée n'est pas remplie.
+ */
+export function rappelJournalDu(o: {
+  heure: string | null;
+  maintenant: string;
+  envoyeLe: string | null;
+  aujourdhui: string;
+  journeeRemplie: boolean;
+}): boolean {
+  if (!o.heure || o.journeeRemplie || o.envoyeLe === o.aujourdhui) return false;
+  const ecart = enMinutes(o.maintenant) - enMinutes(o.heure);
+  return ecart >= 0 && ecart < 180;
+}
