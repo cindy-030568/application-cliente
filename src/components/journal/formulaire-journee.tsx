@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
 import { Message, cx } from "@/components/ui";
@@ -53,14 +54,17 @@ export function FormulaireJournee({
   jour,
   entree,
   sansChiffres,
+  suivant,
 }: {
   jour: string;
   entree: EntreeJournal | null;
   sansChiffres: boolean;
+  /** Prochain jour oublié à remplir, proposé après l'enregistrement. */
+  suivant?: { jour: string; libelle: string } | null;
 }) {
   const [etat, envoyer] = useActionState<EtatJournal, FormData>(enregistrerJournee, {});
   return (
-    <form action={envoyer} key={jour} className="flex flex-col gap-5">
+    <form action={envoyer} className="flex flex-col gap-5">
       <input type="hidden" name="jour" value={jour} />
       {!sansChiffres && (
         <div className="grid grid-cols-2 gap-3">
@@ -95,6 +99,11 @@ export function FormulaireJournee({
       </label>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+      {etat.succes && suivant && (
+        <Link href={`/suivi/journal?jour=${suivant.jour}`} className="self-center text-[14.5px] font-medium underline underline-offset-4">
+          Remplir le jour oublié suivant : {suivant.libelle} →
+        </Link>
+      )}
       <BoutonEnvoi pleineLargeur enCours="Enregistrement…">
         {entree ? "Mettre à jour ma journée" : "Enregistrer ma journée"}
       </BoutonEnvoi>

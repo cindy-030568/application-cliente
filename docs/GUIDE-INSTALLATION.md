@@ -619,7 +619,7 @@ Pour une cliente qui a commencé avant l'app : fiche → **Suivi et bilans** →
 ## Côté cliente
 
 - **Suivi** → **Mon journal** (et une carte « Mon journal du jour » sur l'accueil tant que la journée n'est pas remplie).
-- Chaque jour : poids, tour de taille, sommeil (« 7h30 » ou « 7,5 »), hydratation, pas, trainings, stress (1 à 5), digestion (1 à 5), règles, observations. Tout est facultatif ; « ‹ Veille » permet de rattraper un jour oublié.
+- Chaque jour : poids, tour de taille, sommeil (« 7h30 » ou « 7,5 »), hydratation, pas, trainings, stress (1 à 5), digestion (1 à 5), règles, observations. Tout est facultatif. Pour rattraper un oubli : les **jours oubliés** des 3 dernières semaines s'affichent en boutons (un toucher pour le remplir, puis « Remplir le jour oublié suivant »), et **Remplir un autre jour** ouvre un calendrier jusqu'au début du suivi.
 - En mode sans chiffres, poids et tour de taille sont masqués.
 
 ## Ce qu'on voit (elle et toi)

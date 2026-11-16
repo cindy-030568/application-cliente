@@ -13,6 +13,7 @@ import { journalActif, lireJournal } from "@/lib/journal-serveur";
 export const metadata: Metadata = { title: "Mon journal" };
 
 const dateLongue = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+const jourPuce = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
 export default async function PageJournal({ searchParams }: { searchParams: Promise<{ jour?: string }> }) {
   const { supabase, profil, fiche } = await exigerCliente();
@@ -26,6 +27,14 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
   const entree = entrees.find((e) => e.jour === jour) ?? null;
   const veille = ajouterJours(jour, -1);
   const lendemain = ajouterJours(jour, 1);
+  // Jours oubliés sur les 3 dernières semaines (sans aujourd'hui), du plus récent au plus ancien.
+  const remplis = new Set(entrees.map((e) => e.jour));
+  const oublies: string[] = [];
+  for (let i = 1; i <= 21; i++) {
+    const j = ajouterJours(auj, -i);
+    if (j < debut) break;
+    if (!remplis.has(j)) oublies.push(j);
+  }
 
   return (
     <div className="pt-encoche flex flex-col gap-5 px-5 pb-6">
@@ -58,7 +67,55 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
             <span />
           )}
         </div>
-        <FormulaireJournee jour={jour} entree={entree} sansChiffres={fiche.mode_sans_chiffres} />
+        <form action="/suivi/journal" className="flex items-end gap-2 rounded-xl bg-sable/50 p-3">
+          <label className="flex flex-1 flex-col gap-1 text-[13px] text-texte-2">
+            Remplir un autre jour
+            <input
+              type="date"
+              name="jour"
+              defaultValue={jour}
+              min={debut}
+              max={auj}
+              className="min-h-11 rounded-xl border border-ligne bg-white px-3 text-[16px] text-chocolat"
+            />
+          </label>
+          <button type="submit" className="min-h-11 rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme">
+            Aller
+          </button>
+        </form>
+        {oublies.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-[13px] text-texte-2">
+              {oublies.length === 1 ? "1 jour oublié" : `${oublies.length} jours oubliés`} ces 3 dernières semaines : touche un jour pour le remplir.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {oublies.map((j) => (
+                <Link
+                  key={j}
+                  href={`/suivi/journal?jour=${j}`}
+                  aria-current={j === jour ? "date" : undefined}
+                  className={
+                    j === jour
+                      ? "rounded-full bg-chocolat px-3 py-1.5 text-[13.5px] text-creme"
+                      : "rounded-full border border-caramel-clair bg-white px-3 py-1.5 text-[13.5px] text-chocolat"
+                  }
+                >
+                  {jourPuce.format(new Date(`${j}T00:00:00Z`))}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+        <FormulaireJournee
+          key={jour}
+          jour={jour}
+          entree={entree}
+          sansChiffres={fiche.mode_sans_chiffres}
+          suivant={(() => {
+            const j = oublies.find((x) => x !== jour);
+            return j ? { jour: j, libelle: jourPuce.format(new Date(`${j}T00:00:00Z`)) } : null;
+          })()}
+        />
       </Carte>
 
       <VueJournal entrees={entrees} debut={debut} aujourdhui={auj} sansChiffres={fiche.mode_sans_chiffres} />
