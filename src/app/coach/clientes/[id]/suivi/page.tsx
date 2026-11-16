@@ -10,6 +10,8 @@ import { chargerBilans, chargerChamps, urlsPhotos } from "@/lib/suivi";
 import { COLONNES_FICHE } from "@/lib/types";
 import type { ClienteListe } from "../../../donnees";
 import { ReglagesSuivi } from "./reglages-suivi";
+import { VueJournal } from "@/components/journal/vue-journal";
+import { lireJournal } from "@/lib/journal-serveur";
 
 export const metadata: Metadata = { title: "Suivi" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -28,6 +30,9 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
   const [champsTous, bilans] = await Promise.all([chargerChamps(supabase, true), chargerBilans(supabase, id)]);
   const champs = champsTous.filter((ch) => ch.actif || bilans.some((b) => b.valeurs.some((v) => v.champ_id === ch.id)));
   const urls = await urlsPhotos(supabase, bilans.flatMap((b) => b.photos.map((p) => p.fichier_path)));
+  const journal = await lireJournal(supabase, id);
+  const aujJ = aujourdhuiParis();
+  const debutJournal = c.date_debut && c.date_debut <= aujJ ? c.date_debut : (journal?.at(-1)?.jour ?? aujJ);
   const photos = bilans.flatMap((b) =>
     b.photos.flatMap((p) => (urls.get(p.fichier_path) ? [{ angle: p.angle, date: b.date_mesure, url: urls.get(p.fichier_path)! }] : [])),
   );
@@ -89,6 +94,25 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
           />
         </Carte>
       </div>
+
+      {journal && (
+        <Carte className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="font-titre text-xl font-bold">Journal quotidien</h2>
+              <p className="text-[14px] text-texte-2">
+                Ce qu’elle note chaque jour : moyennes par semaine, écarts par mois et synthèse, comme ton tableau.
+              </p>
+            </div>
+            {journal.length > 0 && (
+              <a href={`/coach/clientes/${id}/suivi/journal-export`} className={classesBouton("contour")} download>
+                Exporter le journal (Excel / CSV)
+              </a>
+            )}
+          </div>
+          <VueJournal entrees={journal} debut={debutJournal} aujourdhui={aujJ} />
+        </Carte>
+      )}
     </div>
   );
 }

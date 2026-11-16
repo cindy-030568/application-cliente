@@ -607,3 +607,26 @@ Deux fichiers, **dans cet ordre** (ignore le 1er s'il est déjà fait) :
 # Photos de départ (avant / après)
 
 Pour une cliente qui a commencé avant l'app : fiche → **Suivi et bilans** → **Photos de départ**. La date proposée est son démarrage ; ajoute ses photos face / profil / dos (et ses mesures du début si tu les as) → **Enregistrer le point de départ**. Elles deviennent l'« avant » du comparatif, pour toi et pour elle. Ce point de départ ne compte pas comme un bilan prévu et n'arrive pas dans ta file à traiter.
+
+---
+
+# Journal quotidien (ton tableau de suivi dans l'app)
+
+## Mettre à jour la base de données (une seule fois)
+
+[`0013_journal_quotidien.sql`](../supabase/migrations/0013_journal_quotidien.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## Côté cliente
+
+- **Suivi** → **Mon journal** (et une carte « Mon journal du jour » sur l'accueil tant que la journée n'est pas remplie).
+- Chaque jour : poids, tour de taille, sommeil (« 7h30 » ou « 7,5 »), hydratation, pas, trainings, stress (1 à 5), digestion (1 à 5), règles, observations. Tout est facultatif ; « ‹ Veille » permet de rattraper un jour oublié.
+- En mode sans chiffres, poids et tour de taille sont masqués.
+
+## Ce qu'on voit (elle et toi)
+
+- **Synthèse** : poids et tour de taille de départ (moyenne de la semaine 1) → actuels, moyennes de sommeil, eau, pas, stress, digestion, trainings par semaine et total.
+- **Écart mois par mois** (semaine 4, 8, 12… comparée à la semaine 1).
+- **Semaine par semaine** : numéro, dates, moyennes (trainings : total), jours de règles, détail jour par jour avec les observations, couleurs repères (vert / beige / rose).
+- **Les courbes** des moyennes hebdomadaires.
+- Toi : fiche → **Suivi et bilans** → **Journal quotidien**, avec **Exporter le journal (Excel / CSV)**.
+- Fiche → **Infos et accès** → case **Journal quotidien** (cochée par défaut) pour l'activer ou non par cliente.

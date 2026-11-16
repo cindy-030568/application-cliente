@@ -22,6 +22,7 @@ export function FormulaireInfos({
   valeurs,
   creation = false,
   suiviSport = true,
+  journal = true,
   formules = [],
 }: {
   action: (etat: EtatAction, formData: FormData) => Promise<EtatAction>;
@@ -29,6 +30,8 @@ export function FormulaireInfos({
   creation?: boolean;
   /** null : la mise à jour 0010 n'est pas encore faite (case masquée en modification). */
   suiviSport?: boolean | null;
+  /** null : la mise à jour 0013 n'est pas encore faite (case masquée en modification). */
+  journal?: boolean | null;
   /** Formules déjà utilisées, proposées à la création. */
   formules?: string[];
 }) {
@@ -75,6 +78,17 @@ export function FormulaireInfos({
               label="Suivi sportif inclus"
               aide="Décoché : l’onglet Sport, son programme et les vidéos d’exercices sont masqués dans son app."
               defaultChecked={suiviSport ?? true}
+            />
+          </>
+        )}
+        {(creation || journal !== null) && (
+          <>
+            {!creation && <input type="hidden" name="journal_present" value="1" />}
+            <CaseACocher
+              name="journal_actif"
+              label="Journal quotidien"
+              aide="Elle note chaque jour poids, sommeil, eau, pas, trainings, stress, digestion, règles…"
+              defaultChecked={journal ?? true}
             />
           </>
         )}

@@ -7,6 +7,7 @@ import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, prochainBilan } from "@/lib/bilan";
 import { chargerBilans, chargerChamps, champsVisibles, urlsPhotos } from "@/lib/suivi";
 import { EnTete } from "../composants";
+import { journalActif, lireJournal } from "@/lib/journal-serveur";
 
 export const metadata: Metadata = { title: "Suivi" };
 
@@ -30,6 +31,8 @@ export default async function PageSuivi() {
   const dejaEnvoye = ouverte ? bilans.find((b) => b.echeance === ouverte.echeance) : undefined;
   const prochain = active ? prochainBilan(fiche.date_debut, fiche.frequence_bilan_jours, auj) : null;
   const retourNonLu = bilans.find((b) => b.retour && !b.retour.lu_le);
+  const [journal, avecJournal] = await Promise.all([lireJournal(supabase, profil.id), journalActif(supabase, profil.id)]);
+  const journalDuJour = journal?.some((e) => e.jour === auj) ?? false;
 
   return (
     <>
@@ -94,6 +97,21 @@ export default async function PageSuivi() {
               )}
             </span>
           </div>
+        )}
+
+        {journal && avecJournal && (
+          <Link href="/suivi/journal" className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-pale text-xl" aria-hidden>
+              📒
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">Mon journal</span>
+              <span className="text-[14px] text-texte-2">
+                {journalDuJour ? "Journée d’aujourd’hui remplie ✓ · voir mes semaines" : "Remplis ta journée : sommeil, eau, pas, ressenti…"}
+              </span>
+            </span>
+            <IconeFleche className="size-5 shrink-0 text-texte-2" />
+          </Link>
         )}
 
         {!fiche.mode_sans_chiffres && (!ouverte || dejaEnvoye) && (

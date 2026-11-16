@@ -88,6 +88,7 @@ export async function creerCliente(_e: EtatAction, formData: FormData): Promise<
   let suite = "creee=1";
   // Lus à part : la création fonctionne même avant la mise à jour 0010.
   if (formData.get("suivi_sport") !== "on") await supabase.from("clientes").update({ suivi_sport: false }).eq("id", id);
+  if (formData.get("journal_actif") !== "on") await supabase.from("clientes").update({ journal_actif: false }).eq("id", id);
   if (!paiement.vide && !(await sauverPaiement(supabase, id, paiement.saisie))) suite += "&paiement=echec";
   if (formData.get("envoyer_email") === "on") {
     const { error: erreurEmail } = await envoyerEmail(profil.email);
@@ -119,6 +120,13 @@ export async function modifierCliente(
   const { error: e1 } = await supabase.from("profils").update(profil).eq("id", id);
   const { error: e2 } = await supabase.from("clientes").update(fiche).eq("id", id);
   if (e1 || e2) return { erreur: "L’enregistrement a échoué. Réessaie dans un instant." };
+  if (formData.has("journal_present")) {
+    const { error: e4 } = await supabase
+      .from("clientes")
+      .update({ journal_actif: formData.get("journal_actif") === "on" })
+      .eq("id", id);
+    if (e4) return { erreur: "Le journal quotidien n’a pas pu être enregistré : fais d’abord la mise à jour 0013 dans Supabase." };
+  }
   if (formData.has("suivi_sport_present")) {
     const { error: e3 } = await supabase
       .from("clientes")

@@ -80,6 +80,11 @@ export default async function PageFicheCliente({
     formulesUtilisees(supabase),
     supabase.from("clientes").select("suivi_sport").eq("id", id).maybeSingle<{ suivi_sport: boolean }>(),
   ]);
+  const { data: jrn, error: sansJournal } = await supabase
+    .from("clientes")
+    .select("journal_actif")
+    .eq("id", id)
+    .maybeSingle<{ journal_actif: boolean }>();
   const auj = aujourdhuiParis();
 
   const bilan =
@@ -149,6 +154,7 @@ export default async function PageFicheCliente({
               action={modifierCliente.bind(null, c.id)}
               valeurs={{ ...c.profils, ...c }}
               suiviSport={sansSport ? null : (sport?.suivi_sport ?? true)}
+              journal={sansJournal ? null : (jrn?.journal_actif ?? true)}
             />
           </Section>
           <Section titre="Formule et paiement" sousTitre="Ta cliente voit sa formule et son échéancier dans son profil. Ta note reste privée.">
