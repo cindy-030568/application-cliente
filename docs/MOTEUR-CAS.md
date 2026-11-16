@@ -7,18 +7,18 @@
 
 | Profil | Repas | Cible (P / G / L) | Proposées | Non proposées |
 |---|---|---|---|---|
-| Profil A (≈ 1 600 kcal, 4 repas) | Petit-déjeuner | 25 / 40 / 12 | 13 | — |
-| Profil A (≈ 1 600 kcal, 4 repas) | Déjeuner | 35 / 50 / 14 | 27 | Poké bowl saumon & mangue, Salade de quinoa, pois chiches, œufs & feta, Galette complète jambon, œuf & champignons |
-| Profil A (≈ 1 600 kcal, 4 repas) | Collation | 15 / 20 / 6 | 12 | Galettes de riz, saumon fumé & chèvre frais, Smoothie bowl mangue-banane, Smoothie banane-cacao protéiné, Pancakes moelleux à la banane |
-| Profil A (≈ 1 600 kcal, 4 repas) | Dîner | 35 / 45 / 14 | 24 | Pizza tortilla jambon & champignons |
-| Profil B (≈ 1 900 kcal, 4 repas) | Petit-déjeuner | 30 / 50 / 15 | 10 | Muffins salés aux légumes, Tartines ricotta, fraises & miel, Galette complète jambon, œuf & champignons |
-| Profil B (≈ 1 900 kcal, 4 repas) | Déjeuner | 40 / 60 / 18 | 24 | Hachis parmentier de patate douce, Salade de quinoa, pois chiches, œufs & feta, Omelette épinards & feta, pain complet, Escalope de dinde, crème de champignons & pâtes, Pizza tortilla jambon & champignons, Galette complète jambon, œuf & champignons |
-| Profil B (≈ 1 900 kcal, 4 repas) | Goûter | 20 / 30 / 8 | 16 | — |
-| Profil B (≈ 1 900 kcal, 4 repas) | Dîner | 40 / 55 / 16 | 23 | Wok de tofu, brocoli & noix de cajou, Galette complète jambon, œuf & champignons |
-| Profil C (≈ 1 450 kcal, 4 repas) | Petit-déjeuner | 22 / 35 / 10 | 13 | — |
-| Profil C (≈ 1 450 kcal, 4 repas) | Déjeuner | 30 / 45 / 12 | 28 | Poké bowl saumon & mangue, Salade de quinoa, pois chiches, œufs & feta |
-| Profil C (≈ 1 450 kcal, 4 repas) | Collation | 12 / 18 / 5 | 12 | Mug cake chocolat, Smoothie bowl mangue-banane, Pancakes moelleux à la banane, Smoothie banane-cacao protéiné |
-| Profil C (≈ 1 450 kcal, 4 repas) | Dîner | 30 / 40 / 12 | 24 | Pizza tortilla jambon & champignons |
+| Profil A (≈ 1 600 kcal, 4 repas) | Petit-déjeuner | 25 / 40 / 12 | 25 | — |
+| Profil A (≈ 1 600 kcal, 4 repas) | Déjeuner | 35 / 50 / 14 | 50 | Poké bowl saumon & mangue, Salade de quinoa, pois chiches, œufs & feta, Galette complète jambon, œuf & champignons |
+| Profil A (≈ 1 600 kcal, 4 repas) | Collation | 15 / 20 / 6 | 28 | Galettes de riz, saumon fumé & chèvre frais, Smoothie bowl mangue-banane, Smoothie banane-cacao protéiné, Pancakes moelleux à la banane |
+| Profil A (≈ 1 600 kcal, 4 repas) | Dîner | 35 / 45 / 14 | 48 | Pizza tortilla jambon & champignons |
+| Profil B (≈ 1 900 kcal, 4 repas) | Petit-déjeuner | 30 / 50 / 15 | 21 | Muffins œuf-jambon express, Muffins salés aux légumes, Tartines ricotta, fraises & miel, Galette complète jambon, œuf & champignons |
+| Profil B (≈ 1 900 kcal, 4 repas) | Déjeuner | 40 / 60 / 18 | 46 | Hachis parmentier de patate douce, Tacos de poulet, avocat & salsa tomate, Salade de quinoa, pois chiches, œufs & feta, Omelette épinards & feta, pain complet, Escalope de dinde, crème de champignons & pâtes, Pizza tortilla jambon & champignons, Galette complète jambon, œuf & champignons |
+| Profil B (≈ 1 900 kcal, 4 repas) | Goûter | 20 / 30 / 8 | 31 | Mousse chocolat-skyr & framboises |
+| Profil B (≈ 1 900 kcal, 4 repas) | Dîner | 40 / 55 / 16 | 45 | Wok de tofu, brocoli & noix de cajou, Curry de pois chiches, tofu & épinards, Tacos de poulet, avocat & salsa tomate, Galette complète jambon, œuf & champignons |
+| Profil C (≈ 1 450 kcal, 4 repas) | Petit-déjeuner | 22 / 35 / 10 | 25 | — |
+| Profil C (≈ 1 450 kcal, 4 repas) | Déjeuner | 30 / 45 / 12 | 49 | Poké bowl saumon & mangue, Saumon, lentilles vertes & poireaux à la moutarde, Salade de quinoa, pois chiches, œufs & feta, Wrap dinde, houmous express & crudités |
+| Profil C (≈ 1 450 kcal, 4 repas) | Collation | 12 / 18 / 5 | 26 | Tartine de seigle, ricotta & figue, Mug cake chocolat, Smoothie vert kiwi, banane & épinards, Smoothie bowl mangue-banane, Pancakes moelleux à la banane, Smoothie banane-cacao protéiné |
+| Profil C (≈ 1 450 kcal, 4 repas) | Dîner | 30 / 40 / 12 | 47 | Tacos de poulet, avocat & salsa tomate, Pizza tortilla jambon & champignons |
 
 ## 2. Exemples détaillés — Profil A (≈ 1 600 kcal, 4 repas)
 
@@ -53,19 +53,19 @@ Obtenu : P 25 g (-0) · G 40,1 g (+0,1) · L 12 g (+0) · 402 kcal — cible P 2
 
 Obtenu : P 24,9 g (-0,1) · G 40 g (+0) · L 12 g (-0) · 400 kcal — cible P 25 / G 40 / L 12
 
-**Muffins salés aux légumes** — ✅ proposée
+**Granola maison, skyr & framboises** — ✅ proposée
 
 | Ingrédient | Rôle | Recette de base | Pour cette cliente |
 |---|---|---|---|
-| Oeuf, cru | protéine | 2 unités (100 g) | **1 unité (50 g)** |
-| Oeuf, blanc (blanc d'oeuf), cru | protéine | 60 g | **60 g** |
-| Flocon d'avoine | glucide | 30 g | **60 g** |
-| Poivron rouge, cru | fixe | 50 g | **50 g** |
-| Courgette, pulpe et peau, crue | fixe | 50 g | **50 g** |
-| Emmental ou emmenthal râpé | lipide | 15 g | **10 g** |
-| Levure chimique ou Poudre à lever | fixe | 2 g | **2 g** |
+| Flocon d'avoine | glucide | 35 g | **40 g** |
+| Amande (avec peau) | lipide | 8 g | **8 g** |
+| Noix de pécan | lipide | 5 g | **6 g** |
+| Miel | fixe | 5 g | **5 g** |
+| Cannelle, poudre | fixe | 1 g | **1 g** |
+| Skyr nature 0 % | protéine | 170 g | **165 g** |
+| Framboise, crue | fruit | 80 g | **80 g** |
 
-Obtenu : P 24,8 g (-0,2) · G 39,9 g (-0,1) · L 12,1 g (+0,1) · 385 kcal — cible P 25 / G 40 / L 12
+Obtenu : P 24,9 g (-0,1) · G 39,9 g (-0,1) · L 12 g (+0) · 393 kcal — cible P 25 / G 40 / L 12
 
 ### Déjeuner — cible P 35 g / G 50 g / L 14 g
 
@@ -84,6 +84,22 @@ Obtenu : P 24,8 g (-0,2) · G 39,9 g (-0,1) · L 12,1 g (+0,1) · 385 kcal — c
 
 Obtenu : P 34,9 g (-0,1) · G 50,4 g (+0,4) · L 14 g (-0) · 493 kcal — cible P 35 / G 50 / L 14
 
+**Salade thaï au poulet, vermicelles & cacahuète** — ✅ proposée
+
+| Ingrédient | Rôle | Recette de base | Pour cette cliente |
+|---|---|---|---|
+| Poulet, filet, sans peau, cru | protéine | 120 g | **110 g** |
+| Vermicelle de riz, cuite, non salée | glucide | 150 g | **205 g** |
+| Beurre de cacahuète ou Pâte d'arachide | lipide | 10 g | **22 g** |
+| Sauce soja, préemballée | fixe | 10 g | **10 g** |
+| Jus de citron vert, maison | fixe | 10 g | **10 g** |
+| Carotte, crue | fixe | 50 g | **50 g** |
+| Concombre, pulpe et peau, cru | fixe | 50 g | **50 g** |
+| Menthe, fraîche | fixe | 2 g | **2 g** |
+| Coriandre, fraiche | fixe | 2 g | **2 g** |
+
+Obtenu : P 35,1 g (+0,1) · G 50,5 g (+0,5) · L 13,9 g (-0,1) · 479 kcal — cible P 35 / G 50 / L 14
+
 **Bowl mexicain poulet, maïs & haricots** — ✅ proposée
 
 | Ingrédient | Rôle | Recette de base | Pour cette cliente |
@@ -98,21 +114,6 @@ Obtenu : P 34,9 g (-0,1) · G 50,4 g (+0,4) · L 14 g (-0) · 493 kcal — cible
 | Paprika | fixe | 2 g | **2 g** |
 
 Obtenu : P 35,1 g (+0,1) · G 50,3 g (+0,3) · L 13,9 g (-0,1) · 492 kcal — cible P 35 / G 50 / L 14
-
-**Pâtes complètes à la bolognaise végétale** — ✅ proposée
-
-| Ingrédient | Rôle | Recette de base | Pour cette cliente |
-|---|---|---|---|
-| Protéine de soja texturée, réhydratée | protéine | 80 g | **105 g** |
-| Lentille corail, sèche | glucide | 25 g | **20 g** |
-| Pâtes sèches, au blé complet, crues | glucide | 50 g | **30 g** |
-| Tomate, pulpe, appertisée | fixe | 200 g | **200 g** |
-| Carotte, crue | fixe | 50 g | **50 g** |
-| Oignon, cru | fixe | 40 g | **40 g** |
-| Parmesan | lipide | 10 g | **11 g** |
-| Huile d'olive vierge extra | lipide | 4 g | **6 g** |
-
-Obtenu : P 35,2 g (+0,2) · G 50,2 g (+0,2) · L 14,1 g (+0,1) · 515 kcal — cible P 35 / G 50 / L 14
 
 Exemple de recette **non proposée** (hors tolérance) :
 
@@ -132,6 +133,21 @@ Obtenu : P 31,6 g (-3,4) · G 51,8 g (+1,8) · L 17,7 g (+3,7) · 500 kcal — c
 
 ### Collation — cible P 15 g / G 20 g / L 6 g
 
+**Muffins myrtilles & avoine** — ✅ proposée
+
+| Ingrédient | Rôle | Recette de base | Pour cette cliente |
+|---|---|---|---|
+| Flocon d'avoine | glucide | 35 g | **20 g** |
+| Protéine en poudre (whey isolat), nature | protéine | 15 g | **10 g** |
+| Oeuf, blanc (blanc d'oeuf), cru | protéine | 40 g | **25 g** |
+| Myrtille, crue | fruit | 40 g | **20 g** |
+| Lait demi-écrémé, UHT | fixe | 30 g | **30 g** |
+| Levure chimique ou Poudre à lever | fixe | 2 g | **2 g** |
+| Sirop d'érable | fixe | 5 g | **5 g** |
+| Huile de colza | lipide | 4 g | **4 g** |
+
+Obtenu : P 15,1 g (+0,1) · G 19,8 g (-0,2) · L 6 g (+0) · 200 kcal — cible P 15 / G 20 / L 6
+
 **Fromage blanc, banane & beurre de cacahuète** — ✅ proposée
 
 | Ingrédient | Rôle | Recette de base | Pour cette cliente |
@@ -143,30 +159,18 @@ Obtenu : P 31,6 g (-3,4) · G 51,8 g (+1,8) · L 17,7 g (+3,7) · 500 kcal — c
 
 Obtenu : P 15 g (+0) · G 19,7 g (-0,3) · L 6 g (-0) · 201 kcal — cible P 15 / G 20 / L 6
 
-**Cookies avoine, banane & chocolat** — ✅ proposée
+**Crêpe protéinée express & compote** — ✅ proposée
 
 | Ingrédient | Rôle | Recette de base | Pour cette cliente |
 |---|---|---|---|
 | Flocon d'avoine | glucide | 30 g | **20 g** |
-| Protéine en poudre (whey isolat), nature | protéine | 15 g | **12 g** |
-| Banane, pulpe, crue | fruit | 40 g | **30 g** |
-| Chocolat noir à 70% cacao minimum, extra, dégustation, tablette | lipide | 8 g | **3 g** |
-| Beurre de cacahuète ou Pâte d'arachide | lipide | 5 g | **6 g** |
-| Levure chimique ou Poudre à lever | fixe | 1 g | **1 g** |
-
-Obtenu : P 14,8 g (-0,2) · G 20,1 g (+0,1) · L 6,1 g (+0,1) · 202 kcal — cible P 15 / G 20 / L 6
-
-**Pomme au four, skyr & noix** — ✅ proposée
-
-| Ingrédient | Rôle | Recette de base | Pour cette cliente |
-|---|---|---|---|
-| Pomme, pulpe et peau, crue | fruit | 150 g | **90 g** |
-| Skyr nature 0 % | protéine | 120 g | **135 g** |
-| Noix, séchée, cerneaux | lipide | 10 g | **8 g** |
+| Oeuf, blanc (blanc d'oeuf), cru | protéine | 80 g | **105 g** |
+| Lait demi-écrémé, UHT | fixe | 30 g | **30 g** |
+| Compote de pomme, allégée en sucres | fruit | 80 g | **40 g** |
 | Cannelle, poudre | fixe | 1 g | **1 g** |
-| Sirop d'érable | fixe | 5 g | **5 g** |
+| Huile de colza | lipide | 2 g | **4 g** |
 
-Obtenu : P 14,8 g (-0,2) · G 20 g (+0) · L 5,9 g (-0,1) · 197 kcal — cible P 15 / G 20 / L 6
+Obtenu : P 15,2 g (+0,2) · G 20,2 g (+0,2) · L 6 g (+0) · 202 kcal — cible P 15 / G 20 / L 6
 
 Exemple de recette **non proposée** (hors tolérance) :
 
@@ -184,6 +188,38 @@ Obtenu : P 12,7 g (-2,3) · G 23,3 g (+3,3) · L 5,9 g (-0,1) · 201 kcal — ci
 
 ### Dîner — cible P 35 g / G 45 g / L 14 g
 
+**Truite au four, pommes de terre & brocolis, sauce aneth** — ✅ proposée
+
+| Ingrédient | Rôle | Recette de base | Pour cette cliente |
+|---|---|---|---|
+| Truite arc en ciel, crue, élevage | protéine | 130 g | **110 g** |
+| Pomme de terre, sans peau, crue | glucide | 180 g | **255 g** |
+| Brocoli, cru | fixe | 120 g | **120 g** |
+| Skyr nature 0 % | fixe | 40 g | **40 g** |
+| Aneth, frais | fixe | 2 g | **2 g** |
+| Citron, pulpe, cru | fixe | 10 g | **10 g** |
+| Huile d'olive vierge extra | lipide | 5 g | **6 g** |
+
+Obtenu : P 35,3 g (+0,3) · G 45,2 g (+0,2) · L 14 g (+0) · 471 kcal — cible P 35 / G 45 / L 14
+
+**Minestrone au jambon & parmesan** — ✅ proposée
+
+| Ingrédient | Rôle | Recette de base | Pour cette cliente |
+|---|---|---|---|
+| Jambon cuit, choix, découenné dégraissé | protéine | 50 g | **90 g** |
+| Pâtes sèches standard, crues | glucide | 40 g | **35 g** |
+| Haricot blanc, appertisé, égoutté | fixe | 60 g | **60 g** |
+| Courgette, pulpe et peau, crue | fixe | 80 g | **80 g** |
+| Carotte, crue | fixe | 60 g | **60 g** |
+| Poireau, cru | fixe | 50 g | **50 g** |
+| Tomate, pulpe, appertisée | fixe | 100 g | **100 g** |
+| Bouillon de légumes, déshydraté reconstitué | fixe | 250 g | **250 g** |
+| Parmesan | lipide | 10 g | **16 g** |
+| Huile d'olive vierge extra | lipide | 3 g | **4 g** |
+| Basilic, frais | fixe | 2 g | **2 g** |
+
+Obtenu : P 34,8 g (-0,2) · G 44,8 g (-0,2) · L 13,9 g (-0,1) · 467 kcal — cible P 35 / G 45 / L 14
+
 **Pâtes complètes à la bolognaise végétale** — ✅ proposée
 
 | Ingrédient | Rôle | Recette de base | Pour cette cliente |
@@ -198,37 +234,6 @@ Obtenu : P 12,7 g (-2,3) · G 23,3 g (+3,3) · L 5,9 g (-0,1) · 201 kcal — ci
 | Huile d'olive vierge extra | lipide | 4 g | **6 g** |
 
 Obtenu : P 34,8 g (-0,2) · G 45,3 g (+0,3) · L 14,1 g (+0,1) · 493 kcal — cible P 35 / G 45 / L 14
-
-**Bowl mexicain poulet, maïs & haricots** — ✅ proposée
-
-| Ingrédient | Rôle | Recette de base | Pour cette cliente |
-|---|---|---|---|
-| Poulet, filet, sans peau, cru | protéine | 100 g | **110 g** |
-| Riz blanc, cru | glucide | 50 g | **35 g** |
-| Haricot rouge, appertisé, égoutté | glucide | 50 g | **50 g** |
-| Maïs doux, appertisé, égoutté | fixe | 40 g | **40 g** |
-| Poivron rouge, cru | fixe | 50 g | **50 g** |
-| Avocat, pulpe, cru | lipide | 40 g | **50 g** |
-| Jus de citron vert, maison | fixe | 10 g | **10 g** |
-| Paprika | fixe | 2 g | **2 g** |
-
-Obtenu : P 35,1 g (+0,1) · G 45,1 g (+0,1) · L 13,8 g (-0,2) · 469 kcal — cible P 35 / G 45 / L 14
-
-**Soupe thaï aux crevettes & nouilles de riz** — ✅ proposée
-
-| Ingrédient | Rôle | Recette de base | Pour cette cliente |
-|---|---|---|---|
-| Crevette grise, cuite | protéine | 120 g | **155 g** |
-| Vermicelle de riz, cuite, non salée | glucide | 150 g | **165 g** |
-| Lait de coco ou Crème de coco | lipide | 40 g | **60 g** |
-| Champignon de Paris ou champignon de couche, cru | fixe | 60 g | **60 g** |
-| Carotte, crue | fixe | 40 g | **40 g** |
-| Gingembre, poudre | fixe | 2 g | **2 g** |
-| Jus de citron vert, maison | fixe | 10 g | **10 g** |
-| Coriandre, fraiche | fixe | 3 g | **3 g** |
-| Bouillon de légumes, déshydraté reconstitué | fixe | 250 g | **250 g** |
-
-Obtenu : P 34,7 g (-0,3) · G 45,4 g (+0,4) · L 14,1 g (+0,1) · 454 kcal — cible P 35 / G 45 / L 14
 
 Exemple de recette **non proposée** (hors tolérance) :
 

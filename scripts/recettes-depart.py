@@ -1,5 +1,5 @@
 """
-Génère data/recettes-depart.json : les 50 recettes de départ de Cindy, importables
+Génère data/recettes-depart.json : les 100 recettes de départ de Cindy (2 lots de 50), importables
 depuis le dashboard coach (Recettes → « Importer les recettes de départ »).
 
 Chaque ingrédient référence un aliment Ciqual (« ciqual:<code> ») ou un aliment perso
@@ -295,6 +295,255 @@ recette("Chia pudding coco-mangue", ["collation", "petit_dejeuner"], 5, ["Sucré
     L(CHIA, 15), X(LAIT_AMANDE, 150), P(SKYR, 100), F(MANGUE, 80, pas=10), G(FLOCONS, 10), X(SIROP_ERABLE, 5)],
     ["Mélange les graines de chia avec la boisson à l’amande et le sirop d’érable.", "Laisse prendre au moins 2 heures au frais (ou une nuit).",
      "Ajoute le skyr, les flocons et la mangue en dés au moment de servir."])
+
+
+# ===================== 50 nouvelles recettes (lot 2) =====================
+POIREAU, CHOU_FLEUR, BUTTERNUT, PETITS_POIS, HARICOT_BLANC, MAQUEREAU, PORC_FILET = (
+    "ciqual:20039", "ciqual:20016", "ciqual:20138", "ciqual:20036", "ciqual:20511", "ciqual:26123", "ciqual:28201")
+KIWI, POIRE, ORANGE, FRAMBOISE, FIGUE_SECHE, PRUNEAU, COMPOTE, GRENADE = (
+    "ciqual:13021", "ciqual:13188", "ciqual:13034", "ciqual:13015", "ciqual:13013", "ciqual:13042", "ciqual:13151", "ciqual:13018")
+EPEAUTRE, CHOU_ROUGE, ENDIVE, FENOUIL, PANAIS, MACHE, RADIS = (
+    "ciqual:9001", "ciqual:20014", "ciqual:20026", "ciqual:20028", "ciqual:20181", "ciqual:20099", "ciqual:20045")
+TRUITE, COLIN, CREVETTE_CRUE, GRUYERE, BRESAOLA, TAHIN, PESTO, PISTACHE, LIN = (
+    "ciqual:27009", "ciqual:26129", "ciqual:10021", "ciqual:12114", "ciqual:28503", "ciqual:15203", "ciqual:11179",
+    "ciqual:15044", "ciqual:15034")
+TOMATE_SECHEE, OIGNON_ROUGE, GINGEMBRE_FRAIS, CIBOULETTE, ANETH, CURCUMA, MUSCADE, ROMARIN = (
+    "ciqual:20189", "ciqual:20238", "ciqual:11074", "ciqual:11003", "ciqual:11093", "ciqual:11089", "ciqual:11048", "ciqual:11068")
+HUILE_SESAME, POIS_GOURMAND, POUSSES_SOJA, PAK_CHOI, FECULE, BOUILLON_VOLAILLE, PAIN_SEIGLE, CORNICHON = (
+    "ciqual:17400", "ciqual:20173", "ciqual:20183", "ciqual:20167", "ciqual:9510", "ciqual:25947", "ciqual:7125", "ciqual:11004")
+NOIX_PECAN = "ciqual:15026"
+
+# ----- Petits-déjeuners (10) -----
+recette("Crêpes à l’avoine & compote de pomme", ["petit_dejeuner"], 15, ["Sucré", "Végétarien"], [
+    G(FLOCONS, 40, note="mixés en farine"), P(OEUF, 1, unite="unite"), P(WHEY, 15), X(LAIT, 120), F(COMPOTE, 80, pas=10),
+    X(CANNELLE, 1), L(HUILE_COLZA, 3, mini=0)],
+    ["Mixe les flocons en farine fine, puis ajoute l’œuf, la protéine et le lait : la pâte doit être fluide.", "Laisse reposer 5 minutes.",
+     "Huile légèrement une poêle chaude, verse une petite louche et étale.", "Cuis 1 minute par face et garnis de compote saupoudrée de cannelle."],
+    description="Des crêpes fines et rassasiantes, sans farine blanche.")
+recette("Granola maison, skyr & framboises", ["petit_dejeuner", "collation"], 20, ["Sucré", "Végétarien", "Batch cooking"], [
+    G(FLOCONS, 35), L(AMANDE, 8), L(NOIX_PECAN, 5, mini=0), X(MIEL, 5), X(CANNELLE, 1), P(SKYR, 170), F(FRAMBOISE, 80, pas=10)],
+    ["Mélange les flocons, les amandes et les noix de pécan concassées avec le miel et la cannelle.", "Étale sur une plaque et fais dorer 12 à 15 minutes à 170 °C en remuant à mi-cuisson.",
+     "Laisse refroidir : le granola devient croustillant.", "Sers sur le skyr avec les framboises."],
+    astuce="Prépare 5 portions d’un coup : il se garde 2 semaines dans un bocal fermé.")
+recette("Tartine ricotta, poire & noix", ["petit_dejeuner", "collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    G(PAIN_COMPLET, 50, pas=10), X(RICOTTA, 30), P(SKYR, 100), F(POIRE, 80, pas=10), L(NOIX, 8, mini=0), X(MIEL, 5), X(CANNELLE, 1)],
+    ["Fais griller le pain.", "Mélange la ricotta et le skyr : tartine généreusement, ajoute la poire en fines lamelles.", "Parsème de noix concassées, d’un filet de miel et d’une pincée de cannelle."])
+recette("Œufs cocotte jambon-épinards & mouillettes de seigle", ["petit_dejeuner"], 15, ["Salé"], [
+    X(OEUF, 2, unite="unite"), P(JAMBON, 30), X(EPINARD, 60), L(CREME_LEGERE, 15, mini=0), X(MUSCADE, 0.5), G(PAIN_SEIGLE, 50, pas=10)],
+    ["Préchauffe le four à 180 °C. Fais tomber les épinards 1 minute à la poêle.", "Répartis-les dans 2 ramequins avec le jambon en dés, la crème et une pointe de muscade.",
+     "Casse un œuf dans chaque ramequin, sale, poivre.", "Enfourne 10 à 12 minutes : le blanc doit être pris, le jaune coulant. Sers avec le pain grillé en mouillettes."])
+recette("Porridge chocolat-banane & cacahuète", ["petit_dejeuner"], 10, ["Sucré", "Végétarien"], [
+    G(FLOCONS, 45), X(LAIT, 150), P(WHEY, 20), X(CACAO, 5), F(BANANE, 60, pas=10), L(CACAHUETE_BEURRE, 8, mini=0)],
+    ["Fais chauffer les flocons et le lait 4 à 5 minutes en remuant.", "Hors du feu, incorpore la protéine et le cacao.",
+     "Ajoute la banane en rondelles et le beurre de cacahuète par-dessus."],
+    description="Le goût d’un dessert, l’énergie d’un vrai petit-déjeuner.")
+recette("Tartine saumon fumé, chèvre frais & concombre", ["petit_dejeuner", "collation"], 5, ["Salé", "Rapide", "Sans cuisson"], [
+    G(PAIN_SEIGLE, 50, pas=10), P(SAUMON_FUME, 40), L(CHEVRE_FRAIS, 20), X(CONCOMBRE, 40), X(ANETH, 1), X(CITRON, 5)],
+    ["Tartine le pain de chèvre frais.", "Ajoute le concombre en fines rondelles et le saumon fumé.", "Termine par l’aneth, quelques gouttes de citron et du poivre."])
+recette("Bowl fromage blanc, kiwi & graines de lin", ["petit_dejeuner", "collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    P(FROMAGE_BLANC, 180), F(KIWI, 100, pas=10), G(FLOCONS, 30), L(LIN, 10), X(MIEL, 5)],
+    ["Verse le fromage blanc dans un bol.", "Ajoute les flocons, le kiwi en dés et les graines de lin.", "Termine par un filet de miel."])
+recette("Muffins œuf-jambon express", ["petit_dejeuner", "collation"], 25, ["Salé", "Batch cooking"], [
+    P(OEUF, 2, unite="unite"), P(JAMBON, 30), X(POIVRON, 40), L(EMMENTAL, 15), X(CIBOULETTE, 2), G(PAIN_COMPLET, 40, pas=10)],
+    ["Préchauffe le four à 180 °C.", "Bats les œufs, ajoute le jambon et le poivron en petits dés, l’emmental et la ciboulette.",
+     "Répartis dans 3 moules à muffins en silicone.", "Enfourne 18 à 20 minutes. Sers avec le pain complet."],
+    astuce="Ils se gardent 3 jours au frais : 30 secondes au micro-ondes le matin.")
+recette("Pain perdu protéiné aux fruits rouges", ["petit_dejeuner"], 15, ["Sucré", "Végétarien"], [
+    G(PAIN_COMPLET, 60, pas=10), P(OEUF, 1, unite="unite"), P(BLANC_OEUF, 60), X(LAIT, 50), X(CANNELLE, 1),
+    F(FRUITS_ROUGES, 80, pas=10), L(BEURRE, 4, mini=0), X(SIROP_ERABLE, 5)],
+    ["Bats l’œuf, les blancs, le lait et la cannelle dans une assiette creuse.", "Trempe les tranches de pain des deux côtés.",
+     "Fais-les dorer 2 minutes par face dans la poêle beurrée.", "Sers avec les fruits rouges et le sirop d’érable."])
+recette("Smoothie vert kiwi, banane & épinards", ["petit_dejeuner", "collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    P(WHEY, 25), F(KIWI, 80, pas=10), F(BANANE, 60, pas=10), X(EPINARD, 30), X(LAIT_AMANDE, 200), G(FLOCONS, 20), L(LIN, 8)],
+    ["Mets tous les ingrédients dans le blender.", "Mixe 1 minute jusqu’à ce que ce soit bien lisse.", "Ajoute un peu d’eau ou de glaçons selon la texture voulue."],
+    description="On ne sent pas les épinards, promis : juste un smoothie bien frais.")
+
+# ----- Déjeuners (15) -----
+recette("Salade d’épeautre, butternut rôtie, poulet & feta", ["dejeuner"], 35, ["Salé", "Batch cooking"], [
+    G(EPEAUTRE, 60), X(BUTTERNUT, 150), P(POULET, 110), L(FETA, 20), L(HUILE_OLIVE, 5, mini=0), X(ROQUETTE, 30), X(THYM, 1)],
+    ["Fais cuire l’épeautre 25 minutes dans l’eau bouillante salée.", "Coupe la butternut en cubes, arrose d’un peu d’huile, ajoute le thym et rôtis 25 minutes à 200 °C.",
+     "Fais dorer le poulet en lanières 6 minutes à la poêle.", "Mélange l’épeautre, la butternut, la roquette, le poulet et la feta émiettée."])
+recette("Bowl truite, quinoa, avocat & radis", ["dejeuner", "diner"], 25, ["Salé"], [
+    P(TRUITE, 120), G(QUINOA, 50), L(AVOCAT, 40, mini=0), X(RADIS, 50), X(MACHE, 30), X(CITRON, 10), X(ANETH, 1)],
+    ["Rince le quinoa et cuis-le 12 minutes dans 2 fois son volume d’eau.", "Fais cuire la truite 4 minutes côté peau à la poêle, puis 1 minute de l’autre côté.",
+     "Dispose dans un bol le quinoa, la mâche, les radis en rondelles et l’avocat.", "Ajoute la truite, le citron et l’aneth."])
+recette("Wrap dinde, houmous express & crudités", ["dejeuner"], 15, ["Salé", "Rapide"], [
+    G(TORTILLA, 1, unite="unite"), P(DINDE, 100), X(POIS_CHICHE, 40), L(TAHIN, 10), X(CITRON, 5), X(CAROTTE, 40), X(LAITUE, 20), X(PAPRIKA, 1)],
+    ["Écrase les pois chiches avec le tahin, le citron et 1 cuillère d’eau : voilà ton houmous express.", "Cuis la dinde en lanières 5 minutes à la poêle avec le paprika.",
+     "Tartine la tortilla de houmous, ajoute la salade, la carotte râpée et la dinde.", "Roule bien serré et coupe en deux."])
+recette("Salade de haricots blancs, thon & tomates séchées", ["dejeuner"], 10, ["Salé", "Rapide", "Sans cuisson"], [
+    P(THON, 100), G(HARICOT_BLANC, 120), G(PAIN_COMPLET, 40, pas=10), X(TOMATE_SECHEE, 15), X(OIGNON_ROUGE, 20), L(HUILE_OLIVE, 8, mini=0), X(ROQUETTE, 30), X(PERSIL, 3),
+    X(VINAIGRE_BALSAMIQUE, 5)],
+    ["Rince et égoutte les haricots blancs.", "Mélange-les avec le thon émietté, les tomates séchées et l’oignon rouge émincés.",
+     "Assaisonne d’huile, de vinaigre balsamique, de persil, sel et poivre.", "Sers sur la roquette, avec le pain complet."])
+recette("Riz sauté aux crevettes, petits pois & œuf", ["dejeuner", "diner"], 20, ["Salé"], [
+    P(CREVETTE_CRUE, 100), P(OEUF, 1, unite="unite"), G(RIZ, 60), X(PETITS_POIS, 60), X(CAROTTE, 40), L(HUILE_SESAME, 5, mini=0),
+    X(SAUCE_SOJA, 10), X(CIBOULETTE, 2)],
+    ["Cuis le riz, puis laisse-le refroidir (idéalement la veille).", "Dans un wok chaud, fais sauter les crevettes 2 minutes avec l’huile, puis réserve.",
+     "Saute la carotte en dés et les petits pois 3 minutes, ajoute le riz et la sauce soja.", "Pousse le riz sur le côté, brouille l’œuf, mélange tout et remets les crevettes. Parsème de ciboulette."],
+    astuce="Le riz de la veille donne un riz sauté bien grainé.")
+recette("Quiche sans pâte poireaux & saumon fumé", ["dejeuner", "diner"], 40, ["Salé", "Batch cooking"], [
+    P(OEUF, 2, unite="unite"), P(SAUMON_FUME, 40), X(POIREAU, 120), X(LAIT, 60), L(CREME_LEGERE, 20, mini=0), L(EMMENTAL, 10, mini=0),
+    G(PAIN_COMPLET, 50, pas=10), X(MUSCADE, 0.5)],
+    ["Émince les poireaux et fais-les fondre 10 minutes à la poêle avec un peu d’eau.", "Bats les œufs avec le lait, la crème, la muscade, sel et poivre.",
+     "Ajoute les poireaux et le saumon en lanières, verse dans un petit plat et parsème d’emmental.", "Enfourne 25 minutes à 180 °C. Sers avec le pain complet et une salade."])
+recette("Falafels au four, boulgour & sauce yaourt-menthe", ["dejeuner", "diner"], 35, ["Salé", "Végétarien", "Batch cooking"], [
+    G(POIS_CHICHE, 100), G(BOULGOUR, 40), P(SKYR, 100), L(HUILE_OLIVE, 5, mini=0), X(OIGNON, 20), X(PERSIL, 5), X(CUMIN, 1), X(MENTHE, 2),
+    X(CONCOMBRE, 60), X(TOMATE, 60)],
+    ["Mixe les pois chiches avec l’oignon, le persil, le cumin, sel et poivre : la pâte doit se tenir.", "Forme des petites boules, aplatis-les, badigeonne d’huile et enfourne 20 minutes à 200 °C en les retournant à mi-cuisson.",
+     "Cuis le boulgour 10 minutes dans l’eau bouillante.", "Mélange le skyr avec la menthe ciselée et sers avec les falafels, le boulgour, la tomate et le concombre."])
+recette("Minestrone au jambon & parmesan", ["dejeuner", "diner"], 35, ["Salé", "Batch cooking"], [
+    P(JAMBON, 50), G(PATES, 40), X(HARICOT_BLANC, 60), X(COURGETTE, 80), X(CAROTTE, 60), X(POIREAU, 50), X(TOMATE_PULPE, 100),
+    X(BOUILLON_LEGUMES, 250), L(PARMESAN, 10), L(HUILE_OLIVE, 3, mini=0), X(BASILIC, 2)],
+    ["Fais revenir le poireau émincé dans l’huile, ajoute la carotte et la courgette en dés.", "Verse la pulpe de tomate et le bouillon, laisse mijoter 15 minutes.",
+     "Ajoute les pâtes et les haricots blancs, cuis encore 10 minutes.", "Sers avec les dés de jambon, le parmesan et le basilic."],
+    astuce="Encore meilleur réchauffé le lendemain.")
+recette("Salade de pommes de terre, maquereau & mâche", ["dejeuner"], 25, ["Salé"], [
+    P(MAQUEREAU, 100), G(PDT, 200), X(OIGNON_ROUGE, 20), X(CORNICHON, 15), L(HUILE_COLZA, 6, mini=0), X(MOUTARDE, 5), X(MACHE, 30), X(ANETH, 1)],
+    ["Cuis les pommes de terre 20 minutes dans l’eau, puis coupe-les en rondelles tièdes.", "Fouette l’huile avec la moutarde, sel et poivre.",
+     "Mélange les pommes de terre avec l’oignon rouge, les cornichons et la vinaigrette.", "Ajoute le maquereau en morceaux, la mâche et l’aneth."])
+recette("Salade thaï au poulet, vermicelles & cacahuète", ["dejeuner", "diner"], 20, ["Salé"], [
+    P(POULET, 120), G(VERMICELLE_RIZ, 150), L(CACAHUETE_BEURRE, 10, mini=0), X(SAUCE_SOJA, 10), X(CITRON_VERT, 10), X(CAROTTE, 50),
+    X(CONCOMBRE, 50), X(MENTHE, 2), X(CORIANDRE, 2)],
+    ["Fais tremper les vermicelles selon le paquet, puis rince-les à l’eau froide.", "Cuis le poulet en lanières 6 minutes à la poêle.",
+     "Mélange le beurre de cacahuète, la sauce soja, le jus de citron vert et 2 cuillères d’eau chaude.", "Assemble vermicelles, carotte râpée, concombre, poulet et sauce ; parsème de menthe et coriandre."])
+recette("Pita poulet tandoori & sauce concombre", ["dejeuner"], 20, ["Salé"], [
+    P(POULET, 120), G(PAIN_PITA, 60, pas=10), P(SKYR, 60), X(CONCOMBRE, 50), X(TOMATE, 50), X(OIGNON_ROUGE, 15), X(PAPRIKA, 1),
+    X(CURCUMA, 1), X(CUMIN, 1), L(HUILE_OLIVE, 5, mini=0)],
+    ["Mélange le poulet en lanières avec l’huile, le paprika, le curcuma et le cumin.", "Fais-le dorer 6 à 8 minutes à la poêle.",
+     "Râpe le concombre, presse-le et mélange-le au skyr avec sel et poivre.", "Garnis la pita de poulet, tomate, oignon rouge et sauce."])
+recette("Taboulé de chou-fleur, poulet & grenade", ["dejeuner"], 20, ["Salé", "Batch cooking"], [
+    X(CHOU_FLEUR, 150), P(POULET, 120), G(BOULGOUR, 40), F(GRENADE, 40, pas=5), L(HUILE_OLIVE, 8, mini=0), X(MENTHE, 3), X(PERSIL, 5), X(CITRON, 15)],
+    ["Mixe le chou-fleur cru en petits grains, comme une semoule.", "Cuis le boulgour 10 minutes et le poulet 8 minutes à la poêle.",
+     "Mélange chou-fleur, boulgour, herbes ciselées, citron et huile.", "Ajoute le poulet en dés et les grains de grenade."])
+recette("Tortilla espagnole légère & salade", ["dejeuner", "diner"], 30, ["Salé", "Végétarien"], [
+    P(OEUF, 2, unite="unite"), P(BLANC_OEUF, 60), G(PDT, 200), X(OIGNON, 50), L(HUILE_OLIVE, 6, mini=0), X(LAITUE, 40)],
+    ["Coupe les pommes de terre en fines rondelles et l’oignon en lamelles.", "Fais-les cuire 15 minutes à feu doux avec l’huile et un couvercle.",
+     "Verse les œufs et les blancs battus, cuis 5 minutes, puis retourne la tortilla à l’aide d’une assiette.", "Cuis encore 3 minutes et sers avec la salade."])
+recette("Pâtes au pesto, poulet & tomates cerises", ["dejeuner", "diner"], 20, ["Salé", "Rapide"], [
+    G(PATES, 70), P(POULET, 110), L(PESTO, 15), X(TOMATE_CERISE, 100), X(ROQUETTE, 20)],
+    ["Cuis les pâtes al dente.", "Pendant ce temps, fais dorer le poulet en dés 6 minutes à la poêle.",
+     "Égoutte les pâtes en gardant un peu d’eau de cuisson.", "Mélange pâtes, pesto, poulet et tomates cerises coupées en deux, ajoute la roquette."])
+recette("Bowl tofu croustillant, riz & chou rouge", ["dejeuner", "diner"], 25, ["Salé", "Végétarien"], [
+    X(TOFU, 100), P(PST, 60, note="réhydratées"), G(RIZ, 60), X(CHOU_ROUGE, 80), X(CAROTTE, 50), X(FECULE, 5), L(HUILE_SESAME, 3, mini=0), X(SAUCE_SOJA, 10),
+    X(GINGEMBRE_FRAIS, 3), X(SESAME, 2)],
+    ["Cuis le riz.", "Coupe le tofu en cubes, enrobe-les de fécule et fais-les dorer 8 minutes à la poêle avec l’huile.",
+     "Ajoute les protéines de soja réhydratées, la sauce soja et le gingembre râpé, fais sauter 3 minutes.", "Sers sur le riz avec le chou rouge émincé, la carotte râpée et le sésame."])
+
+# ----- Dîners (15) -----
+recette("Velouté de butternut, tartines chèvre & bresaola", ["diner"], 30, ["Salé", "Batch cooking"], [
+    X(BUTTERNUT, 250), X(OIGNON, 30), X(BOUILLON_LEGUMES, 200), X(MUSCADE, 0.5), G(PAIN_COMPLET, 50, pas=10), L(CHEVRE_FRAIS, 30),
+    P(BRESAOLA, 40)],
+    ["Fais revenir l’oignon, ajoute la butternut en cubes et le bouillon.", "Laisse cuire 20 minutes, puis mixe avec la muscade, sel et poivre.",
+     "Tartine le pain grillé de chèvre frais et ajoute la bresaola.", "Sers le velouté bien chaud avec les tartines."])
+recette("Filet mignon, purée de panais & haricots verts", ["diner", "dejeuner"], 35, ["Salé"], [
+    P(PORC_FILET, 130), G(PDT, 150), X(PANAIS, 100), X(LAIT, 40), L(BEURRE, 5, mini=0), X(HARICOT_VERT, 100), X(ROMARIN, 1)],
+    ["Cuis la pomme de terre et le panais en morceaux 20 minutes dans l’eau.", "Écrase-les avec le lait chaud et le beurre.",
+     "Saisis le filet mignon en médaillons 3 minutes par face avec le romarin.", "Sers avec la purée et les haricots verts cuits à la vapeur."])
+recette("Colin aux herbes, riz & fenouil fondant", ["diner"], 30, ["Salé"], [
+    P(COLIN, 150), G(RIZ, 55), X(FENOUIL, 150), L(HUILE_OLIVE, 8, mini=0), X(CITRON, 10), X(PERSIL, 3), X(ANETH, 1)],
+    ["Émince le fenouil et fais-le fondre 15 minutes à feu doux avec la moitié de l’huile et un fond d’eau.", "Cuis le riz.",
+     "Fais cuire le colin 3 minutes par face avec le reste d’huile.", "Parsème d’herbes et de citron, sers avec le riz et le fenouil."])
+recette("Curry de pois chiches, tofu & épinards", ["diner", "dejeuner"], 30, ["Salé", "Végétarien", "Batch cooking"], [
+    P(TOFU, 100), X(POIS_CHICHE, 60), G(RIZ, 50), L(LAIT_COCO, 30, mini=0), X(EPINARD, 80), X(TOMATE_PULPE, 100), X(OIGNON, 30),
+    X(CURRY, 2), X(GINGEMBRE_FRAIS, 3)],
+    ["Fais revenir l’oignon, le gingembre et le curry 2 minutes.", "Ajoute le tofu en dés, les pois chiches, la pulpe de tomate et le lait de coco.",
+     "Laisse mijoter 15 minutes, puis ajoute les épinards jusqu’à ce qu’ils tombent.", "Sers avec le riz."])
+recette("Gratin de chou-fleur, pommes de terre & jambon", ["diner"], 45, ["Salé", "Batch cooking"], [
+    P(JAMBON, 60), X(CHOU_FLEUR, 250), G(PDT, 150), X(LAIT, 120), X(FECULE, 8), L(EMMENTAL, 20), X(MUSCADE, 0.5)],
+    ["Cuis le chou-fleur en fleurettes et la pomme de terre en rondelles 12 minutes à la vapeur.", "Fais épaissir le lait avec la fécule à feu doux en remuant, ajoute la muscade.",
+     "Dispose légumes et jambon en lanières dans un plat, nappe de sauce et parsème d’emmental.", "Gratine 20 minutes à 200 °C."],
+    description="Le réconfort d’un gratin, en version légère.")
+recette("Endives au jambon, sauce légère", ["diner"], 45, ["Salé"], [
+    P(JAMBON, 60), X(ENDIVE, 250), X(LAIT, 120), X(FECULE, 8), L(GRUYERE, 20), G(PDT, 150), X(MUSCADE, 0.5)],
+    ["Cuis les endives 15 minutes à la vapeur, puis presse-les pour enlever l’eau.", "Roule chaque endive dans une tranche de jambon.",
+     "Prépare la sauce : fais épaissir le lait avec la fécule et la muscade. Nappe les endives et parsème de gruyère.", "Gratine 20 minutes à 200 °C. Sers avec les pommes de terre vapeur."])
+recette("Saumon, lentilles vertes & poireaux à la moutarde", ["diner", "dejeuner"], 35, ["Salé"], [
+    P(SAUMON, 110), G(LENTILLE_VERTE, 50), X(POIREAU, 120), X(MOUTARDE, 5), L(HUILE_OLIVE, 3, mini=0), X(THYM, 1)],
+    ["Cuis les lentilles 25 minutes avec le thym.", "Fais fondre les poireaux émincés 10 minutes à la poêle avec un fond d’eau, ajoute la moutarde.",
+     "Fais cuire le saumon côté peau 6 minutes à feu moyen, puis 1 minute de l’autre côté.", "Sers sur les lentilles et les poireaux."])
+recette("Steak haché, potatoes au four & salade", ["diner", "dejeuner"], 35, ["Salé"], [
+    P(BOEUF5, 120), G(PDT, 200), L(HUILE_OLIVE, 6, mini=0), X(PAPRIKA, 1), X(HERBES, 1), X(LAITUE, 50), X(TOMATE, 80)],
+    ["Coupe les pommes de terre en quartiers avec la peau, mélange-les avec l’huile, le paprika et les herbes.", "Enfourne 30 minutes à 210 °C en les retournant à mi-cuisson.",
+     "Cuis le steak haché 2 à 3 minutes par face.", "Sers avec la salade et la tomate."],
+    description="Le classique qui fait plaisir, sans friteuse.")
+recette("Risotto crémeux aux champignons & poulet", ["diner", "dejeuner"], 35, ["Salé"], [
+    G(RIZ, 60), P(POULET, 100), X(CHAMPIGNON, 120), X(OIGNON, 30), X(BOUILLON_LEGUMES, 250), L(PARMESAN, 15), L(HUILE_OLIVE, 3, mini=0)],
+    ["Fais revenir l’oignon et les champignons émincés avec l’huile.", "Ajoute le riz, mélange 1 minute, puis verse le bouillon chaud louche par louche en remuant (18 minutes).",
+     "Pendant ce temps, fais dorer le poulet en dés.", "Hors du feu, incorpore le parmesan et le poulet."])
+recette("Tacos de poulet, avocat & salsa tomate", ["diner", "dejeuner"], 20, ["Salé"], [
+    G(TORTILLA, 2, unite="unite"), P(POULET, 120), L(AVOCAT, 40, mini=0), X(TOMATE, 80), X(OIGNON_ROUGE, 20), X(CITRON_VERT, 5),
+    X(CORIANDRE, 3), X(LAITUE, 30), X(PAPRIKA, 1), X(CUMIN, 1)],
+    ["Cuis le poulet en lanières 6 minutes avec le paprika et le cumin.", "Mélange la tomate et l’oignon rouge en petits dés avec le citron vert et la coriandre : c’est la salsa.",
+     "Réchauffe les tortillas 30 secondes à la poêle.", "Garnis de salade, poulet, avocat en lamelles et salsa."])
+recette("Bouillon asiatique au poulet & pak choï", ["diner"], 25, ["Salé"], [
+    P(POULET, 110), G(VERMICELLE_RIZ, 120), X(PAK_CHOI, 100), X(CHAMPIGNON, 50), X(GINGEMBRE_FRAIS, 4), X(SAUCE_SOJA, 10),
+    X(BOUILLON_VOLAILLE, 350), L(HUILE_SESAME, 4, mini=0), X(CORIANDRE, 2)],
+    ["Porte le bouillon à frémissement avec le gingembre râpé et la sauce soja.", "Ajoute le poulet en fines lanières et les champignons, cuis 6 minutes.",
+     "Ajoute le pak choï émincé et les vermicelles, cuis 2 minutes.", "Sers avec un filet d’huile de sésame et la coriandre."],
+    description="Un bol chaud et parfumé, parfait les soirs d’hiver.")
+recette("Lasagnes courgettes & bœuf", ["diner"], 50, ["Salé", "Batch cooking"], [
+    P(BOEUF5, 110), G(PATES, 40, note="feuilles de lasagne"), X(COURGETTE, 200), X(TOMATE_PULPE, 150), X(OIGNON, 30), L(MOZZA, 30), X(ORIGAN, 1)],
+    ["Fais revenir l’oignon et le bœuf, ajoute la pulpe de tomate et l’origan, laisse mijoter 10 minutes.", "Coupe la courgette en fines tranches dans la longueur.",
+     "Alterne dans un plat : sauce, feuilles de lasagne, courgettes. Termine par la sauce et la mozzarella.", "Enfourne 30 minutes à 190 °C."])
+recette("Wok de porc au gingembre & légumes croquants", ["diner", "dejeuner"], 20, ["Salé", "Rapide"], [
+    P(PORC_FILET, 120), G(RIZ, 55), X(POIS_GOURMAND, 80), X(POIVRON, 60), X(POUSSES_SOJA, 50), X(GINGEMBRE_FRAIS, 4), X(SAUCE_SOJA, 10),
+    L(HUILE_SESAME, 5, mini=0)],
+    ["Cuis le riz.", "Saisis le porc en fines lanières 3 minutes dans le wok bien chaud avec l’huile.",
+     "Ajoute le poivron, les pois gourmands et le gingembre, saute 3 minutes : ils doivent rester croquants.", "Ajoute les pousses de soja et la sauce soja, mélange 1 minute. Sers avec le riz."])
+recette("Truite au four, pommes de terre & brocolis, sauce aneth", ["diner"], 30, ["Salé"], [
+    P(TRUITE, 130), G(PDT, 180), X(BROCOLI, 120), X(SKYR, 40), X(ANETH, 2), X(CITRON, 10), L(HUILE_OLIVE, 5, mini=0)],
+    ["Cuis les pommes de terre 20 minutes et le brocoli 6 minutes à la vapeur.", "Pose la truite sur une plaque, arrose d’huile et de citron, enfourne 12 minutes à 200 °C.",
+     "Mélange le skyr avec l’aneth, sel et poivre.", "Sers la truite avec les légumes et la sauce."])
+recette("Tajine de poulet, carottes & pois chiches", ["diner", "dejeuner"], 40, ["Salé", "Batch cooking"], [
+    P(POULET, 120), G(SEMOULE, 45), X(POIS_CHICHE, 50), X(CAROTTE, 100), X(OIGNON, 40), X(CUMIN, 1), X(CURCUMA, 1), X(CANNELLE, 0.5),
+    L(HUILE_OLIVE, 5, mini=0), X(CORIANDRE, 2)],
+    ["Fais dorer le poulet en morceaux avec l’huile, l’oignon et les épices.", "Ajoute les carottes en rondelles, les pois chiches et un verre d’eau.",
+     "Couvre et laisse mijoter 25 minutes.", "Prépare la semoule et sers avec la coriandre."])
+
+# ----- Collations (10) -----
+recette("Muffins myrtilles & avoine", ["collation", "petit_dejeuner"], 25, ["Sucré", "Végétarien", "Batch cooking"], [
+    G(FLOCONS, 35, note="mixés en farine"), P(WHEY, 15), P(BLANC_OEUF, 40), F(MYRTILLE, 40, pas=10), X(LAIT, 30), X(LEVURE, 2),
+    X(SIROP_ERABLE, 5), L(HUILE_COLZA, 4, mini=0)],
+    ["Préchauffe le four à 180 °C.", "Mélange la farine d’avoine, la protéine et la levure, puis ajoute les blancs, le lait, l’huile et le sirop d’érable.",
+     "Incorpore les myrtilles et répartis dans 2 moules à muffins.", "Enfourne 18 à 20 minutes."])
+recette("Banana bread protéiné", ["collation", "petit_dejeuner"], 50, ["Sucré", "Végétarien", "Batch cooking"], [
+    G(FLOCONS, 30, note="mixés en farine"), F(BANANE, 50, pas=10), P(WHEY, 15), P(BLANC_OEUF, 30), L(NOIX, 8), X(LEVURE, 2), X(CANNELLE, 1)],
+    ["Écrase des bananes bien mûres, ajoute les blancs, la farine d’avoine, la protéine, la levure et la cannelle.", "Incorpore les noix concassées.",
+     "Verse dans un moule à cake et enfourne 40 minutes à 180 °C.", "Laisse tiédir avant de couper en tranches."],
+    description="Pour un cake entier, multiplie les quantités par 6 : une tranche = une portion.")
+recette("Fromage blanc, kiwi & pistaches", ["collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    P(FROMAGE_BLANC, 150), F(KIWI, 100, pas=10), L(PISTACHE, 10), G(FLOCONS, 15)],
+    ["Verse le fromage blanc dans un bol.", "Ajoute le kiwi en dés et les flocons.", "Parsème de pistaches concassées."])
+recette("Tartine de seigle, ricotta & figue", ["collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    G(PAIN_SEIGLE, 40, pas=10), X(RICOTTA, 25), P(SKYR, 80), F(FIGUE_SECHE, 20, pas=5), L(NOIX, 5, mini=0), X(MIEL, 3)],
+    ["Mélange la ricotta et le skyr, puis tartine le pain.", "Ajoute la figue en lamelles et les noix concassées.", "Termine par un filet de miel."])
+recette("Pois chiches croustillants & dip aux herbes", ["collation"], 30, ["Salé", "Végétarien", "Batch cooking"], [
+    G(POIS_CHICHE, 80), L(HUILE_OLIVE, 5, mini=0), X(PAPRIKA, 1), P(SKYR, 100), X(CIBOULETTE, 2), X(CAROTTE, 60), X(CONCOMBRE, 60)],
+    ["Sèche bien les pois chiches dans un torchon, mélange-les avec l’huile, le paprika et le sel.", "Enfourne 25 minutes à 200 °C en remuant à mi-cuisson : ils deviennent croustillants.",
+     "Mélange le skyr avec la ciboulette, sel et poivre.", "Sers avec les bâtonnets de carotte et de concombre."])
+recette("Mousse chocolat-skyr & framboises", ["collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    P(SKYR, 150), X(CACAO, 8), L(CHOCOLAT_NOIR, 10, mini=0), F(FRAMBOISE, 60, pas=10), X(SIROP_ERABLE, 5)],
+    ["Fais fondre le chocolat 30 secondes au micro-ondes.", "Fouette le skyr avec le cacao, le sirop d’érable et le chocolat fondu.",
+     "Sers avec les framboises."],
+    description="L’envie de chocolat, version rassasiante.")
+recette("Crêpe protéinée express & compote", ["collation"], 10, ["Sucré", "Végétarien", "Rapide"], [
+    G(FLOCONS, 30, note="mixés en farine"), P(BLANC_OEUF, 80), X(LAIT, 30), F(COMPOTE, 80, pas=10), X(CANNELLE, 1), L(HUILE_COLZA, 2, mini=0)],
+    ["Mixe les flocons avec les blancs et le lait.", "Verse dans une poêle légèrement huilée et étale.",
+     "Cuis 1 à 2 minutes par face.", "Garnis de compote et de cannelle, puis roule."])
+recette("Smoothie orange, carotte & gingembre", ["collation"], 5, ["Sucré", "Végétarien", "Rapide", "Sans cuisson"], [
+    F(ORANGE, 100, pas=10), X(CAROTTE, 40), P(SKYR, 120), G(FLOCONS, 15), L(LIN, 5, mini=0), X(GINGEMBRE_FRAIS, 2)],
+    ["Épluche l’orange et coupe la carotte en rondelles.", "Mixe tous les ingrédients avec un peu d’eau froide jusqu’à obtenir un smoothie lisse."],
+    description="Un plein de vitamine C pour l’hiver.")
+recette("Barres de céréales maison aux pruneaux", ["collation"], 30, ["Sucré", "Végétarien", "Batch cooking"], [
+    G(FLOCONS, 30), F(PRUNEAU, 20, pas=5), L(AMANDE, 10), P(WHEY, 10), X(MIEL, 5), X(CANNELLE, 1)],
+    ["Mixe grossièrement les pruneaux et les amandes.", "Mélange avec les flocons, la protéine, le miel, la cannelle et 2 cuillères d’eau.",
+     "Tasse dans un petit moule et enfourne 15 minutes à 170 °C.", "Laisse refroidir complètement avant de couper en barres."],
+    astuce="Elles se gardent une semaine dans une boîte : pratique dans le sac.")
+recette("Roulés de jambon, chèvre frais & galettes de riz", ["collation"], 5, ["Salé", "Rapide", "Sans cuisson"], [
+    P(JAMBON, 50), L(CHEVRE_FRAIS, 25), G(GALETTE_RIZ, 2, unite="unite"), X(CONCOMBRE, 60), X(CIBOULETTE, 2)],
+    ["Tartine les tranches de jambon de chèvre frais et parsème de ciboulette.", "Ajoute des bâtonnets de concombre et roule.",
+     "Sers avec les galettes de riz."])
 
 
 def macros(recettes):
