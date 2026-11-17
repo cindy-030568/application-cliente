@@ -425,3 +425,22 @@ export async function envoyerAnnonce(admin: SupabaseClient, texte: string, url: 
   res.clientes = touchees.size;
   return res;
 }
+
+// ---------------------------------------------------------------- Notification à une cliente
+
+/** Notification sur les appareils d'une cliente (si les notifications sont configurées). */
+export async function envoyerPushCliente(
+  admin: SupabaseClient,
+  clienteId: string,
+  contenu: { titre: string; texte: string; url: string },
+): Promise<number> {
+  if (!configurationRappels().push) return 0;
+  const { data: appareils } = await admin.from("abonnements_push").select("id, endpoint, p256dh, auth").eq("cliente_id", clienteId);
+  let envoyees = 0;
+  for (const a of (appareils ?? []) as AbonnementPush[]) {
+    const r = await envoyerPush(a, contenu);
+    if (r === "ok") envoyees++;
+    else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+  }
+  return envoyees;
+}

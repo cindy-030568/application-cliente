@@ -651,3 +651,23 @@ Pour vérifier, le lendemain : Supabase → **Integrations** → **Cron** (ou Da
 
 - **Message à toutes** : tableau de bord → **Un message à toutes mes clientes** → ton texte, la page où elle arrive en touchant le message (communauté, journal…) → **Envoyer**. Notification à celles qui les ont activées, et un mot « Un mot de Cindy » sur l'accueil de toutes pendant 24 h (elles peuvent le fermer). **Retirer** l'enlève avant la fin.
 - **Rappel du journal** : chaque cliente le règle dans **Mon journal** → « Me le rappeler chaque jour » (20 h 30 par défaut, ou l'heure qu'elle veut, ou coupé). Notification seulement (pas d'email), une fois par jour, et rien si sa journée est déjà remplie. Il faut qu'elle ait activé les notifications dans son profil.
+
+---
+
+# Plan alimentaire dans l'app (à la place de Nutrium)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0015_plan_alimentaire.sql`](../supabase/migrations/0015_plan_alimentaire.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Faire un plan
+
+Fiche de la cliente → carte **Plan alimentaire** → **Faire son plan alimentaire**.
+
+1. **Ses besoins** (visibles par toi seulement) : sexe, date de naissance, taille, poids actuel (pré-rempli avec son journal) et objectif, formule (Black par défaut), activité actuelle et visée. L'app calcule le métabolisme de base et la dépense ; tu choisis l'objectif calorique (ou **Prendre … kcal**), puis la répartition lipides / glucides / protéines avec les curseurs (grammes et g/kg calculés) et les fibres. **Enregistrer les besoins**.
+2. **Nouveau plan** : vide (avec les repas de sa fiche) ou **copie** d'un plan existant, même d'une autre cliente. Les recommandations de ton dernier plan sont reprises.
+3. Dans l'éditeur, pour chaque repas : l'heure, le nom, **Ajouter un aliment** (recherche Ciqual + tes aliments), la quantité en grammes ou en unités (œuf, tranche…). **+ ou…** ajoute une alternative : la quantité équivalente est calculée toute seule (en calories, ou en protéines / glucides / lipides au choix). Si tu corriges une quantité à la main, elle ne bouge plus (**recalculer** pour revenir au calcul). Notes par repas, recommandations en bas.
+4. À droite, l'**analyse** : calories, lipides, glucides, protéines, fibres du plan par rapport à ses objectifs, et la répartition par repas.
+5. **Enregistrer** (ou Ctrl + S), puis **Publier pour …** : elle le voit dans son onglet **Nutrition** (et reçoit une notification si elle les a activées). **Mettre à jour son plan** republie après des changements ; **Retirer** l'enlève de son appli. **PDF** télécharge le plan.
+
+Bon à savoir : en mode « sans chiffres », elle voit les quantités mais pas les calories ni les macros (dans l'app comme dans le PDF). Ses anciens plans PDF restent accessibles (lien « Voir mes anciens plans en PDF »). Les fibres s'afficheront quand la table Ciqual aura été remise à jour (le site de l'ANSES était en maintenance).

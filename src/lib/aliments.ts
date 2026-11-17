@@ -14,18 +14,23 @@ export async function rechercherAliments(
   q: string,
   options: { source?: "ciqual" | "perso"; limite?: number; actifsSeulement?: boolean; avecUnite?: boolean } = {},
 ): Promise<Aliment[]> {
-  let requete = supabase.from("aliments").select(SELECTION_ALIMENT);
-  for (const mot of normaliser(q).split(/\s+/).filter(Boolean).slice(0, 5)) {
-    requete = requete.ilike("nom_recherche", `%${mot.replace(/[%_]/g, "")}%`);
-  }
-  if (options.source) requete = requete.eq("source", options.source);
-  if (options.actifsSeulement) requete = requete.eq("actif", true);
-  if (options.avecUnite) requete = requete.not("nom_unite", "is", null);
-  const { data } = await requete
-    .order("source", { ascending: false })
-    .order("nom")
-    .limit(options.limite ?? 50)
-    .returns<AlimentBrut[]>();
+  const mots = normaliser(q).split(/\s+/).filter(Boolean).slice(0, 5).map((m) => m.replace(/[%_]/g, ""));
+  const limite = options.limite ?? 50;
+  // Deux recherches : les noms qui COMMENCENT par le premier mot (« oeuf » → Œuf…), puis ceux qui le contiennent
+  // (sinon « oeuf » ne renverrait que des « Boeuf… », classés avant par ordre alphabétique).
+  const construire = (prefixe: boolean) => {
+    let requete = supabase.from("aliments").select(SELECTION_ALIMENT);
+    mots.forEach((mot, i) => {
+      requete = requete.ilike("nom_recherche", i === 0 && prefixe ? `${mot}%` : `%${mot}%`);
+    });
+    if (options.source) requete = requete.eq("source", options.source);
+    if (options.actifsSeulement) requete = requete.eq("actif", true);
+    if (options.avecUnite) requete = requete.not("nom_unite", "is", null);
+    return requete.order("source", { ascending: false }).order("nom").limit(limite).returns<AlimentBrut[]>();
+  };
+  const [{ data: debut }, { data: partout }] = await Promise.all([construire(true), construire(false)]);
+  const vus = new Set<string>();
+  const data = [...(debut ?? []), ...(partout ?? [])].filter((a) => !vus.has(a.id) && vus.add(a.id)).slice(0, limite);
   const resultats = (data ?? []).map(normaliserAliment);
   // Les noms qui commencent par le premier mot passent devant (« riz » avant « farine de riz »).
   const premier = normaliser(q).split(/\s+/)[0] ?? "";

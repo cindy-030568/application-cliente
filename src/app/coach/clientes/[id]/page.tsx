@@ -226,6 +226,18 @@ export default async function PageFicheCliente({
               Ouvrir son suivi
             </Link>
           </Carte>
+          <Carte className="flex flex-col gap-3 border-2 border-accent/40">
+            <h2 className="font-titre text-xl font-bold">Plan alimentaire</h2>
+            <p className="text-[14px] text-texte-2">
+              Ses besoins, puis son plan repas par repas avec les alternatives. Elle le reçoit dans son onglet Nutrition.
+            </p>
+            <Link
+              href={`/coach/clientes/${c.id}/plan-alimentaire`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-medium text-white"
+            >
+              Faire son plan alimentaire
+            </Link>
+          </Carte>
           <Section titre="Connexion">
             <BlocConnexion id={c.id} prenom={c.profils.prenom} />
           </Section>
