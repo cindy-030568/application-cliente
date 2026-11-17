@@ -5,7 +5,9 @@ import { Carte, Etiquette, LienBouton, Message, Surtitre, cx } from "@/component
 import { exigerCoach } from "@/lib/auth";
 import { REPAS_RECETTE, additionner, macrosDe } from "@/lib/nutrition";
 import { chargerRecettes, urlPhotoRecette } from "@/lib/recettes";
+import { detailDepart, resumerDepart, type RecetteDepartResume } from "@/lib/recettes-depart";
 import { normaliser } from "@/lib/texte";
+import depart from "../../../../data/recettes-depart.json";
 import { BoutonImportRecettes } from "./import";
 
 export const metadata: Metadata = { title: "Recettes" };
@@ -18,6 +20,7 @@ export default async function PageRecettesCoach({
   const { q = "", repas = "", supprimee } = await searchParams;
   const { supabase } = await exigerCoach();
   const recettes = await chargerRecettes(supabase);
+  const resume = resumerDepart((depart as { recettes: RecetteDepartResume[] }).recettes, recettes);
   const filtrees = recettes.filter(
     (r) => (!repas || r.repas.includes(repas)) && (!q.trim() || normaliser(r.titre).includes(normaliser(q))),
   );
@@ -38,14 +41,30 @@ export default async function PageRecettesCoach({
       </div>
       {supprimee && <Message ton="succes">Recette supprimée.</Message>}
 
-      <Carte className="flex flex-col gap-3">
-        <h2 className="font-titre text-xl font-bold">Tes 50 recettes de départ</h2>
-        <p className="text-[15px] text-texte-2">
-          10 petits-déjeuners, 15 déjeuners, 15 dîners et 10 collations, dont 27 végétariennes. Il faut d’abord avoir importé la
-          table Ciqual (menu Aliments). Tu pourras ensuite tout modifier.
-        </p>
-        <BoutonImportRecettes principal={recettes.length === 0} misesAJourPossibles={recettes.length > 0} />
-      </Carte>
+      {recettes.length === 0 ? (
+        <Carte className="flex flex-col gap-3">
+          <h2 className="font-titre text-xl font-bold">Tes {resume.total} recettes de départ</h2>
+          <p className="text-[15px] text-texte-2">
+            {detailDepart(resume)}. Il faut d’abord avoir importé la table Ciqual (menu Aliments). Tu pourras ensuite tout
+            modifier.
+          </p>
+          <BoutonImportRecettes importer={resume.total} principal />
+        </Carte>
+      ) : resume.manquantes > 0 || resume.photosAMettreAJour > 0 ? (
+        <Carte className="flex flex-col gap-3">
+          <h2 className="font-titre text-xl font-bold">
+            {resume.manquantes > 0
+              ? `${resume.manquantes} nouvelle${resume.manquantes > 1 ? "s" : ""} recette${resume.manquantes > 1 ? "s" : ""} de départ`
+              : `${resume.photosAMettreAJour} nouvelle${resume.photosAMettreAJour > 1 ? "s" : ""} photo${resume.photosAMettreAJour > 1 ? "s" : ""} de recettes`}
+          </h2>
+          <p className="text-[15px] text-texte-2">
+            {resume.manquantes > 0
+              ? "Elles ne sont pas encore dans ta bibliothèque. Tu pourras ensuite les modifier comme les autres."
+              : "Elles vont s’afficher sur les recettes de départ. Tes recettes et tes propres photos ne changent pas."}
+          </p>
+          <BoutonImportRecettes importer={resume.manquantes} photos={resume.photosAMettreAJour > 0} />
+        </Carte>
+      ) : null}
 
       <form action="/coach/recettes" className="flex flex-wrap gap-2">
         <input

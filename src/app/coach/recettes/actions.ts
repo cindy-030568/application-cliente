@@ -265,3 +265,31 @@ export async function importerRecettesDepart(mettreAJour = false): Promise<EtatR
   if (mettreAJour) return { succes: `${misesAJour} recettes mises à jour, ${ajoutees} ajoutées.` };
   return { succes: ajoutees ? `${ajoutees} recettes importées.` : "Toutes les recettes de départ sont déjà là." };
 }
+
+/**
+ * Installe les photos fournies avec les recettes de départ déjà présentes,
+ * sans toucher au reste (textes, ingrédients, modifications de la coach).
+ * Une photo ajoutée par la coach n'est jamais remplacée.
+ */
+export async function mettreAJourPhotosDepart(): Promise<EtatRecette> {
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE };
+  const { supabase } = session;
+  const fichier = depart as FichierDepart;
+  const { data: existantes } = await supabase.from("recettes").select("id, titre, photo_path");
+  const parTitre = new Map((existantes ?? []).map((r) => [r.titre as string, r as { id: string; photo_path: string | null }]));
+  let changees = 0;
+  for (const r of fichier.recettes) {
+    if (!r.photo) continue;
+    const existante = [r.titre, ...(r.anciens_titres ?? [])].map((t) => parTitre.get(t)).find(Boolean);
+    if (!existante) continue;
+    if (existante.photo_path && !PHOTO_DEPART_VALIDE.test(existante.photo_path)) continue;
+    const photo = `${PREFIXE_PHOTO_DEPART}${r.photo}`;
+    if (existante.photo_path === photo) continue;
+    const { error } = await supabase.from("recettes").update({ photo_path: photo }).eq("id", existante.id);
+    if (error) return { erreur: `La photo de « ${r.titre} » n’a pas pu être ajoutée (${changees} ajoutées avant elle).` };
+    changees++;
+  }
+  rafraichir();
+  return { succes: changees ? `${changees} photo${changees > 1 ? "s" : ""} ajoutée${changees > 1 ? "s" : ""}.` : "Toutes les photos sont déjà à jour." };
+}
