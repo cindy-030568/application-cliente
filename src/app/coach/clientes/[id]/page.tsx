@@ -238,6 +238,18 @@ export default async function PageFicheCliente({
               Faire son plan alimentaire
             </Link>
           </Carte>
+          <Carte className="flex flex-col gap-3">
+            <h2 className="font-titre text-xl font-bold">Programme sportif</h2>
+            <p className="text-[14px] text-texte-2">
+              Construit avec Claude, collé ici, puis publié dans son onglet Sport.
+            </p>
+            <Link
+              href={`/coach/clientes/${c.id}/programme-sportif`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
+            >
+              Son programme sportif
+            </Link>
+          </Carte>
           <Section titre="Connexion">
             <BlocConnexion id={c.id} prenom={c.profils.prenom} />
           </Section>

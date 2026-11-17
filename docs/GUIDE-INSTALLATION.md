@@ -671,3 +671,25 @@ Fiche de la cliente → carte **Plan alimentaire** → **Faire son plan alimenta
 5. **Enregistrer** (ou Ctrl + S), puis **Publier pour …** : elle le voit dans son onglet **Nutrition** (et reçoit une notification si elle les a activées). **Mettre à jour son plan** republie après des changements ; **Retirer** l'enlève de son appli. **PDF** télécharge le plan.
 
 Bon à savoir : en mode « sans chiffres », elle voit les quantités mais pas les calories ni les macros (dans l'app comme dans le PDF). Ses anciens plans PDF restent accessibles (lien « Voir mes anciens plans en PDF »). Les fibres s'afficheront quand la table Ciqual aura été remise à jour (le site de l'ANSES était en maintenance).
+
+---
+
+# Programme sportif construit avec Claude
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0016_programme_sportif.sql`](../supabase/migrations/0016_programme_sportif.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Faire un programme
+
+Fiche de la cliente → carte **Programme sportif** → **Son programme sportif**.
+
+1. **Copier la consigne pour Claude** → colle-la au début d'une conversation Claude. Astuce : crée une fois pour toutes un **projet Claude** « Programmes sportifs » et colle la consigne dans ses instructions ; chaque nouvelle conversation du projet la connaîtra.
+2. Décris ta cliente à Claude (objectif, niveau, matériel de la box, nombre de séances, blessures…) **sans son nom**, et construisez le programme ensemble.
+3. Quand il te convient, écris **« format application »** : Claude répond avec le programme dans un bloc de code.
+4. Copie **toute** sa réponse → colle-la dans l'app → **Importer le programme** → tu vois l'aperçu tel qu'elle le verra.
+5. **Publier pour …** : elle le voit dans son onglet **Sport** (et reçoit une notification si elle les a activées).
+
+Pour **modifier** : sur la page du programme, **Copier le programme pour Claude** → colle-le dans Claude avec tes changements → colle sa réponse dans **Remplacer par cette version** → **Republier**.
+
+Bon à savoir : le suivi sportif doit être coché dans la fiche, sinon elle n'a pas d'onglet Sport. Si un exercice porte le même nom qu'une vidéo de ta bibliothèque (ex. « Squat goblet »), elle aura un bouton **Voir la vidéo**. Ses anciens programmes PDF restent accessibles.
