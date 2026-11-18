@@ -788,3 +788,26 @@ Pour que le guidage soit juste, chaque exercice de force doit avoir **series** (
 - **3 jours avant** : elle reçoit une notification « Ton nouveau programme sportif arrive vendredi 20 novembre (dans 3 jours) » et voit un encadré dans son onglet Sport.
 - **Le jour J** : le nouveau programme remplace l'ancien (le matin, ou dès qu'elle ouvre l'onglet Sport) et elle reçoit « Ton nouveau programme sportif est là 💪 ».
 - Tu n'as plus le rappel « programme à changer » pour cette cliente : le changement est déjà prévu.
+
+---
+
+# Poids utilisés (mode séance)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0021_charges_series.sql`](../supabase/migrations/0021_charges_series.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Pour ta cliente
+
+Sur chaque série du mode séance, un champ **Poids utilisé** (boutons − / + d'un kilo, ou elle tape le poids, ex. 15,5).
+
+- **La dernière fois (dim. 15 nov.) : 12 · 12 · 14 · 14 kg** s'affiche sous le champ, la série en cours en gras.
+- Le poids est **proposé** : celui de sa série d'avant, sinon celui de la même série la dernière fois. Si elle ne change rien, **Fait ✓** l'enregistre tel quel.
+- Exercice sans charge prévue (gainage, rameur…) : le champ est replié, **+ Noter le poids utilisé** l'ouvre.
+- À la fin : **Tes poids du jour**, exercice par exercice.
+
+Chaque poids est enregistré dès qu'elle touche **Fait ✓** (et renvoyé à la validation si le réseau avait coupé). Elle le retrouve sur n'importe quel téléphone.
+
+## 3. Pour toi
+
+Page **Programme sportif** de la cliente → carte **Poids utilisés** : pour chaque exercice, sa dernière séance, la précédente, et la progression (ex. **+1,5 kg**).

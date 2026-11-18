@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
+import { cleExercice } from "@/lib/programme-sportif";
 import { lireMonProgramme } from "@/lib/programme-sportif-serveur";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -43,4 +44,31 @@ export async function validerSeance(
   }
   revalidatePath("/sport");
   return { succes: "Séance enregistrée : Cindy la verra. Bravo ! 💪" };
+}
+
+export type ChargeNotee = { exercice: string; serie: number; kg: number };
+
+/**
+ * Mode séance : la cliente note le poids d'une ou plusieurs séries (corrigeable : même séance + même série = mise à jour).
+ * Renvoie true si c'est enregistré (sinon l'écran réessaiera à la fin de la séance).
+ */
+export async function noterCharges(programmeId: string, seanceRef: string, lignes: ChargeNotee[]): Promise<boolean> {
+  const session = await lireSession();
+  if (!session || session.profil.role === "coach" || !UUID.test(seanceRef) || !UUID.test(programmeId)) return false;
+  const propres = lignes
+    .slice(0, 100)
+    .filter((l) => typeof l.exercice === "string" && l.exercice.trim() && Number.isInteger(l.serie) && l.serie >= 1 && l.serie <= 50 && Number.isFinite(l.kg) && l.kg >= 0 && l.kg <= 500)
+    .map((l) => ({
+      programme_id: programmeId,
+      seance_ref: seanceRef,
+      exercice_cle: cleExercice(l.exercice).slice(0, 120),
+      exercice_nom: l.exercice.trim().slice(0, 120),
+      serie: l.serie,
+      charge_kg: Math.round(l.kg * 10) / 10,
+      cliente_id: session.profil.id,
+    }))
+    .filter((l) => l.exercice_cle);
+  if (!propres.length) return true;
+  const { error } = await session.supabase.from("charges_series").upsert(propres, { onConflict: "cliente_id,seance_ref,exercice_cle,serie" });
+  return !error;
 }

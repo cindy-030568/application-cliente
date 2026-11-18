@@ -5,15 +5,36 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { IconeVideo } from "@/components/icones";
 import { Bouton, Message, cx } from "@/components/ui";
 import { cleExercice, type Exercice, type Seance } from "@/lib/programme-sportif";
-import { RESSENTIS, etapesSeance, formaterDuree, phaseIntervalle, type Etape, type EtapeChrono } from "@/lib/seance-guidee";
+import {
+  RESSENTIS,
+  chargeProposee,
+  derniereFois,
+  etapesSeance,
+  formaterDuree,
+  formaterKg,
+  lireKg,
+  phaseIntervalle,
+  type Etape,
+  type EtapeChrono,
+  type EtapeSerie,
+  type HistoriqueCharges,
+  type SeanceCharges,
+} from "@/lib/seance-guidee";
 
 type Chrono = { debut: number | null; pause: number | null; cumul: number; fini: number | null };
-type Etat = { index: number; debut: number | null; finRepos: number | null; chrono: Chrono };
+/** Poids noté pour une série (clé « exercice#série ») ; `envoye` : enregistré dans la base. */
+type Charge = { kg: number; nom: string; serie: number; envoye: boolean };
+type Etat = { index: number; debut: number | null; finRepos: number | null; chrono: Chrono; ref: string | null; charges: Record<string, Charge> };
+type Notation = (ref: string, lignes: { exercice: string; serie: number; kg: number }[]) => Promise<boolean>;
 type Infos = { dureeMinutes: number | null; ressenti: number | null; commentaire: string };
 type Resultat = { erreur?: string; succes?: string };
 
 const CHRONO_VIDE: Chrono = { debut: null, pause: null, cumul: 0, fini: null };
-const DEPART: Etat = { index: -1, debut: null, finRepos: null, chrono: CHRONO_VIDE };
+const DEPART: Etat = { index: -1, debut: null, finRepos: null, chrono: CHRONO_VIDE, ref: null, charges: {} };
+const nouvelleRef = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (Number(c) ^ (Math.random() * 16) >> (Number(c) / 4)).toString(16));
 const DECOMPTE = 3000; // « 3, 2, 1 » avant un minuteur de bloc
 const GARDE = 6 * 60 * 60 * 1000; // une séance commencée se reprend pendant 6 h
 
@@ -40,6 +61,10 @@ type Proprietes = {
   videos?: Record<string, string>;
   lienVideo?: string | null;
   valider?: (infos: Infos) => Promise<Resultat>;
+  /** Poids notés les fois précédentes, par exercice. */
+  historique?: HistoriqueCharges;
+  /** Enregistre les poids de la séance (absent = aperçu coach : rien n'est enregistré). */
+  noterCharges?: Notation;
 };
 
 /** Reprise après une sortie (vidéo, appel, appli fermée…). */
@@ -48,7 +73,7 @@ function lireSauvegarde(stockage: string, n: number): Etat | null {
     const brut = localStorage.getItem(stockage);
     const s = brut ? (JSON.parse(brut) as Etat & { maj: number; n: number }) : null;
     if (s && s.n === n && s.index >= 0 && s.index <= n && Date.now() - s.maj < GARDE) {
-      return { index: s.index, debut: s.debut, finRepos: s.finRepos, chrono: s.chrono ?? CHRONO_VIDE };
+      return { index: s.index, debut: s.debut, finRepos: s.finRepos, chrono: s.chrono ?? CHRONO_VIDE, ref: s.ref ?? null, charges: s.charges ?? {} };
     }
   } catch {
     // stockage indisponible (navigation privée) : on repart du début
@@ -56,7 +81,7 @@ function lireSauvegarde(stockage: string, n: number): Etat | null {
   return null;
 }
 
-function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider }: Proprietes) {
+function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, historique = {}, noterCharges }: Proprietes) {
   const etapes = useMemo(() => etapesSeance(seance), [seance]);
   const n = etapes.length;
   const stockage = `seance-guidee:${cle}`;
@@ -85,6 +110,7 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider }
         ...e,
         index,
         debut: e.debut ?? Date.now(),
+        ref: e.ref ?? nouvelleRef(),
         finRepos: cible?.type === "repos" ? Date.now() + cible.secondes * 1000 : null,
         chrono: CHRONO_VIDE,
       }));
@@ -98,6 +124,40 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider }
     son.debloquer();
     aller(etat.index + 1);
   };
+
+  // Poids utilisés : saisie de l'écran en cours, proposée d'après la série d'avant ou la dernière fois.
+  const [saisies, setSaisies] = useState<Record<number, string>>({});
+  const kgEnCours = useMemo(() => Object.fromEntries(Object.entries(etat.charges).map(([k, c]) => [k, c.kg])), [etat.charges]);
+  const poids = (e: EtapeSerie, index: number) => {
+    const k = `${cleExercice(e.exercice.nom)}#${e.numero}`;
+    const derniere = derniereFois(historique, cleExercice(e.exercice.nom), etat.ref);
+    const propose = etat.charges[k]?.kg ?? chargeProposee(kgEnCours, cleExercice(e.exercice.nom), e.numero, derniere);
+    return { k, derniere, texte: saisies[index] ?? (propose !== null ? formaterKg(propose) : "") };
+  };
+  const envoyer = (ref: string, aEnvoyer: [string, Charge][]) => {
+    if (!noterCharges || !aEnvoyer.length) return Promise.resolve(true);
+    return noterCharges(
+      ref,
+      aEnvoyer.map(([, c]) => ({ exercice: c.nom, serie: c.serie, kg: c.kg })),
+    )
+      .then((ok) => {
+        if (ok) setEtat((x) => ({ ...x, charges: Object.fromEntries(Object.entries(x.charges).map(([k, c]) => [k, aEnvoyer.some(([j]) => j === k) ? { ...c, envoye: true } : c])) }));
+        return ok;
+      })
+      .catch(() => false);
+  };
+  const serieFaite = (e: EtapeSerie) => {
+    const { k, texte } = poids(e, etat.index);
+    const kg = lireKg(texte);
+    if (kg !== null && etat.ref) {
+      const charge: Charge = { kg, nom: e.exercice.nom, serie: e.numero, envoye: false };
+      setEtat((x) => ({ ...x, charges: { ...x.charges, [k]: charge } }));
+      void envoyer(etat.ref, [[k, charge]]);
+    }
+    suivant();
+  };
+  /** Avant de valider la séance : les poids pas encore enregistrés (réseau coupé…) repartent. */
+  const rattraper = () => (etat.ref ? envoyer(etat.ref, Object.entries(etat.charges).filter(([, c]) => !c.envoye)) : Promise.resolve(true));
   const precedent = () => {
     let i = etat.index - 1;
     while (i > 0 && etapes[i]?.type === "repos") i--; // on revient à la série, pas au repos
@@ -200,8 +260,16 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider }
               <IconeVideo className="size-5" /> Revoir le mouvement en vidéo
             </Link>
           )}
+          <ChampPoids
+            key={etat.index}
+            texte={poids(etape, etat.index).texte}
+            changer={(t) => setSaisies((x) => ({ ...x, [etat.index]: t }))}
+            derniere={poids(etape, etat.index).derniere}
+            serie={etape.numero}
+            ouvert={Boolean(etape.exercice.charge) || poids(etape, etat.index).texte !== ""}
+          />
           <Actions precedent={etat.index > 0 ? precedent : undefined} ensuite={prochaine ? apercu(prochaine) : null}>
-            <Bouton pleineLargeur className="min-h-14 text-[16.5px]" onClick={suivant}>
+            <Bouton pleineLargeur className="min-h-14 text-[16.5px]" onClick={() => serieFaite(etape)}>
               {etat.index === n - 1
                 ? "Terminer la séance"
                 : etapes[etat.index + 1]?.type === "repos"
@@ -255,7 +323,14 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider }
         <Fin
           debut={etat.debut}
           retour={retour}
-          valider={valider}
+          valider={
+            valider &&
+            (async (infos: Infos) => {
+              await rattraper();
+              return valider(infos);
+            })
+          }
+          charges={Object.values(etat.charges)}
           recommencer={() => setEtat(DEPART)}
           oublier={() => {
             try {
@@ -498,12 +573,14 @@ function Fin({
   debut,
   retour,
   valider,
+  charges,
   recommencer,
   oublier,
 }: {
   debut: number | null;
   retour: string;
   valider?: (infos: Infos) => Promise<Resultat>;
+  charges: Charge[];
   recommencer: () => void;
   oublier: () => void;
 }) {
@@ -522,6 +599,7 @@ function Fin({
         <h1 className="font-titre text-[30px] font-bold leading-tight">Séance terminée !</h1>
         {minutes && <p className="text-[15px] text-texte-2">{minutes} min d’entraînement. Bravo, tu peux être fière de toi 💛</p>}
       </div>
+      {charges.length > 0 && <RecapCharges charges={charges} />}
       {!valider ? (
         <Message ton="info">Aperçu coach : ta cliente valide ici sa séance avec son ressenti. Rien n’est enregistré pendant l’aperçu.</Message>
       ) : resultat.succes ? (
@@ -656,4 +734,102 @@ function useEcranAllume(actif: boolean) {
       void verrou?.release().catch(() => {});
     };
   }, [actif]);
+}
+
+// ---------------------------------------------------------------- Poids utilisés
+
+/** Champ « Poids utilisé » d'une série, avec le rappel de la dernière fois. */
+function ChampPoids({
+  texte,
+  changer,
+  derniere,
+  serie,
+  ouvert: ouvertAuDepart,
+}: {
+  texte: string;
+  changer: (t: string) => void;
+  derniere: SeanceCharges | null;
+  serie: number;
+  ouvert: boolean;
+}) {
+  const [ouvert, setOuvert] = useState(ouvertAuDepart || derniere !== null);
+  const pas = (delta: number) => {
+    const kg = lireKg(texte) ?? 0;
+    changer(formaterKg(Math.max(0, Math.min(500, kg + delta))));
+  };
+  if (!ouvert) {
+    return (
+      <button type="button" onClick={() => setOuvert(true)} className="w-fit text-[14.5px] font-medium text-accent underline underline-offset-4">
+        + Noter le poids utilisé
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-ligne bg-white/70 p-3">
+      <label htmlFor="poids-serie" className="text-[14px] font-medium">
+        Poids utilisé
+      </label>
+      <div className="flex items-center gap-2">
+        <button type="button" aria-label="Moins 1 kg" onClick={() => pas(-1)} className="size-12 shrink-0 rounded-full border-[1.5px] border-chocolat text-[22px] leading-none">
+          −
+        </button>
+        <div className="relative min-w-0 flex-1">
+          <input
+            id="poids-serie"
+            inputMode="decimal"
+            autoComplete="off"
+            value={texte}
+            onChange={(e) => changer(e.target.value.replace(/[^\d.,]/g, "").slice(0, 5))}
+            placeholder="—"
+            className="h-12 w-full rounded-xl border border-ligne bg-white pr-10 text-center font-titre text-[26px] font-bold tabular-nums"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[15px] text-texte-2">kg</span>
+        </div>
+        <button type="button" aria-label="Plus 1 kg" onClick={() => pas(1)} className="size-12 shrink-0 rounded-full border-[1.5px] border-chocolat text-[22px] leading-none">
+          +
+        </button>
+      </div>
+      {derniere ? (
+        <p className="text-[13.5px] text-texte-2">
+          La dernière fois ({dateCourte.format(new Date(derniere.date))}) :{" "}
+          {derniere.series.map((x, i) => (
+            <span key={x.serie}>
+              {i > 0 && " · "}
+              <span className={x.serie === serie ? "font-semibold text-chocolat" : undefined}>{formaterKg(x.kg)}</span>
+            </span>
+          ))}{" "}
+          kg
+        </p>
+      ) : (
+        <p className="text-[13px] text-texte-2">Note ton poids : la prochaine fois, l’appli te le rappellera.</p>
+      )}
+    </div>
+  );
+}
+
+const dateCourte = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Paris" });
+
+/** Fin de séance : les poids du jour, par exercice. */
+function RecapCharges({ charges }: { charges: Charge[] }) {
+  const parExercice = new Map<string, Charge[]>();
+  for (const c of charges) parExercice.set(c.nom, [...(parExercice.get(c.nom) ?? []), c]);
+  return (
+    <div className="rounded-xl bg-blanc-casse p-4 shadow-douce">
+      <p className="text-[12.5px] font-medium uppercase tracking-[0.1em] text-caramel-texte">Tes poids du jour</p>
+      <ul className="mt-2 flex flex-col gap-1 text-[14.5px]">
+        {[...parExercice].map(([nom, liste]) => (
+          <li key={nom} className="flex justify-between gap-3">
+            <span>{nom}</span>
+            <span className="shrink-0 font-medium tabular-nums">
+              {liste
+                .sort((a, b) => a.serie - b.serie)
+                .map((c) => formaterKg(c.kg))
+                .join(" · ")}{" "}
+              kg
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }

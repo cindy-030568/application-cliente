@@ -8,9 +8,9 @@ import { lireSuiviSport } from "@/lib/paiements-serveur";
 import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
 import { CONSIGNE_CLAUDE, DEMANDE_PDF, compterExercices, echeanceRenouvellement, statutProgramme } from "@/lib/programme-sportif";
 import { activerProgrammesPlanifies, lireProgrammes } from "@/lib/programme-sportif-serveur";
-import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
+import { lireCharges, lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { BoutonCopier, BoutonPlanifier, DateDebut, FormulaireImport } from "./composants";
-import { SeancesFaites } from "./seances-faites";
+import { PoidsUtilises, SeancesFaites } from "./seances-faites";
 
 export const metadata: Metadata = { title: "Programme sportif" };
 
@@ -34,6 +34,7 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
     lireSuiviSport(supabase, id),
     lireSeancesFaites(supabase, { clienteId: id, limite: 30 }),
   ]);
+  const charges = await lireCharges(supabase, { clienteId: id, limite: 600 });
   const auj = aujourdhuiParis();
   // Programmes jamais publiés, dans l'ordre du planning (date, puis ordre d'import).
   const planning = (programmes ?? [])
@@ -172,6 +173,7 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
             )}
           </Carte>
           <SeancesFaites seances={faites} prenom={c.profils.prenom} />
+          <PoidsUtilises lignes={charges} prenom={c.profils.prenom} />
           </div>
         </div>
       )}

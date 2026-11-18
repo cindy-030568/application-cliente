@@ -177,3 +177,56 @@ export function resumeSeancesFaites(faites: { seance_nom: string; faite_le: stri
   }
   return r;
 }
+
+// ---------------------------------------------------------------- Poids utilisés
+
+export type LigneCharge = { seance_ref: string; exercice_cle: string; serie: number; charge_kg: number | string; faite_le: string };
+export type SeanceCharges = { ref: string; date: string; series: { serie: number; kg: number }[] };
+/** Par exercice (nom normalisé) : ses dernières séances, la plus récente d'abord. */
+export type HistoriqueCharges = Record<string, SeanceCharges[]>;
+
+/** « 14 », « 14,5 », « 14.5 kg » → 14,5 ; null si vide ou illisible. */
+export function lireKg(t: string): number | null {
+  const m = t.trim().replace(",", ".").match(/^\d{1,3}(\.\d+)?/);
+  if (!m) return null;
+  const n = Math.round(Number(m[0]) * 10) / 10;
+  return n >= 0 && n <= 500 ? n : null;
+}
+
+/** 14 → « 14 » ; 14.5 → « 14,5 ». */
+export function formaterKg(n: number): string {
+  return String(Math.round(n * 10) / 10).replace(".", ",");
+}
+
+/** Regroupe les charges enregistrées par exercice puis par séance (3 dernières séances gardées). */
+export function regrouperCharges(lignes: LigneCharge[]): HistoriqueCharges {
+  const r: HistoriqueCharges = {};
+  const triees = [...lignes].sort((a, b) => b.faite_le.localeCompare(a.faite_le));
+  for (const l of triees) {
+    const seances = (r[l.exercice_cle] ??= []);
+    let s = seances.find((x) => x.ref === l.seance_ref);
+    if (!s) {
+      if (seances.length >= 3) continue;
+      s = { ref: l.seance_ref, date: l.faite_le, series: [] };
+      seances.push(s);
+    }
+    if (!s.series.some((x) => x.serie === l.serie)) s.series.push({ serie: l.serie, kg: Number(l.charge_kg) });
+  }
+  for (const seances of Object.values(r)) for (const s of seances) s.series.sort((a, b) => a.serie - b.serie);
+  return r;
+}
+
+/** La dernière séance (autre que celle en cours) où elle a noté un poids pour cet exercice. */
+export function derniereFois(historique: HistoriqueCharges, cle: string, refEnCours: string | null): SeanceCharges | null {
+  return (historique[cle] ?? []).find((s) => s.ref !== refEnCours && s.series.length > 0) ?? null;
+}
+
+/**
+ * Poids proposé pour une série : celui de la série d'avant dans la séance en cours,
+ * sinon celui de la même série la dernière fois, sinon la dernière charge de la dernière fois.
+ */
+export function chargeProposee(enCours: Record<string, number>, cle: string, serie: number, derniere: SeanceCharges | null): number | null {
+  for (let s = serie - 1; s >= 1; s--) if (enCours[`${cle}#${s}`] !== undefined) return enCours[`${cle}#${s}`];
+  if (!derniere) return null;
+  return derniere.series.find((x) => x.serie === serie)?.kg ?? derniere.series.at(-1)?.kg ?? null;
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Exercice, Seance } from "./programme-sportif";
-import { etapesSeance, formaterDuree, lireFormat, lireSecondes, nombreSeries, phaseIntervalle } from "./seance-guidee";
+import { chargeProposee, derniereFois, etapesSeance, formaterDuree, formaterKg, lireFormat, lireKg, lireSecondes, nombreSeries, phaseIntervalle, regrouperCharges } from "./seance-guidee";
 
 const ex = (nom: string, o: Partial<Exercice> = {}): Exercice => ({ nom, series: null, repetitions: null, charge: null, repos: null, tempo: null, consignes: null, ...o });
 
@@ -89,5 +89,41 @@ describe("minuteurs", () => {
     expect(phaseIntervalle("emom", 60, 125)).toEqual({ tour: 3, phase: "effort", reste: 55 });
     expect(phaseIntervalle("tabata", 20, 25)).toEqual({ tour: 1, phase: "repos", reste: 5 });
     expect(phaseIntervalle("tabata", 20, 31)).toEqual({ tour: 2, phase: "effort", reste: 19 });
+  });
+});
+
+describe("poids utilisés", () => {
+  const lignes = [
+    { seance_ref: "s1", exercice_cle: "squat goblet", serie: 1, charge_kg: "12.0", faite_le: "2026-11-10T09:00:00Z" },
+    { seance_ref: "s1", exercice_cle: "squat goblet", serie: 2, charge_kg: "12.0", faite_le: "2026-11-10T09:05:00Z" },
+    { seance_ref: "s2", exercice_cle: "squat goblet", serie: 2, charge_kg: "16.0", faite_le: "2026-11-16T09:05:00Z" },
+    { seance_ref: "s2", exercice_cle: "squat goblet", serie: 1, charge_kg: "14.0", faite_le: "2026-11-16T09:00:00Z" },
+    { seance_ref: "s2", exercice_cle: "rameur", serie: 1, charge_kg: "0", faite_le: "2026-11-16T09:20:00Z" },
+  ];
+  const h = regrouperCharges(lignes);
+  it("lit et affiche les kilos", () => {
+    expect(lireKg("14,5")).toBe(14.5);
+    expect(lireKg("14.5 kg")).toBe(14.5);
+    expect(lireKg("")).toBeNull();
+    expect(lireKg("lourd")).toBeNull();
+    expect(lireKg("9999")).toBeNull();
+    expect(formaterKg(14.5)).toBe("14,5");
+    expect(formaterKg(16)).toBe("16");
+  });
+  it("regroupe par exercice et par séance, la plus récente d'abord", () => {
+    expect(h["squat goblet"].map((s) => s.ref)).toEqual(["s2", "s1"]);
+    expect(h["squat goblet"][0].series).toEqual([{ serie: 1, kg: 14 }, { serie: 2, kg: 16 }]);
+  });
+  it("la dernière fois, sans compter la séance en cours", () => {
+    expect(derniereFois(h, "squat goblet", null)?.ref).toBe("s2");
+    expect(derniereFois(h, "squat goblet", "s2")?.ref).toBe("s1");
+    expect(derniereFois(h, "inconnu", null)).toBeNull();
+  });
+  it("poids proposé", () => {
+    const d = derniereFois(h, "squat goblet", null);
+    expect(chargeProposee({}, "squat goblet", 2, d)).toBe(16); // même série la dernière fois
+    expect(chargeProposee({}, "squat goblet", 4, d)).toBe(16); // sinon sa dernière charge
+    expect(chargeProposee({ "squat goblet#1": 18 }, "squat goblet", 2, d)).toBe(18); // série d'avant aujourd'hui
+    expect(chargeProposee({}, "squat goblet", 1, null)).toBeNull();
   });
 });
