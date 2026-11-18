@@ -52,7 +52,13 @@ export default async function PageProgramme({ params }: { params: Promise<{ id: 
             Aperçu tel qu’elle le verra · {p.contenu.seances.length} séance{p.contenu.seances.length > 1 ? "s" : ""}, {compterExercices(p.contenu)} exercices.
             Un exercice qui porte le même nom qu’une vidéo de ta bibliothèque affiche « Voir la vidéo ».
           </p>
-          <VueProgramme programme={p.contenu} videos={videos} lienVideo="/coach/videos/" />
+          <VueProgramme
+            programme={p.contenu}
+            videos={videos}
+            lienVideo="/coach/videos/"
+            lienSeance={(i) => `/coach/clientes/${id}/programme-sportif/${p.id}/seance/${i}`}
+            libelleSeance="Tester le mode séance"
+          />
         </div>
 
         <div className="flex flex-col gap-6">

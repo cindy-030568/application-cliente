@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { IconeRetour } from "@/components/icones";
 import { Carte, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { aujourdhuiParis, bilanAvecPhotos, formaterDate, prochainBilan } from "@/lib/bilan";
+import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, formaterDate, prochainBilan } from "@/lib/bilan";
 import type { ClienteListe } from "../../donnees";
 import { BadgeStatut } from "../../badge-statut";
 import { modifierCliente } from "../actions";
@@ -16,8 +16,9 @@ import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
 import { BlocPaiement } from "./bloc-paiement";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
 import { chargerCategoriesAliment } from "@/lib/aliments";
-import { echeanceRenouvellement, semaineProgramme } from "@/lib/programme-sportif";
+import { echeanceRenouvellement, jourParisDe, semaineProgramme } from "@/lib/programme-sportif";
 import { lireRenouvellements } from "@/lib/programme-sportif-serveur";
+import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
@@ -64,7 +65,10 @@ export default async function PageFicheCliente({
     chargerCategoriesAliment(supabase),
   ]);
   if (!c) notFound();
-  const programmeEnCours = (await lireRenouvellements(supabase, id))?.[0] ?? null;
+  const [renouvellements, seancesFaites] = await Promise.all([lireRenouvellements(supabase, id), lireSeancesFaites(supabase, { clienteId: id, limite: 50 })]);
+  const programmeEnCours = renouvellements?.[0] ?? null;
+  const depuis = ajouterJours(aujourdhuiParis(), -6);
+  const faitesSemaine = (seancesFaites ?? []).filter((s) => jourParisDe(s.faite_le) >= depuis).length;
   // Rappels (phase 8) : lus à part, la fiche reste utilisable avant la mise à jour de la base.
   const [{ data: prefRappels, error: sansRappels }, { data: rappels }, { count: appareils }] = await Promise.all([
     supabase.from("clientes").select("rappels_email").eq("id", id).maybeSingle<{ rappels_email: boolean }>(),
@@ -248,6 +252,12 @@ export default async function PageFicheCliente({
             </p>
             {programmeEnCours && (
               <ProgrammeEnCours publieLe={programmeEnCours.publie_le} renouvelerLe={programmeEnCours.renouveler_le} />
+            )}
+            {seancesFaites && seancesFaites.length > 0 && (
+              <p className="text-[14px]">
+                <strong className="font-medium">{faitesSemaine}</strong> séance{faitesSemaine > 1 ? "s" : ""} faite{faitesSemaine > 1 ? "s" : ""} ces 7 derniers jours · dernière :{" "}
+                {seancesFaites[0].seance_nom}, {formaterDate(jourParisDe(seancesFaites[0].faite_le), { year: undefined })}
+              </p>
             )}
             <Link
               href={`/coach/clientes/${c.id}/programme-sportif`}

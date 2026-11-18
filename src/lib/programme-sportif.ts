@@ -177,11 +177,22 @@ const EXEMPLE: Programme = {
 /** Consigne à coller dans Claude (ou dans les instructions d'un projet Claude). */
 export const CONSIGNE_CLAUDE = `Tu m’aides à construire des programmes sportifs pour mes clientes (je suis coach, je travaille en box de CrossFit). Je te décris la cliente (objectif, niveau, matériel, nombre de séances, contraintes) ; tu me proposes un programme, on l’ajuste ensemble, puis je l’importe dans mon application.
 
+Si je te donne un programme déjà écrit (PDF, photo ou texte), retranscris-le FIDÈLEMENT dans le format ci-dessous : ne change rien, n’invente rien, garde toutes les consignes ; s’il manque une information, mets null.
+
 Quand je te dis « format application » (ou quand le programme est validé), réponds avec le programme COMPLET dans un seul bloc de code JSON, sans rien d’autre, exactement avec cette structure :
 - titre, duree, frequence, conseils : texte (ou null)
 - seances : liste de séances avec nom, jour (ou null), duree (ou null), echauffement (texte ou null), blocs, retour_au_calme (ou null), notes (ou null)
-- blocs : liste avec titre (ex. « Force », « Metcon »), format (ex. « 4 séries », « EMOM 12 min », « AMRAP 10 min », « For time », « 3 tours ») et exercices
-- exercices : nom, series, repetitions (ex. « 10 », « 8-12 », « 30 s », « 12 calories »), charge, repos, tempo, consignes — tout en texte, null si sans objet
+- blocs : liste avec titre (ex. « Force », « Metcon ») et format, puis exercices. Le format dit à l’application comment guider la séance :
+  • « 4 séries » : exercice par exercice, série après série, avec le repos de l’exercice entre chaque série ;
+  • « 3 tours – repos 2 min entre les tours » : circuit, on enchaîne les exercices puis on recommence ;
+  • « AMRAP 10 min », « EMOM 12 min », « E2MOM 10 min », « For time (cap 15 min) », « Tabata » : un minuteur pour tout le bloc.
+- exercices : nom, series, repetitions, charge, repos, tempo, consignes — tout en texte, null si sans objet :
+  • series : le nombre de séries en chiffres (« 4 ») ;
+  • repetitions : « 10 », « 8-12 », « 30 s », « 12 calories », « max » ;
+  • repos : le temps de repos après chaque série (« 90 s », « 2 min ») ;
+  • consignes : ce que la cliente doit avoir en tête pendant la série (placement, respiration, sensations).
+
+Pendant la séance, l’application affiche chaque série avec ses consignes, puis lance un minuteur de repos : indique donc toujours series et repos pour les exercices de force.
 
 Écris en français, tutoie la cliente dans les consignes et les conseils, sans son nom. Exemple du format :
 

@@ -3,6 +3,8 @@ import { IconeVideo } from "@/components/icones";
 import { Surtitre } from "@/components/ui";
 import { cleExercice, volume, type Programme } from "@/lib/programme-sportif";
 
+const dateFaite = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" });
+
 /**
  * Affichage d'un programme sportif (cliente et aperçu coach).
  * `videos` : titre normalisé → id de vidéo ; `lienVideo` : préfixe du lien (null = pas de lien).
@@ -11,10 +13,18 @@ export function VueProgramme({
   programme,
   videos = {},
   lienVideo = null,
+  lienSeance,
+  libelleSeance = "Commencer la séance",
+  faites = {},
 }: {
   programme: Programme;
   videos?: Record<string, string>;
   lienVideo?: string | null;
+  /** Mode séance : lien vers la séance n° i (absent = pas de bouton). */
+  lienSeance?: (i: number) => string;
+  libelleSeance?: string;
+  /** Séances déjà faites, par nom de séance. */
+  faites?: Record<string, { nb: number; derniere: string }>;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -33,6 +43,21 @@ export function VueProgramme({
           </summary>
 
           <div className="flex flex-col gap-4 px-4 pb-4">
+            {lienSeance && (
+              <div className="flex flex-col gap-1.5">
+                <Link
+                  href={lienSeance(i)}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 text-[15.5px] font-medium text-white"
+                >
+                  ▶ {libelleSeance}
+                </Link>
+                {faites[s.nom] && (
+                  <p className="text-center text-[13px] text-texte-2">
+                    ✓ Faite {faites[s.nom].nb} fois · dernière fois le {dateFaite.format(new Date(faites[s.nom].derniere))}
+                  </p>
+                )}
+              </div>
+            )}
             {s.echauffement && <Encart titre="Échauffement">{s.echauffement}</Encart>}
 
             {s.blocs.map((b, j) => (

@@ -690,6 +690,8 @@ Fiche de la cliente → carte **Programme sportif** → **Son programme sportif*
 4. Copie **toute** sa réponse → colle-la dans l'app → **Importer le programme** → tu vois l'aperçu tel qu'elle le verra.
 5. **Publier pour …** : elle le voit dans son onglet **Sport** (et reçoit une notification si elle les a activées).
 
+**Tu as déjà le programme en PDF ?** Dans ta conversation Claude (avec la consigne), joins le PDF et écris : *« Retranscris ce programme au format application »*. Claude le recopie fidèlement ; tu colles sa réponse dans l'app comme d'habitude. Pense à recopier la consigne à jour (bouton **Copier la consigne pour Claude**) dans les instructions de ton projet Claude : elle explique maintenant comment écrire les séries, les repos et les formats pour le mode séance.
+
 Pour **modifier** : sur la page du programme, **Copier le programme pour Claude** → colle-le dans Claude avec tes changements → colle sa réponse dans **Remplacer par cette version** → **Republier**.
 
 Bon à savoir : le suivi sportif doit être coché dans la fiche, sinon elle n'a pas d'onglet Sport. Si un exercice porte le même nom qu'une vidéo de ta bibliothèque (ex. « Squat goblet »), elle aura un bouton **Voir la vidéo**. Ses anciens programmes PDF restent accessibles.
@@ -733,3 +735,33 @@ Les programmes déjà publiés reçoivent automatiquement une date de changement
 - **Rappel** : le matin, une semaine avant, puis le jour même, tu reçois une notification (et un email si tu les as activés dans Réglages → Notifications). Plusieurs clientes le même jour = un seul message.
 - **Reporter** (vacances, blessure…) : ouvre son programme → carte **Changement de programme** → choisis une date, ou **Reporter d'une semaine**. Les rappels suivent la nouvelle date.
 - **Fiche cliente** : « Semaine 3 sur 6 · prochain programme le … ». Ta cliente voit aussi « Semaine 3 sur 6 » dans son onglet Sport.
+
+---
+
+# Mode séance (la cliente suit sa séance pas à pas)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0019_seances_faites.sql`](../supabase/migrations/0019_seances_faites.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+Sans cette mise à jour, le mode séance fonctionne, mais les séances validées ne sont pas enregistrées.
+
+## 2. Comment ça marche pour ta cliente
+
+Onglet **Sport** → elle ouvre une séance → **▶ Commencer la séance** :
+
+1. **Échauffement**, puis **C'est parti**.
+2. **Chaque série** s'affiche en grand : exercice, série 2/4, répétitions, charge, tempo, consignes, lien vers la vidéo.
+3. Elle touche **Fait ✓ · Repos 1:30** : le **minuteur de repos** démarre (−15 s / +15 s / Passer). À la fin : bip + vibration, et **la série suivante s'affiche toute seule**. Ainsi de suite, exercice après exercice.
+4. **Circuits** (« 3 tours ») : les exercices s'enchaînent, puis on recommence. **AMRAP / EMOM / For time / Tabata** : un grand minuteur pour le bloc (bip à chaque minute en EMOM, chrono « J'ai fini ! » en For time).
+5. **Séance terminée** : elle choisit son ressenti (de 😌 très facile à 🥵 très dur), peut t'écrire un mot, puis **Valider ma séance**.
+
+L'écran reste allumé pendant la séance. Si elle quitte l'appli (pour regarder une vidéo par exemple), elle reprend là où elle s'était arrêtée.
+
+## 3. Ce que tu vois
+
+- Page **Programme sportif** de la cliente : carte **Séances faites** (date, durée, ressenti, son mot).
+- **Fiche cliente** : « 3 séances faites ces 7 derniers jours · dernière : … ».
+- Sur la page d'un programme, **▶ Tester le mode séance** te montre exactement ce qu'elle verra (rien n'est enregistré).
+
+Pour que le guidage soit juste, chaque exercice de force doit avoir **series** (un chiffre) et **repos** (« 90 s », « 2 min ») : la consigne Claude le demande déjà.

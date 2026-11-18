@@ -7,6 +7,8 @@ import { Etiquette, Surtitre } from "@/components/ui";
 import { lireMonProgramme, videosParExercice } from "@/lib/programme-sportif-serveur";
 import { aujourdhuiParis } from "@/lib/bilan";
 import { semaineProgramme } from "@/lib/programme-sportif";
+import { resumeSeancesFaites } from "@/lib/seance-guidee";
+import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { EnTete } from "../composants";
 import { PagePlan } from "../page-plan";
 import { MarquerProgrammeVu } from "./marquer-vu";
@@ -22,9 +24,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
   const nbVideos = count ?? 0;
   // Programme construit avec Claude (0016) : affiché en priorité. Sinon, les programmes PDF / liens comme avant.
   const programme = version || pdf ? null : await lireMonProgramme(supabase);
-  const [videos, { count: nbPdf }] = programme
-    ? await Promise.all([videosParExercice(supabase), supabase.from("plans").select("id", { count: "exact", head: true }).eq("type", "sport")])
-    : [{}, { count: 0 }];
+  const [videos, { count: nbPdf }, faites] = programme
+    ? await Promise.all([
+        videosParExercice(supabase),
+        supabase.from("plans").select("id", { count: "exact", head: true }).eq("type", "sport"),
+        lireSeancesFaites(supabase, { programmeId: programme.id, limite: 200 }),
+      ])
+    : [{}, { count: 0 }, null];
   const semaine = programme ? semaineProgramme(programme.publie_le, programme.renouveler_le, aujourdhuiParis()) : null;
   return (
     <>
@@ -49,7 +55,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
                   ))}
               </div>
             )}
-            <VueProgramme programme={programme.contenu} videos={videos} lienVideo="/sport/videos/" />
+            <VueProgramme
+              programme={programme.contenu}
+              videos={videos}
+              lienVideo="/sport/videos/"
+              lienSeance={(i) => `/seance/${i}`}
+              faites={resumeSeancesFaites(faites ?? [])}
+            />
             {(nbPdf ?? 0) > 0 && (
               <Link href="/sport?pdf=1" className="text-center text-[14px] text-texte-2 underline underline-offset-4">
                 Voir mes anciens programmes en PDF

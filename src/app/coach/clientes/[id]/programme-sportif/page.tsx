@@ -8,7 +8,9 @@ import { lireSuiviSport } from "@/lib/paiements-serveur";
 import { aujourdhuiParis } from "@/lib/bilan";
 import { CONSIGNE_CLAUDE, compterExercices, echeanceRenouvellement } from "@/lib/programme-sportif";
 import { lireProgrammes } from "@/lib/programme-sportif-serveur";
+import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { BoutonCopier, FormulaireImport } from "./composants";
+import { SeancesFaites } from "./seances-faites";
 
 export const metadata: Metadata = { title: "Programme sportif" };
 
@@ -25,7 +27,11 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
     .eq("id", id)
     .maybeSingle<{ id: string; profils: { prenom: string; nom: string } }>();
   if (!c) notFound();
-  const [programmes, sport] = await Promise.all([lireProgrammes(supabase, id), lireSuiviSport(supabase, id)]);
+  const [programmes, sport, faites] = await Promise.all([
+    lireProgrammes(supabase, id),
+    lireSuiviSport(supabase, id),
+    lireSeancesFaites(supabase, { clienteId: id, limite: 30 }),
+  ]);
   const auj = aujourdhuiParis();
 
   return (
@@ -75,7 +81,8 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
             </ol>
           </Carte>
 
-          <Carte className="flex flex-col gap-4 self-start">
+          <div className="flex flex-col gap-6 self-start">
+          <Carte className="flex flex-col gap-4">
             <h2 className="font-titre text-xl font-bold">Ses programmes</h2>
             {programmes.length === 0 ? (
               <p className="text-[14px] text-texte-2">Aucun programme pour l’instant.</p>
@@ -103,6 +110,8 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
               </ul>
             )}
           </Carte>
+          <SeancesFaites seances={faites} prenom={c.profils.prenom} />
+          </div>
         </div>
       )}
     </div>
