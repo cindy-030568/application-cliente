@@ -112,7 +112,7 @@ export function extraireProgramme(colle: string): ResultatImport {
   const debut = bloc.indexOf("{");
   const fin = bloc.lastIndexOf("}");
   if (debut < 0) {
-    return { erreur: "Je ne trouve pas de programme dans ce texte. Demande à Claude de répondre « au format application »." };
+    return { erreur: "Je ne trouve pas de programme dans ce texte : il faut le bloc de code JSON de Claude. S’il a créé une page ou une mini-application, réponds-lui « Non, juste le bloc de code JSON au format application »." };
   }
   const incomplet = "Le programme est incomplet ou abîmé (copie coupée ?). Recopie toute la réponse de Claude, jusqu’à la dernière accolade }.";
   if (fin <= debut) return { erreur: incomplet };
@@ -190,7 +190,10 @@ Quand je te dis « format application » (ou quand le programme est validé), r�
   • series : le nombre de séries en chiffres (« 4 ») ;
   • repetitions : « 10 », « 8-12 », « 30 s », « 12 calories », « max » ;
   • repos : le temps de repos après chaque série (« 90 s », « 2 min ») ;
-  • consignes : ce que la cliente doit avoir en tête pendant la série (placement, respiration, sensations).
+  • consignes : ce que la cliente doit avoir en tête pendant la série (placement, respiration, sensations), ainsi que le RPE et les notes du coach s’il y en a ;
+  • si le programme change de semaine en semaine (charges, répétitions), écris la progression dans consignes (ex. « S1 : 3 × 10 à 20 kg · S2 : 3 × 12 · S3 : 4 × 10 »).
+
+IMPORTANT : ne crée JAMAIS d’artefact, de page, de mini-application ou de fichier. Ta réponse « format application » est uniquement un bloc de code JSON que je copie-colle dans mon application, qui s’occupe elle-même des minuteurs, du suivi et des notifications.
 
 Pendant la séance, l’application affiche chaque série avec ses consignes, puis lance un minuteur de repos : indique donc toujours series et repos pour les exercices de force.
 
@@ -199,6 +202,13 @@ Pendant la séance, l’application affiche chaque série avec ses consignes, pu
 \`\`\`json
 ${JSON.stringify(EXEMPLE, null, 2)}
 \`\`\``;
+
+/** Message tout prêt pour transformer un ou plusieurs PDF : consigne + demande, à coller avec les PDF joints. */
+export const DEMANDE_PDF = `${CONSIGNE_CLAUDE}
+
+---
+
+Voici le(s) programme(s) en PDF joint(s). Retranscris-le(s) FIDÈLEMENT au format application : un bloc de code JSON par programme, dans l’ordre, et rien d’autre (pas d’artefact, pas d’application).`;
 
 /** Texte à coller dans Claude pour faire modifier un programme existant. */
 export function texteModification(p: Programme): string {

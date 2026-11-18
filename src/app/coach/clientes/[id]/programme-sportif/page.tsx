@@ -6,7 +6,7 @@ import { Carte, Etiquette, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
 import { lireSuiviSport } from "@/lib/paiements-serveur";
 import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
-import { CONSIGNE_CLAUDE, compterExercices, echeanceRenouvellement, statutProgramme } from "@/lib/programme-sportif";
+import { CONSIGNE_CLAUDE, DEMANDE_PDF, compterExercices, echeanceRenouvellement, statutProgramme } from "@/lib/programme-sportif";
 import { activerProgrammesPlanifies, lireProgrammes } from "@/lib/programme-sportif-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { BoutonCopier, BoutonPlanifier, DateDebut, FormulaireImport } from "./composants";
@@ -75,8 +75,21 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
                   aide="Elle explique à Claude le format que l’application sait lire. Ne lui donne pas le nom de ta cliente : décris son objectif, son niveau, son matériel, ses contraintes."
                 />
               </li>
-              <li className="text-[15px]">
-                <strong className="font-medium">2.</strong> Construis le programme avec Claude. Quand il te convient, écris-lui : <em>« format application »</em>.
+              <li className="flex flex-col gap-2">
+                <p className="text-[15px]">
+                  <strong className="font-medium">2.</strong> Construis le programme avec Claude. Quand il te convient, écris-lui : <em>« format application »</em>.
+                </p>
+                <div className="rounded-xl bg-sable/50 p-3">
+                  <p className="mb-2 text-[14px]">
+                    <strong className="font-medium">Tu as déjà le programme en PDF ?</strong> Copie ce message tout prêt, colle-le dans une nouvelle conversation Claude
+                    et joins le ou les PDF avant d’envoyer.
+                  </p>
+                  <BoutonCopier
+                    texte={DEMANDE_PDF}
+                    libelle="Copier le message pour un PDF"
+                    aide="Claude doit répondre par un bloc de code (```json). S’il te propose une page ou une mini-application, réponds-lui : « Non, juste le bloc de code JSON »."
+                  />
+                </div>
               </li>
               <li className="flex flex-col gap-2">
                 <p className="text-[15px]">
