@@ -14,5 +14,13 @@ export async function listerClientes() {
     .order("created_at", { ascending: false })
     .returns<ClienteListe[]>();
   if (error) throw new Error("Impossible de charger les clientes");
-  return data ?? [];
+  return trierClientes(data ?? []);
+}
+
+/** Ordre alphabétique (prénom puis nom), sans tenir compte des accents ni des majuscules. */
+export function trierClientes<T extends { profils: { prenom: string; nom: string } }>(liste: T[]): T[] {
+  const ordre = new Intl.Collator("fr", { sensitivity: "base" });
+  return [...liste].sort(
+    (a, b) => ordre.compare(a.profils.prenom.trim(), b.profils.prenom.trim()) || ordre.compare(a.profils.nom.trim(), b.profils.nom.trim()),
+  );
 }

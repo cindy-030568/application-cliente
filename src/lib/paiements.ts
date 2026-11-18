@@ -29,7 +29,7 @@ export type Paiement = {
 /** Part du 1er paiement par défaut quand on paie en plusieurs fois. */
 export const PART_PREMIER_PAIEMENT = 0.5;
 export const premierParDefaut = (totalCentimes: number) => Math.round(totalCentimes * PART_PREMIER_PAIEMENT);
-export type Echeance = { id: string; date_echeance: string; montant: number; payee_le: string | null };
+export type Echeance = { id: string; date_echeance: string; montant: number; payee_le: string | null; note?: string | null };
 
 /** « 450 », « 149,90 », « 1 200 € » → centimes ; null si vide ; NaN si illisible. */
 export function lireCentimes(brut: string): number | null {

@@ -693,3 +693,25 @@ Fiche de la cliente → carte **Programme sportif** → **Son programme sportif*
 Pour **modifier** : sur la page du programme, **Copier le programme pour Claude** → colle-le dans Claude avec tes changements → colle sa réponse dans **Remplacer par cette version** → **Republier**.
 
 Bon à savoir : le suivi sportif doit être coché dans la fiche, sinon elle n'a pas d'onglet Sport. Si un exercice porte le même nom qu'une vidéo de ta bibliothèque (ex. « Squat goblet »), elle aura un bouton **Voir la vidéo**. Ses anciens programmes PDF restent accessibles.
+
+---
+
+# Revenus
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0017_revenus.sql`](../supabase/migrations/0017_revenus.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Utilisation
+
+Menu **Revenus** :
+
+- **En haut** : encaissé dans l'année (et ce qui était prévu), ce mois-ci, moyenne par mois, ce qu'il reste à encaisser (dont en retard). Flèches pour changer d'année.
+- **Mois par mois** : encaissé (à la date réelle du virement) et prévu (à la date d'échéance). Touche un mois pour ne voir que ses encaissements ; « Voir le tableau » donne les chiffres.
+- **À encaisser** : les retards d'abord. **Encaissé** → choisis la vraie date du virement. **Reporter / modifier** → nouvelle date prévue, montant, note (« report demandé par la cliente »…).
+- **Encaissements** : tout ce qui est rentré ; **Modifier** pour corriger une date ou un montant (ou annuler un encaissement en décochant « Encaissé »).
+- **Ajouter un revenu** : ce qui n'est pas dans un échéancier (séance ponctuelle, atelier, ebook…), avec ou sans cliente.
+- **Par formule / par moyen de paiement** : d'où viennent tes revenus.
+- **Exporter (Excel)** : tous les encaissements de l'année avec le total, pour ta comptabilité.
+
+Les mêmes boutons sont dans la fiche de chaque cliente (Formule et paiement). Bon à savoir : enregistrer la formule ne touche plus aux dates que tu as reportées, sauf si tu changes le montant, le nombre de fois ou la date du 1er paiement.

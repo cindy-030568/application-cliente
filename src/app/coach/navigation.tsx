@@ -6,6 +6,7 @@ import { useState } from "react";
 import {
   IconeClientes,
   IconeCommunaute,
+  IconeEuro,
   IconeNutrition,
   IconeRecettes,
   IconeReglages,
@@ -21,6 +22,7 @@ const LIENS = [
   { href: "/coach/bilans", label: "Bilans", Icone: IconeSuivi },
   { href: "/coach/clientes", label: "Clientes", Icone: IconeClientes },
   { href: "/coach/communaute", label: "Communauté", Icone: IconeCommunaute },
+  { href: "/coach/revenus", label: "Revenus", Icone: IconeEuro },
   { href: "/coach/recettes", label: "Recettes", Icone: IconeRecettes },
   { href: "/coach/aliments", label: "Aliments", Icone: IconeNutrition },
   { href: "/coach/videos", label: "Vidéos", Icone: IconeVideo },

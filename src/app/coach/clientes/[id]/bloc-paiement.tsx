@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState } from "react";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
-import { Message, cx } from "@/components/ui";
-import { formaterDate } from "@/lib/bilan";
-import { bilanPaiement, etatEcheance, formaterEuros, type Echeance, type Paiement } from "@/lib/paiements";
+import { Message } from "@/components/ui";
+import { bilanPaiement, formaterEuros, type Echeance, type Paiement } from "@/lib/paiements";
+import { LigneMouvement } from "../../revenus/composants";
 import { ChampsPaiement } from "../champs-paiement";
-import { basculerEcheance, enregistrerPaiement } from "../paiement-actions";
+import { enregistrerPaiement } from "../paiement-actions";
 
 export function BlocPaiement({
   clienteId,
@@ -24,16 +24,7 @@ export function BlocPaiement({
   aujourdhui: string;
 }) {
   const [etat, envoyer] = useActionState(enregistrerPaiement.bind(null, clienteId), {});
-  const [erreur, setErreur] = useState<string>();
-  const [enCours, demarrer] = useTransition();
   const { paye, reste } = bilanPaiement(echeances);
-
-  const basculer = (e: Echeance) =>
-    demarrer(async () => {
-      setErreur(undefined);
-      const r = await basculerEcheance(e.id, !e.payee_le);
-      if (r.erreur) setErreur(r.erreur);
-    });
 
   return (
     <div className="flex flex-col gap-5">
@@ -52,42 +43,31 @@ export function BlocPaiement({
             </p>
           </div>
           <ul className="flex flex-col divide-y divide-ligne rounded-xl border border-ligne bg-white">
-            {echeances.map((e, i) => {
-              const statut = etatEcheance(e, aujourdhui);
-              return (
-                <li key={e.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
-                  <span className="w-7 text-[13px] text-texte-2 tabular-nums">{i + 1}.</span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="font-medium tabular-nums">{formaterEuros(e.montant)}</span>
-                    <span className="text-[13px] text-texte-2">{formaterDate(e.date_echeance)}</span>
-                  </span>
-                  <span
-                    className={cx(
-                      "rounded-full px-2.5 py-1 text-[12.5px] font-medium",
-                      statut === "payee" && "bg-succes-pale text-succes",
-                      statut === "en_retard" && "bg-accent-pale text-erreur",
-                      statut === "a_venir" && "bg-sable text-chocolat",
-                    )}
-                  >
-                    {statut === "payee"
-                      ? "Payée ✓"
-                      : statut === "en_retard"
-                        ? "En retard"
-                        : "À venir"}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={enCours}
-                    onClick={() => basculer(e)}
-                    className="min-h-10 text-[13.5px] underline underline-offset-4"
-                  >
-                    {e.payee_le ? "Annuler" : "Marquer payée"}
-                  </button>
-                </li>
-              );
-            })}
+            {echeances.map((e, i) => (
+              <LigneMouvement
+                key={e.id}
+                aujourdhui={aujourdhui}
+                clientes={[]}
+                lienCliente={false}
+                m={{
+                  id: e.id,
+                  type: "echeance",
+                  cliente_id: clienteId,
+                  cliente: null,
+                  formule: null,
+                  libelle: echeances.length > 1 ? `Échéance ${i + 1}/${echeances.length}` : "Paiement",
+                  date_prevue: e.date_echeance,
+                  montant: e.montant,
+                  payee_le: e.payee_le,
+                  moyen: paiement?.moyen ?? null,
+                  note: e.note ?? null,
+                }}
+              />
+            ))}
           </ul>
-          {erreur && <Message ton="erreur">{erreur}</Message>}
+          <p className="text-[12.5px] text-texte-2">
+            Tous tes encaissements sont aussi dans le menu <a href="/coach/revenus" className="underline underline-offset-2">Revenus</a>.
+          </p>
         </div>
       )}
 
@@ -95,7 +75,7 @@ export function BlocPaiement({
         <ChampsPaiement valeurs={paiement} premiereParDefaut={premiereParDefaut} formules={formules} />
         {echeances.some((e) => e.payee_le) && (
           <p className="text-[13px] text-texte-2">
-            En enregistrant, les échéances déjà payées sont gardées ; les autres sont recalculées.
+            En enregistrant, les échéances payées sont gardées. Les autres ne sont recalculées que si tu changes le montant, le nombre de fois ou la 1re date.
           </p>
         )}
         {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}

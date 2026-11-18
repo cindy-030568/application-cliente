@@ -24,6 +24,9 @@ export async function lirePaiement(supabase: SupabaseClient, clienteId: string) 
       .maybeSingle<{ premier_montant: number | null; rappels: boolean }>(),
   ]);
   if (p.error || e.error) return null;
+  // Notes des échéances (0017), lues à part.
+  const { data: notes, error: sansNotes } = await supabase.from("echeances_paiement").select("id, note").eq("cliente_id", clienteId);
+  const noteDe = new Map((sansNotes ? [] : (notes ?? [])).map((n) => [n.id as string, (n.note as string | null) ?? null]));
   const premier = plus.data?.premier_montant;
   return {
     paiement: p.data
@@ -34,7 +37,7 @@ export async function lirePaiement(supabase: SupabaseClient, clienteId: string) 
           rappels: plus.data?.rappels ?? true,
         }
       : null,
-    echeances: (e.data ?? []).map((x) => ({ ...x, montant: Number(x.montant) })),
+    echeances: (e.data ?? []).map((x) => ({ ...x, montant: Number(x.montant), note: noteDe.get(x.id) ?? null })),
   };
 }
 
@@ -107,19 +110,24 @@ export async function sauverPaiement(supabase: SupabaseClient, clienteId: string
     .eq("cliente_id", clienteId)
     .order("date_echeance");
   const payees = (existantes ?? []).filter((e) => e.payee_le).map((e) => ({ montant: Number(e.montant) }));
-  const aSupprimer = (existantes ?? []).filter((e) => !e.payee_le).map((e) => e.id as string);
+  const nonPayees = (existantes ?? []).filter((e) => !e.payee_le);
+  const nouvelles =
+    s.montantCentimes !== null && s.premiere ? echeancesARecreer(s.montantCentimes, s.nbFois, s.premiere, payees, s.premierCentimes) : [];
+  // Mêmes montants et même 1re date qu'avant : on garde les échéances telles quelles
+  // (dates reportées à la main comprises). Changer la 1re date recalcule l'échéancier.
+  const inchangees =
+    s.premiere === (existantes ?? [])[0]?.date_echeance &&
+    nouvelles.length === nonPayees.length &&
+    nouvelles.every((n, i) => Math.round(n.montant * 100) === Math.round(Number(nonPayees[i].montant) * 100));
+  if (inchangees && nouvelles.length) return true;
+  const aSupprimer = nonPayees.map((e) => e.id as string);
   if (aSupprimer.length) {
     const { error: e1 } = await supabase.from("echeances_paiement").delete().in("id", aSupprimer);
     if (e1) return false;
   }
-  if (s.montantCentimes !== null && s.premiere) {
-    const nouvelles = echeancesARecreer(s.montantCentimes, s.nbFois, s.premiere, payees, s.premierCentimes);
-    if (nouvelles.length) {
-      const { error: e2 } = await supabase
-        .from("echeances_paiement")
-        .insert(nouvelles.map((n) => ({ ...n, cliente_id: clienteId })));
-      if (e2) return false;
-    }
+  if (nouvelles.length) {
+    const { error: e2 } = await supabase.from("echeances_paiement").insert(nouvelles.map((n) => ({ ...n, cliente_id: clienteId })));
+    if (e2) return false;
   }
   return true;
 }

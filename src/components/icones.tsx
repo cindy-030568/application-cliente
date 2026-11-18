@@ -56,6 +56,9 @@ export const IconeClientes = (p: P) => (
 export const IconeTableau = (p: P) => (
   <svg {...base} {...p}><rect x="3.5" y="3.5" width="7" height="8" rx="1.5" /><rect x="13.5" y="3.5" width="7" height="5" rx="1.5" /><rect x="13.5" y="11.5" width="7" height="9" rx="1.5" /><rect x="3.5" y="14.5" width="7" height="6" rx="1.5" /></svg>
 );
+export const IconeEuro = (p: P) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="8.5" /><path d="M15 8.6a4 4 0 1 0 0 6.8M7.5 11h5.5M7.5 13.2h5" /></svg>
+);
 export const IconeReglages = (p: P) => (
   <svg {...base} {...p}><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg>
 );
