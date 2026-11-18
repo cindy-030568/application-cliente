@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
 import { ErreurBrevo, configurationRappels, envoyerEmail, executerTachesDuMatin } from "@/lib/envoi-rappels";
+import { executerRappelsProgrammes } from "@/lib/rappels-programmes";
 import { SUJETS, emailRappel, personnaliser } from "@/lib/rappels";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -74,17 +75,19 @@ export async function lancerRappelsMaintenant(): Promise<EtatRappelsCoach> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
   try {
-    const t = await executerTachesDuMatin(createAdminClient());
+    const admin = createAdminClient();
+    const t = await executerTachesDuMatin(admin);
+    const prog = await executerRappelsProgrammes(admin).catch(() => ({ rappels: 0, notifications: 0, emails: 0 }));
     revalidatePath("/coach", "layout");
     const p = t.paiements;
-    const rappels = t.rappels + p.rappels;
-    const emails = t.emails + p.emails;
-    const notifications = t.notifications + p.notifications;
+    const rappels = t.rappels + p.rappels + prog.rappels;
+    const emails = t.emails + p.emails + prog.emails;
+    const notifications = t.notifications + p.notifications + prog.notifications;
     const erreurs = t.erreurs + p.erreurs;
     const pause = t.actifs ? "" : " (rappels de bilan en pause)";
     if (rappels === 0) return { succes: `Aucun rappel à envoyer aujourd’hui${pause}.` };
     return {
-      succes: `${rappels} rappel${rappels > 1 ? "s" : ""}${p.rappels ? ` dont ${p.rappels} de paiement` : ""} : ${emails} email${emails > 1 ? "s" : ""}, ${notifications} notification${notifications > 1 ? "s" : ""}${pause}.`,
+      succes: `${rappels} rappel${rappels > 1 ? "s" : ""}${p.rappels ? ` dont ${p.rappels} de paiement` : ""}${prog.rappels ? ` et ${prog.rappels} de programme sportif` : ""} : ${emails} email${emails > 1 ? "s" : ""}, ${notifications} notification${notifications > 1 ? "s" : ""}${pause}.`,
       erreur: erreurs ? `${erreurs} envoi${erreurs > 1 ? "s ont" : " a"} échoué.` : undefined,
     };
   } catch {

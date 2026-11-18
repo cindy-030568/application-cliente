@@ -4,12 +4,14 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { envoyerPushCliente } from "@/lib/envoi-rappels";
-import { extraireProgramme } from "@/lib/programme-sportif";
+import { ajouterJours, aujourdhuiParis } from "@/lib/bilan";
+import { extraireProgramme, renouvellementParDefaut } from "@/lib/programme-sportif";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UUID, verifierCliente } from "./verification";
 
 export type EtatProgramme = { erreur?: string; succes?: string };
 
+const MIGRATION_DATE = "Fais d’abord la mise à jour de la base : fichier 0018_renouvellement_programme.sql (voir le guide).";
 const MIGRATION = "Fais d’abord la mise à jour de la base : fichier 0016_programme_sportif.sql (voir le guide).";
 
 function rafraichir(clienteId: string, programmeId?: string) {
@@ -17,7 +19,10 @@ function rafraichir(clienteId: string, programmeId?: string) {
   revalidatePath(`/coach/clientes/${clienteId}/programme-sportif`);
   if (programmeId) revalidatePath(`/coach/clientes/${clienteId}/programme-sportif/${programmeId}`);
   revalidatePath("/sport");
+  revalidatePath("/coach");
 }
+
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Colle la réponse de Claude : crée un nouveau programme (brouillon), ou remplace le contenu d'un programme existant. */
 export async function importerProgramme(clienteId: string, programmeId: string | null, _e: EtatProgramme, formData: FormData): Promise<EtatProgramme> {
@@ -65,8 +70,17 @@ export async function publierProgramme(clienteId: string, programmeId: string, p
   const v = await verifierCliente(clienteId);
   if (v.erreur) return { erreur: v.erreur };
   if (!UUID.test(programmeId)) return { erreur: "Programme introuvable." };
+  // Un programme qu'on republie (après une correction) garde sa date de changement.
+  const { data: avant } = await v.supabase.from("programmes_sportifs").select("publie").eq("id", programmeId).maybeSingle<{ publie: boolean }>();
   const { error } = await v.supabase.rpc("publier_programme_sportif", { p_programme: programmeId, p_publie: publie });
   if (error) return { erreur: "Le programme n’a pas pu être publié. Réessaie dans un instant." };
+  if (publie && !avant?.publie) {
+    // Nouveau programme : changement prévu dans 6 semaines (ignoré tant que la mise à jour 0018 n'est pas faite).
+    await v.supabase
+      .from("programmes_sportifs")
+      .update({ renouveler_le: renouvellementParDefaut(aujourdhuiParis()), rappel_renouvellement_le: null })
+      .eq("id", programmeId);
+  }
   rafraichir(clienteId, programmeId);
   if (publie) {
     after(async () => {
@@ -92,4 +106,23 @@ export async function supprimerProgramme(clienteId: string, programmeId: string)
   if (error) return { erreur: "Le programme n’a pas pu être supprimé." };
   rafraichir(clienteId);
   redirect(`/coach/clientes/${clienteId}/programme-sportif`);
+}
+
+/** La coach choisit une autre date de changement (report, vacances, blessure…). */
+export async function modifierRenouvellement(clienteId: string, programmeId: string, date: string): Promise<EtatProgramme> {
+  const v = await verifierCliente(clienteId);
+  if (v.erreur) return { erreur: v.erreur };
+  if (!UUID.test(programmeId)) return { erreur: "Programme introuvable." };
+  const auj = aujourdhuiParis();
+  if (!DATE.test(date) || date < ajouterJours(auj, -365) || date > ajouterJours(auj, 365)) return { erreur: "Choisis une date valide (au plus tard dans un an)." };
+  const { data, error } = await v.supabase
+    .from("programmes_sportifs")
+    .update({ renouveler_le: date })
+    .eq("id", programmeId)
+    .eq("cliente_id", clienteId)
+    .select("id");
+  if (error) return { erreur: ["42703", "PGRST204"].includes(error.code) ? MIGRATION_DATE : "La date n’a pas pu être enregistrée. Réessaie." };
+  if (!data?.length) return { erreur: "Programme introuvable." };
+  rafraichir(clienteId, programmeId);
+  return { succes: "Date du prochain programme enregistrée." };
 }

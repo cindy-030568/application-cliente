@@ -5,9 +5,10 @@ import { IconeRetour } from "@/components/icones";
 import { VueProgramme } from "@/components/programme/vue-programme";
 import { Carte, Etiquette } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { compterExercices, texteModification } from "@/lib/programme-sportif";
+import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
+import { compterExercices, echeanceRenouvellement, semaineProgramme, texteModification } from "@/lib/programme-sportif";
 import { lireProgrammeSportif, videosParExercice } from "@/lib/programme-sportif-serveur";
-import { ActionsProgramme, BoutonCopier, FormulaireImport } from "../composants";
+import { ActionsProgramme, BoutonCopier, DateRenouvellement, FormulaireImport } from "../composants";
 
 export const metadata: Metadata = { title: "Programme sportif" };
 
@@ -24,6 +25,9 @@ export default async function PageProgramme({ params }: { params: Promise<{ id: 
     supabase.from("clientes").select("profils!inner(prenom)").eq("id", id).maybeSingle<{ profils: { prenom: string } }>(),
   ]);
   if (!p || p.cliente_id !== id || !c) notFound();
+  const auj = aujourdhuiParis();
+  const semaine = p.publie ? semaineProgramme(p.publie_le, p.renouveler_le, auj) : null;
+  const echeance = p.publie && p.renouveler_le ? echeanceRenouvellement(p.renouveler_le, auj) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,6 +60,21 @@ export default async function PageProgramme({ params }: { params: Promise<{ id: 
             <h2 className="font-titre text-xl font-bold">Publier</h2>
             <ActionsProgramme clienteId={id} programmeId={p.id} publie={p.publie} prenom={c.profils.prenom} titre={p.titre} />
           </Carte>
+          {p.publie && p.renouveler_le && (
+            <Carte className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-titre text-xl font-bold">Changement de programme</h2>
+                {echeance && (
+                  <Etiquette ton={echeance.retard || echeance.jours <= 7 ? "rose" : "sable"}>{echeance.texte}</Etiquette>
+                )}
+              </div>
+              <p className="text-[14px] text-texte-2">
+                {semaine && semaine.semaine <= semaine.total ? `Semaine ${semaine.semaine} sur ${semaine.total} · ` : ""}
+                prévu le {formaterDate(p.renouveler_le, { weekday: "long", year: undefined })}.
+              </p>
+              <DateRenouvellement clienteId={id} programmeId={p.id} date={p.renouveler_le} aujourdhui={auj} />
+            </Carte>
+          )}
           <Carte className="flex flex-col gap-4">
             <h2 className="font-titre text-xl font-bold">Modifier avec Claude</h2>
             <BoutonCopier

@@ -5,6 +5,8 @@ import { exigerCoach } from "@/lib/auth";
 import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, conservationDepassee, formaterDate, joursEntre, prochainBilan, type Alerte } from "@/lib/bilan";
 import { chargerFile } from "./bilans/donnees";
 import { formaterEuros } from "@/lib/paiements";
+import { echeanceRenouvellement } from "@/lib/programme-sportif";
+import { lireRenouvellements } from "@/lib/programme-sportif-serveur";
 import { CarteAnnonce } from "./annonce";
 
 export default async function TableauDeBord() {
@@ -31,6 +33,15 @@ export default async function TableauDeBord() {
     const cliente = clientes.find((c) => c.id === e.cliente_id);
     return cliente ? [{ ...e, montant: Number(e.montant), cliente, retard: e.date_echeance < auj }] : [];
   });
+
+  // Programmes sportifs à changer : en retard ou dans les 14 jours (rien avant la mise à jour 0016).
+  const programmes = ((await lireRenouvellements(supabase)) ?? [])
+    .filter((p) => p.renouveler_le <= ajouterJours(auj, 14))
+    .flatMap((p) => {
+      const cliente = clientes.find((c) => c.id === p.cliente_id && c.statut !== "fermee");
+      return cliente ? [{ ...p, cliente, e: echeanceRenouvellement(p.renouveler_le, auj) }] : [];
+    })
+    .sort((a, b) => a.renouveler_le.localeCompare(b.renouveler_le));
 
   // Annonces en cours (rien avant la mise à jour 0014).
   const { data: annonces, error: sansAnnonces } = await supabase
@@ -173,6 +184,38 @@ export default async function TableauDeBord() {
             ))}
           </ul>
           <p className="text-[13px] text-texte-2">Pour cocher une échéance payée : ouvre la fiche de la cliente.</p>
+        </Carte>
+      )}
+
+      {programmes.length > 0 && (
+        <Carte className="flex flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Programmes sportifs à changer</h2>
+            <p className="text-[14px] text-texte-2">Toutes les 6 semaines · en retard et à venir dans les 14 jours.</p>
+          </div>
+          <ul className="flex flex-col divide-y divide-ligne">
+            {programmes.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/coach/clientes/${p.cliente.id}/programme-sportif`}
+                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-3 hover:text-accent"
+                >
+                  <span className="font-medium">
+                    {p.cliente.profils.prenom} {p.cliente.profils.nom}
+                  </span>
+                  <span className="flex items-center gap-3 text-[14px]">
+                    <span className="text-texte-2">{formaterDate(p.renouveler_le, { year: undefined })}</span>
+                    {p.e.jours <= 7 ? (
+                      <span className="rounded-full bg-accent-pale px-3 py-1 text-[12.5px] font-medium text-erreur">{p.e.texte}</span>
+                    ) : (
+                      <span className="text-texte-2">{p.e.texte}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[13px] text-texte-2">Pour reporter un changement : ouvre son programme → « Changement de programme ».</p>
         </Carte>
       )}
 

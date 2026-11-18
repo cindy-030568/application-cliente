@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { CONSIGNE_CLAUDE, cleExercice, compterExercices, extraireProgramme, lireProgramme, texteModification, volume } from "./programme-sportif";
+import {
+  CONSIGNE_CLAUDE,
+  cleExercice,
+  compterExercices,
+  dateRenouvellement,
+  echeanceRenouvellement,
+  extraireProgramme,
+  lireProgramme,
+  rappelRenouvellementDu,
+  renouvellementParDefaut,
+  semaineProgramme,
+  texteModification,
+  volume,
+} from "./programme-sportif";
 
 const reponse = `Voici le programme validé :
 
@@ -76,5 +89,41 @@ describe("format", () => {
 
   it("rapproche les noms d'exercices", () => {
     expect(cleExercice("Fente arrière – haltères")).toBe(cleExercice("fente ARRIERE haltères"));
+  });
+});
+
+describe("changement de programme", () => {
+  it("date prévue : choisie par la coach, sinon 6 semaines après la publication (jour à Paris)", () => {
+    expect(dateRenouvellement({ renouveler_le: "2026-12-20", publie_le: "2026-11-01T10:00:00Z" })).toBe("2026-12-20");
+    // 23 h 30 UTC le 1er novembre = 2 novembre à Paris
+    expect(dateRenouvellement({ publie_le: "2026-11-01T23:30:00Z" })).toBe("2026-12-14");
+    expect(dateRenouvellement({ renouveler_le: null, publie_le: null })).toBeNull();
+    expect(renouvellementParDefaut("2026-11-18")).toBe("2026-12-30");
+  });
+  it("prévient une semaine avant puis le jour même, une seule fois chacun", () => {
+    const d = "2026-12-30";
+    expect(rappelRenouvellementDu(d, "2026-12-22", null)).toBeNull();
+    expect(rappelRenouvellementDu(d, "2026-12-23", null)).toBe("bientot");
+    expect(rappelRenouvellementDu(d, "2026-12-24", "2026-12-23")).toBeNull();
+    // tâche du matin manquée le 23 : le rappel part le 25
+    expect(rappelRenouvellementDu(d, "2026-12-25", null)).toBe("bientot");
+    expect(rappelRenouvellementDu(d, "2026-12-30", "2026-12-23")).toBe("jour");
+    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-30")).toBeNull();
+    // pas encore changé et aucun rappel du jour J parti : il part
+    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-23")).toBe("jour");
+  });
+  it("reporter la date réarme les rappels", () => {
+    expect(rappelRenouvellementDu("2027-01-13", "2027-01-06", "2026-12-30")).toBe("bientot");
+  });
+  it("semaine en cours", () => {
+    expect(semaineProgramme("2026-11-18T09:00:00Z", "2026-12-30", "2026-11-18")).toEqual({ semaine: 1, total: 6 });
+    expect(semaineProgramme("2026-11-18T09:00:00Z", "2026-12-30", "2026-12-02")).toEqual({ semaine: 3, total: 6 });
+    expect(semaineProgramme("2026-11-18T09:00:00Z", "2026-12-30", "2026-12-31")).toEqual({ semaine: 7, total: 6 });
+    expect(semaineProgramme(null, "2026-12-30", "2026-12-02")).toBeNull();
+  });
+  it("texte pour la coach", () => {
+    expect(echeanceRenouvellement("2026-11-18", "2026-11-18").texte).toBe("aujourd’hui");
+    expect(echeanceRenouvellement("2026-11-23", "2026-11-18").texte).toBe("dans 5 j");
+    expect(echeanceRenouvellement("2026-11-15", "2026-11-18")).toEqual({ texte: "en retard de 3 j", retard: true, jours: -3 });
   });
 });

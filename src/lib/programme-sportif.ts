@@ -4,6 +4,8 @@
  * sa réponse dans l'app : on y retrouve le JSON, on le vérifie et on le nettoie.
  */
 
+import { ajouterJours, joursEntre } from "./bilan";
+
 export type Exercice = {
   nom: string;
   series: string | null;
@@ -207,4 +209,58 @@ export function cleExercice(nom: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+// ---------------------------------------------------------------- Changement de programme (toutes les 6 semaines)
+
+/** Durée d'un programme : la cliente change de programme toutes les 6 semaines. */
+export const DUREE_PROGRAMME_JOURS = 42;
+/** La coach est prévenue une semaine avant, puis le jour du changement. */
+export const AVANCE_RAPPEL_JOURS = 7;
+
+/** Jour (AAAA-MM-JJ) à Paris d'un horodatage. */
+export function jourParisDe(iso: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+}
+
+/** Date prévue du prochain programme : celle choisie par la coach, sinon 6 semaines après la publication. */
+export function dateRenouvellement(p: { renouveler_le?: string | null; publie_le: string | null }): string | null {
+  if (p.renouveler_le) return p.renouveler_le;
+  return p.publie_le ? ajouterJours(jourParisDe(p.publie_le), DUREE_PROGRAMME_JOURS) : null;
+}
+
+/** Date par défaut à la publication d'un programme (aujourd'hui + 6 semaines). */
+export function renouvellementParDefaut(aujourdhui: string): string {
+  return ajouterJours(aujourdhui, DUREE_PROGRAMME_JOURS);
+}
+
+/**
+ * Rappel à envoyer ce matin à la coach : « bientot » (à partir de J-7), puis « jour » (à partir du jour J).
+ * Chaque rappel ne part qu'une fois, même si la tâche du matin a sauté un jour ;
+ * reporter la date réarme les rappels.
+ */
+export function rappelRenouvellementDu(renouvelerLe: string, aujourdhui: string, envoyeLe: string | null): "bientot" | "jour" | null {
+  const debut = ajouterJours(renouvelerLe, -AVANCE_RAPPEL_JOURS);
+  if (aujourdhui >= renouvelerLe) return !envoyeLe || envoyeLe < renouvelerLe ? "jour" : null;
+  if (aujourdhui >= debut) return !envoyeLe || envoyeLe < debut ? "bientot" : null;
+  return null;
+}
+
+/** Où en est la cliente : « semaine 3 sur 6 ». `null` si les dates manquent ou sont incohérentes. */
+export function semaineProgramme(publieLe: string | null, renouvelerLe: string | null, aujourdhui: string): { semaine: number; total: number } | null {
+  if (!publieLe || !renouvelerLe) return null;
+  const debut = jourParisDe(publieLe);
+  const total = Math.ceil(joursEntre(debut, renouvelerLe) / 7);
+  const ecoules = joursEntre(debut, aujourdhui);
+  if (total < 2 || ecoules < 0) return null; // « semaine 1 sur 1 » n'apporte rien
+  return { semaine: Math.floor(ecoules / 7) + 1, total };
+}
+
+/** Texte court pour la coach : « dans 5 j », « aujourd'hui », « en retard de 3 j ». */
+export function echeanceRenouvellement(renouvelerLe: string, aujourdhui: string): { texte: string; retard: boolean; jours: number } {
+  const j = joursEntre(aujourdhui, renouvelerLe);
+  if (j === 0) return { texte: "aujourd’hui", retard: false, jours: 0 };
+  if (j === 1) return { texte: "demain", retard: false, jours: 1 };
+  if (j > 0) return { texte: `dans ${j} j`, retard: false, jours: j };
+  return { texte: `en retard de ${-j} j`, retard: true, jours: j };
 }

@@ -2,7 +2,9 @@
 
 import { startTransition, useActionState, useState, useTransition } from "react";
 import { Bouton, Message, classesBouton } from "@/components/ui";
-import { importerProgramme, publierProgramme, renommerProgramme, supprimerProgramme, type EtatProgramme } from "../../programme-actions";
+import { ajouterJours } from "@/lib/bilan";
+import { DUREE_PROGRAMME_JOURS } from "@/lib/programme-sportif";
+import { importerProgramme, modifierRenouvellement, publierProgramme, renommerProgramme, supprimerProgramme, type EtatProgramme } from "../../programme-actions";
 
 /** Copie un texte (consigne ou programme) pour le coller dans Claude. */
 export function BoutonCopier({ texte, libelle, aide }: { texte: string; libelle: string; aide: string }) {
@@ -121,6 +123,45 @@ export function ActionsProgramme({ clienteId, programmeId, publie, prenom, titre
           Supprimer
         </Bouton>
       </div>
+      {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
+      {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+    </div>
+  );
+}
+
+/** Date du prochain programme : tu es prévenue une semaine avant, puis le jour même. */
+export function DateRenouvellement({ clienteId, programmeId, date, aujourdhui }: { clienteId: string; programmeId: string; date: string; aujourdhui: string }) {
+  const [valeur, setValeur] = useState(date);
+  const [etat, setEtat] = useState<EtatProgramme>({});
+  const [enCours, demarrer] = useTransition();
+  const enregistrer = (d: string) =>
+    demarrer(async () => {
+      const r = await modifierRenouvellement(clienteId, programmeId, d);
+      setEtat(r);
+      if (!r.erreur) setValeur(d);
+    });
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] font-medium text-texte-2">Prochain programme le</span>
+          <input type="date" value={valeur} onChange={(e) => setValeur(e.target.value)} className="min-h-11 w-44 rounded-xl border border-ligne bg-white px-3 text-[15px]" />
+        </label>
+        {valeur !== date && (
+          <Bouton type="button" className="min-h-11" disabled={enCours || !valeur} onClick={() => enregistrer(valeur)}>
+            Enregistrer
+          </Bouton>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13.5px]">
+        <button type="button" disabled={enCours} onClick={() => enregistrer(ajouterJours(date, 7))} className="underline underline-offset-4">
+          Reporter d’une semaine
+        </button>
+        <button type="button" disabled={enCours} onClick={() => enregistrer(ajouterJours(aujourdhui, DUREE_PROGRAMME_JOURS))} className="underline underline-offset-4">
+          6 semaines à partir d’aujourd’hui
+        </button>
+      </div>
+      <p className="text-[13px] text-texte-2">Tu reçois un rappel une semaine avant, puis le jour même.</p>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
     </div>

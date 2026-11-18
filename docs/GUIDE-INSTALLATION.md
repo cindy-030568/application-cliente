@@ -715,3 +715,21 @@ Menu **Revenus** :
 - **Exporter (Excel)** : tous les encaissements de l'année avec le total, pour ta comptabilité.
 
 Les mêmes boutons sont dans la fiche de chaque cliente (Formule et paiement). Bon à savoir : enregistrer la formule ne touche plus aux dates que tu as reportées, sauf si tu changes le montant, le nombre de fois ou la date du 1er paiement.
+
+---
+
+# Changement de programme sportif (toutes les 6 semaines)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0018_renouvellement_programme.sql`](../supabase/migrations/0018_renouvellement_programme.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+Les programmes déjà publiés reçoivent automatiquement une date de changement 6 semaines après leur publication.
+
+## 2. Utilisation
+
+- Quand tu **publies un nouveau programme**, le prochain changement est prévu **6 semaines plus tard**. Republier le même programme après une correction ne change pas la date.
+- **Tableau de bord** : la carte « Programmes sportifs à changer » liste les changements en retard ou dans les 14 jours.
+- **Rappel** : le matin, une semaine avant, puis le jour même, tu reçois une notification (et un email si tu les as activés dans Réglages → Notifications). Plusieurs clientes le même jour = un seul message.
+- **Reporter** (vacances, blessure…) : ouvre son programme → carte **Changement de programme** → choisis une date, ou **Reporter d'une semaine**. Les rappels suivent la nouvelle date.
+- **Fiche cliente** : « Semaine 3 sur 6 · prochain programme le … ». Ta cliente voit aussi « Semaine 3 sur 6 » dans son onglet Sport.

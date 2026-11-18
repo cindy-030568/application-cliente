@@ -16,6 +16,8 @@ import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
 import { BlocPaiement } from "./bloc-paiement";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
 import { chargerCategoriesAliment } from "@/lib/aliments";
+import { echeanceRenouvellement, semaineProgramme } from "@/lib/programme-sportif";
+import { lireRenouvellements } from "@/lib/programme-sportif-serveur";
 import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
@@ -62,6 +64,7 @@ export default async function PageFicheCliente({
     chargerCategoriesAliment(supabase),
   ]);
   if (!c) notFound();
+  const programmeEnCours = (await lireRenouvellements(supabase, id))?.[0] ?? null;
   // Rappels (phase 8) : lus à part, la fiche reste utilisable avant la mise à jour de la base.
   const [{ data: prefRappels, error: sansRappels }, { data: rappels }, { count: appareils }] = await Promise.all([
     supabase.from("clientes").select("rappels_email").eq("id", id).maybeSingle<{ rappels_email: boolean }>(),
@@ -243,6 +246,9 @@ export default async function PageFicheCliente({
             <p className="text-[14px] text-texte-2">
               Construit avec Claude, collé ici, puis publié dans son onglet Sport.
             </p>
+            {programmeEnCours && (
+              <ProgrammeEnCours publieLe={programmeEnCours.publie_le} renouvelerLe={programmeEnCours.renouveler_le} />
+            )}
             <Link
               href={`/coach/clientes/${c.id}/programme-sportif`}
               className="inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
@@ -316,5 +322,19 @@ function Section({ titre, sousTitre, children }: { titre: string; sousTitre?: st
       </div>
       {children}
     </Carte>
+  );
+}
+
+/** Où en est son programme sportif, et quand préparer le suivant. */
+function ProgrammeEnCours({ publieLe, renouvelerLe }: { publieLe: string | null; renouvelerLe: string }) {
+  const auj = aujourdhuiParis();
+  const semaine = semaineProgramme(publieLe, renouvelerLe, auj);
+  const e = echeanceRenouvellement(renouvelerLe, auj);
+  return (
+    <p className="rounded-xl bg-sable/50 px-3 py-2 text-[14px]">
+      {semaine && semaine.semaine <= semaine.total && <>Semaine {semaine.semaine} sur {semaine.total} · </>}
+      Prochain programme le {formaterDate(renouvelerLe, { year: undefined })}{" "}
+      <span className={e.jours <= 7 ? "font-medium text-erreur" : "text-texte-2"}>({e.texte})</span>
+    </p>
   );
 }

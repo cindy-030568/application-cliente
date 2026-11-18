@@ -5,7 +5,8 @@ import { IconeRetour } from "@/components/icones";
 import { Carte, Etiquette, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
 import { lireSuiviSport } from "@/lib/paiements-serveur";
-import { CONSIGNE_CLAUDE, compterExercices } from "@/lib/programme-sportif";
+import { aujourdhuiParis } from "@/lib/bilan";
+import { CONSIGNE_CLAUDE, compterExercices, echeanceRenouvellement } from "@/lib/programme-sportif";
 import { lireProgrammes } from "@/lib/programme-sportif-serveur";
 import { BoutonCopier, FormulaireImport } from "./composants";
 
@@ -25,6 +26,7 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
     .maybeSingle<{ id: string; profils: { prenom: string; nom: string } }>();
   if (!c) notFound();
   const [programmes, sport] = await Promise.all([lireProgrammes(supabase, id), lireSuiviSport(supabase, id)]);
+  const auj = aujourdhuiParis();
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,6 +90,11 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
                           {dateCourte.format(new Date(p.updated_at))} · {p.contenu.seances.length} séance{p.contenu.seances.length > 1 ? "s" : ""} ·{" "}
                           {compterExercices(p.contenu)} exercices
                         </span>
+                        {p.publie && p.renouveler_le && (
+                          <span className={echeanceRenouvellement(p.renouveler_le, auj).jours <= 7 ? "text-[13px] font-medium text-erreur" : "text-[13px] text-texte-2"}>
+                            Prochain programme : {echeanceRenouvellement(p.renouveler_le, auj).texte}
+                          </span>
+                        )}
                       </span>
                       {p.publie ? <Etiquette ton="vert">{p.vu_le ? "Publié · vu" : "Publié"}</Etiquette> : <Etiquette ton="sable">Brouillon</Etiquette>}
                     </Link>

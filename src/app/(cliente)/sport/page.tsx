@@ -5,6 +5,8 @@ import { exigerCliente } from "@/lib/auth";
 import { VueProgramme } from "@/components/programme/vue-programme";
 import { Etiquette, Surtitre } from "@/components/ui";
 import { lireMonProgramme, videosParExercice } from "@/lib/programme-sportif-serveur";
+import { aujourdhuiParis } from "@/lib/bilan";
+import { semaineProgramme } from "@/lib/programme-sportif";
 import { EnTete } from "../composants";
 import { PagePlan } from "../page-plan";
 import { MarquerProgrammeVu } from "./marquer-vu";
@@ -23,6 +25,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
   const [videos, { count: nbPdf }] = programme
     ? await Promise.all([videosParExercice(supabase), supabase.from("plans").select("id", { count: "exact", head: true }).eq("type", "sport")])
     : [{}, { count: 0 }];
+  const semaine = programme ? semaineProgramme(programme.publie_le, programme.renouveler_le, aujourdhuiParis()) : null;
   return (
     <>
       {programme ? (
@@ -33,9 +36,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
           />
           {!programme.vu_le && <MarquerProgrammeVu programmeId={programme.id} />}
           <div className="flex flex-col gap-4 px-5 pt-3">
-            {!programme.vu_le && (
-              <div>
-                <Etiquette>Nouveau</Etiquette>
+            {(!programme.vu_le || semaine) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {!programme.vu_le && <Etiquette>Nouveau</Etiquette>}
+                {semaine &&
+                  (semaine.semaine <= semaine.total ? (
+                    <Etiquette ton="sable">
+                      Semaine {semaine.semaine} sur {semaine.total}
+                    </Etiquette>
+                  ) : (
+                    <Etiquette ton="sable">Ton prochain programme arrive bientôt 💪</Etiquette>
+                  ))}
               </div>
             )}
             <VueProgramme programme={programme.contenu} videos={videos} lienVideo="/sport/videos/" />
