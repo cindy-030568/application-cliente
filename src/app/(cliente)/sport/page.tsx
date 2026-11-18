@@ -4,9 +4,9 @@ import { IconeFleche, IconeVideo } from "@/components/icones";
 import { exigerCliente } from "@/lib/auth";
 import { VueProgramme } from "@/components/programme/vue-programme";
 import { Etiquette, Surtitre } from "@/components/ui";
-import { lireMonProgramme, videosParExercice } from "@/lib/programme-sportif-serveur";
-import { aujourdhuiParis } from "@/lib/bilan";
-import { semaineProgramme } from "@/lib/programme-sportif";
+import { activerProgrammesPlanifies, lireMonProgramme, videosParExercice } from "@/lib/programme-sportif-serveur";
+import { aujourdhuiParis, formaterDate, joursEntre } from "@/lib/bilan";
+import { ANNONCE_JOURS, semaineProgramme } from "@/lib/programme-sportif";
 import { resumeSeancesFaites } from "@/lib/seance-guidee";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { EnTete } from "../composants";
@@ -22,8 +22,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
   const { supabase } = await exigerCliente();
   const { count } = await supabase.from("videos").select("id", { count: "exact", head: true });
   const nbVideos = count ?? 0;
+  // Son programme planifié passe en ligne dès sa date, même avant la tâche du matin.
+  if (!version && !pdf) await activerProgrammesPlanifies(supabase);
   // Programme construit avec Claude (0016) : affiché en priorité. Sinon, les programmes PDF / liens comme avant.
   const programme = version || pdf ? null : await lireMonProgramme(supabase);
+  const { data: prochain } = programme ? await supabase.rpc("ma_prochaine_bascule") : { data: null };
+  const auj = aujourdhuiParis();
+  const dansJours = typeof prochain === "string" ? joursEntre(auj, prochain) : null;
   const [videos, { count: nbPdf }, faites] = programme
     ? await Promise.all([
         videosParExercice(supabase),
@@ -31,7 +36,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
         lireSeancesFaites(supabase, { programmeId: programme.id, limite: 200 }),
       ])
     : [{}, { count: 0 }, null];
-  const semaine = programme ? semaineProgramme(programme.publie_le, programme.renouveler_le, aujourdhuiParis()) : null;
+  const semaine = programme ? semaineProgramme(programme.publie_le, programme.renouveler_le, auj) : null;
   return (
     <>
       {programme ? (
@@ -53,6 +58,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
                   ) : (
                     <Etiquette ton="sable">Ton prochain programme arrive bientôt 💪</Etiquette>
                   ))}
+              </div>
+            )}
+            {dansJours !== null && dansJours >= 1 && dansJours <= ANNONCE_JOURS && (
+              <div className="rounded-carte bg-chocolat p-4 text-creme">
+                <p className="font-titre text-lg font-bold">Ton nouveau programme arrive {dansJours === 1 ? "demain" : `dans ${dansJours} jours`} 🗓️</p>
+                <p className="text-[14px] text-texte-clair">
+                  Il s’affichera ici le {formaterDate(prochain as string, { weekday: "long", year: undefined })}. Termine bien celui-ci, tu y es presque 💪
+                </p>
               </div>
             )}
             <VueProgramme

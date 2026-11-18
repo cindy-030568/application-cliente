@@ -5,11 +5,11 @@ import { IconeRetour } from "@/components/icones";
 import { Carte, Etiquette, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
 import { lireSuiviSport } from "@/lib/paiements-serveur";
-import { aujourdhuiParis } from "@/lib/bilan";
-import { CONSIGNE_CLAUDE, compterExercices, echeanceRenouvellement } from "@/lib/programme-sportif";
-import { lireProgrammes } from "@/lib/programme-sportif-serveur";
+import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
+import { CONSIGNE_CLAUDE, compterExercices, echeanceRenouvellement, statutProgramme } from "@/lib/programme-sportif";
+import { activerProgrammesPlanifies, lireProgrammes } from "@/lib/programme-sportif-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
-import { BoutonCopier, FormulaireImport } from "./composants";
+import { BoutonCopier, BoutonPlanifier, DateDebut, FormulaireImport } from "./composants";
 import { SeancesFaites } from "./seances-faites";
 
 export const metadata: Metadata = { title: "Programme sportif" };
@@ -23,16 +23,22 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
   const { supabase } = await exigerCoach();
   const { data: c } = await supabase
     .from("clientes")
-    .select("id, profils!inner(prenom, nom)")
+    .select("id, date_debut, profils!inner(prenom, nom)")
     .eq("id", id)
-    .maybeSingle<{ id: string; profils: { prenom: string; nom: string } }>();
+    .maybeSingle<{ id: string; date_debut: string | null; profils: { prenom: string; nom: string } }>();
   if (!c) notFound();
+  // Un programme planifié arrivé à date passe en ligne (si la tâche du matin ne l'a pas encore fait).
+  await activerProgrammesPlanifies(supabase, id);
   const [programmes, sport, faites] = await Promise.all([
     lireProgrammes(supabase, id),
     lireSuiviSport(supabase, id),
     lireSeancesFaites(supabase, { clienteId: id, limite: 30 }),
   ]);
   const auj = aujourdhuiParis();
+  // Programmes jamais publiés, dans l'ordre du planning (date, puis ordre d'import).
+  const planning = (programmes ?? [])
+    .filter((p) => !p.publie && !p.publie_le)
+    .sort((a, b) => (a.debut_le ?? "9999").localeCompare(b.debut_le ?? "9999") || a.created_at.localeCompare(b.created_at));
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,7 +80,8 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
               </li>
               <li className="flex flex-col gap-2">
                 <p className="text-[15px]">
-                  <strong className="font-medium">3.</strong> Copie toute sa réponse et colle-la ici. Tu verras un aperçu avant de le publier.
+                  <strong className="font-medium">3.</strong> Copie toute sa réponse et colle-la ici. Tu verras un aperçu avant de le publier. Plusieurs programmes
+                  dans la même réponse (ex. tous ses PDF d’un coup) ? Ils sont tous importés, prêts à être planifiés.
                 </p>
                 <FormulaireImport clienteId={id} />
               </li>
@@ -103,11 +110,52 @@ export default async function PageProgrammes({ params }: { params: Promise<{ id:
                           </span>
                         )}
                       </span>
-                      {p.publie ? <Etiquette ton="vert">{p.vu_le ? "Publié · vu" : "Publié"}</Etiquette> : <Etiquette ton="sable">Brouillon</Etiquette>}
+                      {p.publie ? (
+                        <Etiquette ton="vert">{p.vu_le ? "En ligne · vu" : "En ligne"}</Etiquette>
+                      ) : statutProgramme(p) === "planifie" ? (
+                        <Etiquette>Le {formaterDate(p.debut_le, { day: "numeric", month: "short", year: undefined })}</Etiquette>
+                      ) : statutProgramme(p) === "termine" ? (
+                        <Etiquette ton="sable">Terminé</Etiquette>
+                      ) : (
+                        <Etiquette ton="sable">Brouillon</Etiquette>
+                      )}
                     </Link>
                   </li>
                 ))}
               </ul>
+            )}
+          </Carte>
+          <Carte className="flex flex-col gap-4">
+            <div>
+              <h2 className="font-titre text-xl font-bold">Planning des programmes</h2>
+              <p className="text-[14px] text-texte-2">
+                Prépare tous ses programmes à l’avance : chacun reste caché jusqu’à sa date, puis passe en ligne tout seul. {c.profils.prenom} est
+                prévenue 3 jours avant, puis le jour même.
+              </p>
+            </div>
+            {planning.length > 0 && (
+              <ol className="flex flex-col divide-y divide-ligne">
+                {planning.map((p) => (
+                  <li key={p.id} className="flex flex-col gap-2 py-3">
+                    <Link href={`/coach/clientes/${id}/programme-sportif/${p.id}`} className="text-[15px] font-medium hover:text-accent">
+                      {p.titre}
+                    </Link>
+                    <DateDebut clienteId={id} programmeId={p.id} date={p.debut_le} />
+                  </li>
+                ))}
+              </ol>
+            )}
+            <p className="text-[13.5px] text-texte-2">
+              {c.date_debut ? (
+                <>Début du coaching : {formaterDate(c.date_debut)}. Un programme toutes les 6 semaines, dans l’ordre d’import.</>
+              ) : (
+                <>Pas de date de début de coaching dans sa fiche : le planning partira d’aujourd’hui.</>
+              )}
+            </p>
+            {planning.length > 0 ? (
+              <BoutonPlanifier clienteId={id} deja={planning.some((p) => p.debut_le)} />
+            ) : (
+              <p className="text-[14px]">Importe ses prochains programmes (même plusieurs d’un coup) pour les planifier.</p>
             )}
           </Carte>
           <SeancesFaites seances={faites} prenom={c.profils.prenom} />

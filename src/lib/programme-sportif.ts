@@ -177,7 +177,7 @@ const EXEMPLE: Programme = {
 /** Consigne à coller dans Claude (ou dans les instructions d'un projet Claude). */
 export const CONSIGNE_CLAUDE = `Tu m’aides à construire des programmes sportifs pour mes clientes (je suis coach, je travaille en box de CrossFit). Je te décris la cliente (objectif, niveau, matériel, nombre de séances, contraintes) ; tu me proposes un programme, on l’ajuste ensemble, puis je l’importe dans mon application.
 
-Si je te donne un programme déjà écrit (PDF, photo ou texte), retranscris-le FIDÈLEMENT dans le format ci-dessous : ne change rien, n’invente rien, garde toutes les consignes ; s’il manque une information, mets null.
+Si je te donne un programme déjà écrit (PDF, photo ou texte), retranscris-le FIDÈLEMENT dans le format ci-dessous : ne change rien, n’invente rien, garde toutes les consignes ; s’il manque une information, mets null. Si je t’en donne plusieurs, réponds avec un bloc de code JSON par programme, dans l’ordre où ils doivent se suivre.
 
 Quand je te dis « format application » (ou quand le programme est validé), réponds avec le programme COMPLET dans un seul bloc de code JSON, sans rien d’autre, exactement avec cette structure :
 - titre, duree, frequence, conseils : texte (ou null)
@@ -275,3 +275,66 @@ export function echeanceRenouvellement(renouvelerLe: string, aujourdhui: string)
   if (j > 0) return { texte: `dans ${j} j`, retard: false, jours: j };
   return { texte: `en retard de ${-j} j`, retard: true, jours: j };
 }
+
+// ---------------------------------------------------------------- Plusieurs programmes d'un coup, planning
+
+export type ResultatImportMultiple = { programmes: Programme[]; erreur?: undefined } | { programmes?: undefined; erreur: string };
+
+/**
+ * Comme `extraireProgramme`, mais accepte plusieurs programmes dans la même réponse de Claude
+ * (un bloc de code par programme, ou une liste JSON). Ils sont gardés dans l'ordre.
+ */
+export function extraireProgrammes(colle: string): ResultatImportMultiple {
+  const blocs = [...colle.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)].map((m) => m[1]);
+  if (blocs.length > 1) {
+    const programmes: Programme[] = [];
+    for (const [i, b] of blocs.entries()) {
+      const r = extraireProgramme(b);
+      if (!r.programme) return { erreur: `Programme n° ${i + 1} : ${r.erreur}` };
+      programmes.push(r.programme);
+    }
+    return { programmes };
+  }
+  // Une liste JSON [ {…}, {…} ] ou { "programmes": [ … ] }.
+  const brut = (blocs[0] ?? colle).trim();
+  const debut = brut.search(/[[{]/);
+  if (debut >= 0) {
+    try {
+      const v: unknown = JSON.parse(brut.slice(debut, Math.max(brut.lastIndexOf("]"), brut.lastIndexOf("}")) + 1).replace(/[“”]/g, '"'));
+      const liste = Array.isArray(v) ? v : Array.isArray((v as { programmes?: unknown })?.programmes) ? (v as { programmes: unknown[] }).programmes : null;
+      if (liste && liste.length > 1) {
+        const programmes = liste.slice(0, 12).map(lireProgramme);
+        const vide = programmes.findIndex((p) => !p.seances.length);
+        if (vide >= 0) return { erreur: `Le programme n° ${vide + 1} ne contient aucune séance avec des exercices.` };
+        return { programmes };
+      }
+    } catch {
+      // pas une liste : on essaie un seul programme
+    }
+  }
+  const r = extraireProgramme(colle);
+  return r.programme ? { programmes: [r.programme] } : { erreur: r.erreur };
+}
+
+export type StatutProgramme = "en_ligne" | "planifie" | "brouillon" | "termine";
+
+export function statutProgramme(p: { publie: boolean; publie_le: string | null; debut_le?: string | null }): StatutProgramme {
+  if (p.publie) return "en_ligne";
+  if (p.publie_le) return "termine";
+  return p.debut_le ? "planifie" : "brouillon";
+}
+
+/**
+ * Dates des prochains programmes, toutes les 6 semaines à partir du début du coaching.
+ * Le programme en ligne occupe la période en cours ; les suivants prennent les périodes d'après.
+ * Sans programme en ligne, le premier démarre sur la période en cours (donc tout de suite).
+ */
+export function datesPlanning(debutCoaching: string | null, aujourdhui: string, enLigne: boolean, nombre: number): string[] {
+  const base = debutCoaching ?? aujourdhui;
+  const periode = Math.max(0, Math.floor(joursEntre(base, aujourdhui) / DUREE_PROGRAMME_JOURS));
+  const premiere = periode + (enLigne && base <= aujourdhui ? 1 : 0);
+  return Array.from({ length: nombre }, (_, i) => ajouterJours(base, (premiere + i) * DUREE_PROGRAMME_JOURS));
+}
+
+/** Les 3 jours avant un nouveau programme planifié, la cliente est prévenue. */
+export const ANNONCE_JOURS = 3;

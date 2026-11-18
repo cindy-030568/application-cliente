@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { executerTachesDuMatin } from "@/lib/envoi-rappels";
-import { executerRappelsProgrammes } from "@/lib/rappels-programmes";
+import { executerProgrammesPlanifies, executerRappelsProgrammes } from "@/lib/rappels-programmes";
 
 /**
  * Tâche quotidienne des rappels (bilans, paiements, changement de programme sportif), lancée par Vercel (voir vercel.json).
@@ -18,8 +18,9 @@ export async function GET(request: Request) {
   try {
     const admin = createAdminClient();
     const bilan = await executerTachesDuMatin(admin);
+    const planifies = await executerProgrammesPlanifies(admin).catch(() => ({ misEnLigne: 0, annonces: 0, notifications: 0 }));
     const programmes = await executerRappelsProgrammes(admin).catch(() => ({ rappels: 0, notifications: 0, emails: 0 }));
-    return Response.json({ ...bilan, programmes });
+    return Response.json({ ...bilan, programmes, planifies });
   } catch (e) {
     console.error("Rappels : échec de la tâche", e instanceof Error ? e.message : "erreur inconnue");
     return Response.json({ erreur: "échec" }, { status: 500 });

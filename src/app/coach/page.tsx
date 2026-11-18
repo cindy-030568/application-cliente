@@ -6,7 +6,7 @@ import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, conservationDepassee, f
 import { chargerFile } from "./bilans/donnees";
 import { formaterEuros } from "@/lib/paiements";
 import { echeanceRenouvellement } from "@/lib/programme-sportif";
-import { lireRenouvellements } from "@/lib/programme-sportif-serveur";
+import { clientesAvecSuitePlanifiee, lireRenouvellements } from "@/lib/programme-sportif-serveur";
 import { CarteAnnonce } from "./annonce";
 
 export default async function TableauDeBord() {
@@ -35,8 +35,10 @@ export default async function TableauDeBord() {
   });
 
   // Programmes sportifs à changer : en retard ou dans les 14 jours (rien avant la mise à jour 0016).
-  const programmes = ((await lireRenouvellements(supabase)) ?? [])
-    .filter((p) => p.renouveler_le <= ajouterJours(auj, 14))
+  // Sauf si le programme suivant est déjà planifié : le changement se fera tout seul.
+  const [renouvellements, avecSuite] = await Promise.all([lireRenouvellements(supabase), clientesAvecSuitePlanifiee(supabase)]);
+  const programmes = (renouvellements ?? [])
+    .filter((p) => p.renouveler_le <= ajouterJours(auj, 14) && !avecSuite.has(p.cliente_id))
     .flatMap((p) => {
       const cliente = clientes.find((c) => c.id === p.cliente_id && c.statut !== "fermee");
       return cliente ? [{ ...p, cliente, e: echeanceRenouvellement(p.renouveler_le, auj) }] : [];

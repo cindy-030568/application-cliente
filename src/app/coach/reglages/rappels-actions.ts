@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
 import { SITE_URL } from "@/lib/env";
 import { ErreurBrevo, configurationRappels, envoyerEmail, executerTachesDuMatin } from "@/lib/envoi-rappels";
-import { executerRappelsProgrammes } from "@/lib/rappels-programmes";
+import { executerProgrammesPlanifies, executerRappelsProgrammes } from "@/lib/rappels-programmes";
 import { SUJETS, emailRappel, personnaliser } from "@/lib/rappels";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -77,12 +77,13 @@ export async function lancerRappelsMaintenant(): Promise<EtatRappelsCoach> {
   try {
     const admin = createAdminClient();
     const t = await executerTachesDuMatin(admin);
+    const plan = await executerProgrammesPlanifies(admin).catch(() => ({ misEnLigne: 0, annonces: 0, notifications: 0 }));
     const prog = await executerRappelsProgrammes(admin).catch(() => ({ rappels: 0, notifications: 0, emails: 0 }));
     revalidatePath("/coach", "layout");
     const p = t.paiements;
-    const rappels = t.rappels + p.rappels + prog.rappels;
+    const rappels = t.rappels + p.rappels + prog.rappels + plan.annonces + plan.misEnLigne;
     const emails = t.emails + p.emails + prog.emails;
-    const notifications = t.notifications + p.notifications + prog.notifications;
+    const notifications = t.notifications + p.notifications + prog.notifications + plan.notifications;
     const erreurs = t.erreurs + p.erreurs;
     const pause = t.actifs ? "" : " (rappels de bilan en pause)";
     if (rappels === 0) return { succes: `Aucun rappel à envoyer aujourd’hui${pause}.` };

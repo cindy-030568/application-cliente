@@ -5,7 +5,10 @@ import {
   compterExercices,
   dateRenouvellement,
   echeanceRenouvellement,
+  datesPlanning,
   extraireProgramme,
+  extraireProgrammes,
+  statutProgramme,
   lireProgramme,
   rappelRenouvellementDu,
   renouvellementParDefaut,
@@ -125,5 +128,37 @@ describe("changement de programme", () => {
     expect(echeanceRenouvellement("2026-11-18", "2026-11-18").texte).toBe("aujourd’hui");
     expect(echeanceRenouvellement("2026-11-23", "2026-11-18").texte).toBe("dans 5 j");
     expect(echeanceRenouvellement("2026-11-15", "2026-11-18")).toEqual({ texte: "en retard de 3 j", retard: true, jours: -3 });
+  });
+});
+
+describe("plusieurs programmes et planning", () => {
+  const prog = (titre: string) => JSON.stringify({ titre, seances: [{ nom: "S1", blocs: [{ exercices: [{ nom: "Squat" }] }] }] });
+  it("lit plusieurs blocs de code, dans l'ordre", () => {
+    const r = extraireProgrammes(`Programme 1 :\n\`\`\`json\n${prog("P1")}\n\`\`\`\nProgramme 2 :\n\`\`\`json\n${prog("P2")}\n\`\`\``);
+    expect(r.programmes?.map((p) => p.titre)).toEqual(["P1", "P2"]);
+  });
+  it("lit une liste JSON", () => {
+    expect(extraireProgrammes(`[${prog("A")}, ${prog("B")}, ${prog("C")}]`).programmes?.length).toBe(3);
+    expect(extraireProgrammes(`{"programmes": [${prog("A")}, ${prog("B")}]}`).programmes?.length).toBe(2);
+  });
+  it("un seul programme comme avant, et les erreurs", () => {
+    expect(extraireProgrammes(`\`\`\`json\n${prog("Seul")}\n\`\`\``).programmes?.[0].titre).toBe("Seul");
+    expect(extraireProgrammes(`\`\`\`json\n${prog("A")}\n\`\`\`\n\`\`\`json\n{"titre": "vide"}\n\`\`\``).erreur).toMatch(/^Programme n° 2/);
+  });
+  it("statut", () => {
+    expect(statutProgramme({ publie: true, publie_le: "x" })).toBe("en_ligne");
+    expect(statutProgramme({ publie: false, publie_le: "x", debut_le: "2026-12-01" })).toBe("termine");
+    expect(statutProgramme({ publie: false, publie_le: null, debut_le: "2026-12-01" })).toBe("planifie");
+    expect(statutProgramme({ publie: false, publie_le: null })).toBe("brouillon");
+  });
+  it("planning toutes les 6 semaines depuis le début du coaching", () => {
+    // coaching commencé le 1er octobre, on est le 18 novembre (période 2 : du 12 nov. au 23 déc.)
+    expect(datesPlanning("2026-10-01", "2026-11-18", true, 2)).toEqual(["2026-12-24", "2027-02-04"]);
+    // aucun programme en ligne : le premier démarre sur la période en cours (tout de suite)
+    expect(datesPlanning("2026-10-01", "2026-11-18", false, 2)).toEqual(["2026-11-12", "2026-12-24"]);
+    // coaching qui commence plus tard
+    expect(datesPlanning("2026-12-07", "2026-11-18", false, 3)).toEqual(["2026-12-07", "2027-01-18", "2027-03-01"]);
+    // sans date de début : à partir d'aujourd'hui
+    expect(datesPlanning(null, "2026-11-18", true, 1)).toEqual(["2026-12-30"]);
   });
 });

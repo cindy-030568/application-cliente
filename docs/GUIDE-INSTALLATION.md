@@ -765,3 +765,26 @@ L'écran reste allumé pendant la séance. Si elle quitte l'appli (pour regarder
 - Sur la page d'un programme, **▶ Tester le mode séance** te montre exactement ce qu'elle verra (rien n'est enregistré).
 
 Pour que le guidage soit juste, chaque exercice de force doit avoir **series** (un chiffre) et **repos** (« 90 s », « 2 min ») : la consigne Claude le demande déjà.
+
+---
+
+# Programmes planifiés (tous les programmes d'un coup, mis en ligne toutes les 6 semaines)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0020_programmes_planifies.sql`](../supabase/migrations/0020_programmes_planifies.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Préparer tous ses programmes d'un coup
+
+1. Vérifie la **date de début du coaching** dans sa fiche (Infos) : le planning part de cette date.
+2. Dans Claude (avec la consigne à jour), joins **tous ses PDF** et écris : *« Retranscris ces programmes au format application, un bloc par programme, dans l'ordre »*.
+3. Copie toute la réponse → fiche → **Programme sportif** → colle → **Importer le programme** : tous les programmes sont créés en brouillon.
+4. Carte **Planning des programmes** → **Planifier toutes les 6 semaines**. Le programme de la période en cours passe en ligne tout de suite (si elle n'en a pas déjà un), les suivants prennent chacun une date, 6 semaines après le précédent.
+5. Une date à changer (vacances, blessure) ? Modifie-la dans le planning → **Planifier**. **Retirer du planning** le remet en brouillon.
+
+## 3. Ce qui se passe ensuite (tout seul)
+
+- Un programme planifié **reste caché** à ta cliente jusqu'à sa date.
+- **3 jours avant** : elle reçoit une notification « Ton nouveau programme sportif arrive vendredi 20 novembre (dans 3 jours) » et voit un encadré dans son onglet Sport.
+- **Le jour J** : le nouveau programme remplace l'ancien (le matin, ou dès qu'elle ouvre l'onglet Sport) et elle reçoit « Ton nouveau programme sportif est là 💪 ».
+- Tu n'as plus le rappel « programme à changer » pour cette cliente : le changement est déjà prévu.

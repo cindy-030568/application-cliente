@@ -4,7 +4,16 @@ import { startTransition, useActionState, useState, useTransition } from "react"
 import { Bouton, Message, classesBouton } from "@/components/ui";
 import { ajouterJours } from "@/lib/bilan";
 import { DUREE_PROGRAMME_JOURS } from "@/lib/programme-sportif";
-import { importerProgramme, modifierRenouvellement, publierProgramme, renommerProgramme, supprimerProgramme, type EtatProgramme } from "../../programme-actions";
+import {
+  importerProgramme,
+  modifierDebutProgramme,
+  modifierRenouvellement,
+  planifierProgrammes,
+  publierProgramme,
+  renommerProgramme,
+  supprimerProgramme,
+  type EtatProgramme,
+} from "../../programme-actions";
 
 /** Copie un texte (consigne ou programme) pour le coller dans Claude. */
 export function BoutonCopier({ texte, libelle, aide }: { texte: string; libelle: string; aide: string }) {
@@ -162,6 +171,63 @@ export function DateRenouvellement({ clienteId, programmeId, date, aujourdhui }:
         </button>
       </div>
       <p className="text-[13px] text-texte-2">Tu reçois un rappel une semaine avant, puis le jour même.</p>
+      {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
+      {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+    </div>
+  );
+}
+
+/** Date de mise en ligne automatique d'un programme pas encore publié. */
+export function DateDebut({ clienteId, programmeId, date }: { clienteId: string; programmeId: string; date: string | null }) {
+  const [valeur, setValeur] = useState(date ?? "");
+  const [etat, setEtat] = useState<EtatProgramme>({});
+  const [enCours, demarrer] = useTransition();
+  const lancer = (d: string | null) =>
+    demarrer(async () => {
+      const r = await modifierDebutProgramme(clienteId, programmeId, d);
+      setEtat(r);
+      if (!r.erreur && d === null) setValeur("");
+    });
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] font-medium text-texte-2">En ligne automatiquement le</span>
+          <input type="date" value={valeur} onChange={(e) => setValeur(e.target.value)} className="min-h-11 w-44 rounded-xl border border-ligne bg-white px-3 text-[15px]" />
+        </label>
+        {valeur && valeur !== (date ?? "") && (
+          <Bouton type="button" className="min-h-11" disabled={enCours} onClick={() => lancer(valeur)}>
+            Planifier
+          </Bouton>
+        )}
+        {date && (
+          <button type="button" disabled={enCours} onClick={() => lancer(null)} className="min-h-11 px-1 text-[13.5px] text-texte-2 underline underline-offset-4">
+            Retirer du planning
+          </button>
+        )}
+      </div>
+      {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
+      {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+    </div>
+  );
+}
+
+/** Bouton « Planifier toutes les 6 semaines ». */
+export function BoutonPlanifier({ clienteId, deja }: { clienteId: string; deja: boolean }) {
+  const [etat, setEtat] = useState<EtatProgramme>({});
+  const [enCours, demarrer] = useTransition();
+  return (
+    <div className="flex flex-col gap-2">
+      <Bouton
+        type="button"
+        disabled={enCours}
+        onClick={() => {
+          if (deja && !window.confirm("Recalculer toutes les dates du planning (toutes les 6 semaines, dans l’ordre d’import) ?")) return;
+          demarrer(async () => setEtat(await planifierProgrammes(clienteId)));
+        }}
+      >
+        {enCours ? "Planification…" : deja ? "Recalculer le planning" : "Planifier toutes les 6 semaines"}
+      </Bouton>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
     </div>

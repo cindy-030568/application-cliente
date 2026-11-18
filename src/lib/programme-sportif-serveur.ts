@@ -14,15 +14,33 @@ export type ProgrammeSportif = {
   vu_le: string | null;
   /** Date prévue du prochain programme (mise à jour 0018 ; sinon 6 semaines après la publication). */
   renouveler_le: string | null;
+  /** Mise en ligne automatique prévue ce jour-là (mise à jour 0020). */
+  debut_le: string | null;
   created_at: string;
   updated_at: string;
 };
 const COLONNES = "id, cliente_id, titre, contenu, publie, publie_le, vu_le, created_at, updated_at";
-const normaliser = (d: Record<string, unknown>, dates: Map<string, string | null>): ProgrammeSportif => {
+const normaliser = (d: Record<string, unknown>, dates: Map<string, string | null>, debuts = new Map<string, string | null>()): ProgrammeSportif => {
   const p = { ...(d as unknown as ProgrammeSportif), contenu: lireProgramme(d.contenu) };
   p.renouveler_le = p.publie ? dateRenouvellement({ renouveler_le: dates.get(p.id), publie_le: p.publie_le }) : (dates.get(p.id) ?? null);
+  p.debut_le = debuts.get(p.id) ?? null;
   return p;
 };
+
+/** Dates de mise en ligne automatique (colonne de la mise à jour 0020, lue à part). */
+async function datesDebut(supabase: SupabaseClient, ids: string[]): Promise<Map<string, string | null>> {
+  if (!ids.length) return new Map();
+  const { data, error } = await supabase.from("programmes_sportifs").select("id, debut_le").in("id", ids);
+  if (error) return new Map();
+  return new Map((data ?? []).map((d) => [d.id as string, (d.debut_le as string | null) ?? null]));
+}
+
+/** Met en ligne les programmes planifiés arrivés à date (rien avant la mise à jour 0020). */
+export async function activerProgrammesPlanifies(supabase: SupabaseClient, clienteId?: string): Promise<string[]> {
+  const { data, error } = await supabase.rpc("activer_programmes_planifies", clienteId ? { p_cliente: clienteId } : {});
+  if (error || !Array.isArray(data)) return [];
+  return data.map((x) => (typeof x === "string" ? x : String((x as Record<string, unknown>).activer_programmes_planifies ?? ""))).filter(Boolean);
+}
 
 /** Dates de changement (colonne de la mise à jour 0018, lue à part : vide si elle n'est pas faite). */
 async function datesRenouvellement(supabase: SupabaseClient, ids: string[]): Promise<Map<string, string | null>> {
@@ -35,14 +53,16 @@ async function datesRenouvellement(supabase: SupabaseClient, ids: string[]): Pro
 export async function lireProgrammes(supabase: SupabaseClient, clienteId: string): Promise<ProgrammeSportif[] | null> {
   const { data, error } = await supabase.from("programmes_sportifs").select(COLONNES).eq("cliente_id", clienteId).order("created_at", { ascending: false });
   if (error) return null;
-  const dates = await datesRenouvellement(supabase, (data ?? []).map((d) => d.id as string));
-  return (data ?? []).map((d) => normaliser(d as Record<string, unknown>, dates));
+  const ids = (data ?? []).map((d) => d.id as string);
+  const [dates, debuts] = await Promise.all([datesRenouvellement(supabase, ids), datesDebut(supabase, ids)]);
+  return (data ?? []).map((d) => normaliser(d as Record<string, unknown>, dates, debuts));
 }
 
 export async function lireProgrammeSportif(supabase: SupabaseClient, id: string): Promise<ProgrammeSportif | null> {
   const { data, error } = await supabase.from("programmes_sportifs").select(COLONNES).eq("id", id).maybeSingle();
   if (error || !data) return null;
-  return normaliser(data as Record<string, unknown>, await datesRenouvellement(supabase, [data.id as string]));
+  const [dates, debuts] = await Promise.all([datesRenouvellement(supabase, [data.id as string]), datesDebut(supabase, [data.id as string])]);
+  return normaliser(data as Record<string, unknown>, dates, debuts);
 }
 
 /** Côté cliente : son programme publié (la sécurité de la base ne laisse voir que celui-là). */
@@ -74,4 +94,15 @@ export async function videosParExercice(supabase: SupabaseClient): Promise<Recor
   const index: Record<string, string> = {};
   for (const v of data ?? []) index[cleExercice(v.titre as string)] = v.id as string;
   return index;
+}
+
+/** Clientes qui ont un programme planifié à venir (le changement se fera tout seul). Vide avant la mise à jour 0020. */
+export async function clientesAvecSuitePlanifiee(supabase: SupabaseClient): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from("programmes_sportifs")
+    .select("cliente_id")
+    .eq("publie", false)
+    .is("publie_le", null)
+    .not("debut_le", "is", null);
+  return new Set(error ? [] : (data ?? []).map((d) => d.cliente_id as string));
 }

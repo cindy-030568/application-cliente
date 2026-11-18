@@ -1,9 +1,10 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
-import { configurationRappels } from "@/lib/envoi-rappels";
+import { ajouterJours, aujourdhuiParis, formaterDate, joursEntre } from "@/lib/bilan";
+import { configurationRappels, envoyerPushCliente } from "@/lib/envoi-rappels";
+import { activerProgrammesPlanifies, clientesAvecSuitePlanifiee } from "@/lib/programme-sportif-serveur";
 import { envoyerALaCoach, lirePrefsNotifCoach } from "@/lib/notifications-coach";
-import { dateRenouvellement, echeanceRenouvellement, rappelRenouvellementDu } from "@/lib/programme-sportif";
+import { ANNONCE_JOURS, dateRenouvellement, echeanceRenouvellement, rappelRenouvellementDu } from "@/lib/programme-sportif";
 
 type Rappel = { programmeId: string; clienteId: string; prenom: string; date: string; type: "bientot" | "jour" };
 
@@ -49,7 +50,9 @@ export async function executerRappelsProgrammes(admin: SupabaseClient, aujourdhu
     .eq("publie", true);
   if (error || !programmes?.length) return bilan;
 
-  const ids = [...new Set(programmes.map((p) => p.cliente_id as string))];
+  // Changement déjà planifié : il se fera tout seul, inutile de prévenir la coach.
+  const avecSuite = await clientesAvecSuitePlanifiee(admin);
+  const ids = [...new Set(programmes.map((p) => p.cliente_id as string))].filter((id) => !avecSuite.has(id));
   const { data: clientes } = await admin.from("clientes").select("id, statut, profils!inner(prenom)").in("id", ids);
   const prenomDe = new Map<string, string>();
   for (const c of clientes ?? []) {
@@ -82,4 +85,60 @@ export async function executerRappelsProgrammes(admin: SupabaseClient, aujourdhu
   const prefs = await lirePrefsNotifCoach(admin);
   const envoi = await envoyerALaCoach(admin, contenuRappelProgrammes(rappels, aujourdhui), prefs?.notif_coach_email ?? true);
   return { rappels: rappels.length, notifications: envoi.notifications, emails: envoi.emails };
+}
+
+/** Texte de la notification à la cliente quelques jours avant son nouveau programme (pur : testé). */
+export function texteAnnonceProgramme(debutLe: string, aujourdhui: string): string {
+  const j = joursEntre(aujourdhui, debutLe);
+  const quand = j <= 1 ? "demain" : `${formaterDate(debutLe, { weekday: "long", year: undefined })} (dans ${j} jours)`;
+  return `Ton nouveau programme sportif arrive ${quand}. Termine bien celui-ci, tu y es presque !`;
+}
+
+/**
+ * Tâche du matin, côté cliente : met en ligne les programmes planifiés arrivés à date
+ * (et la prévient), puis annonce ceux qui arrivent dans 3 jours ou moins. Rien avant la mise à jour 0020.
+ */
+export async function executerProgrammesPlanifies(admin: SupabaseClient, aujourdhui = aujourdhuiParis()) {
+  const bilan = { misEnLigne: 0, annonces: 0, notifications: 0 };
+  const enLigne = await activerProgrammesPlanifies(admin);
+  bilan.misEnLigne = enLigne.length;
+  if (enLigne.length) {
+    const { data } = await admin.from("programmes_sportifs").select("cliente_id").in("id", enLigne);
+    for (const p of data ?? []) {
+      bilan.notifications += await envoyerPushCliente(admin, p.cliente_id as string, {
+        titre: "Ton nouveau programme sportif est là 💪",
+        texte: "Il t’attend dans ton onglet Sport. Bonne séance !",
+        url: "/sport",
+      });
+    }
+  }
+
+  const { data: aVenir, error } = await admin
+    .from("programmes_sportifs")
+    .select("id, cliente_id, debut_le, clientes!inner(statut)")
+    .eq("publie", false)
+    .is("publie_le", null)
+    .is("annonce_le", null)
+    .gt("debut_le", aujourdhui)
+    .lte("debut_le", ajouterJours(aujourdhui, ANNONCE_JOURS))
+    .neq("clientes.statut", "fermee");
+  if (error) return bilan;
+  for (const p of aVenir ?? []) {
+    // Réservation avant l'envoi : une seule annonce par programme.
+    const { data: reserve } = await admin
+      .from("programmes_sportifs")
+      .update({ annonce_le: aujourdhui })
+      .eq("id", p.id)
+      .is("annonce_le", null)
+      .select("id")
+      .maybeSingle();
+    if (!reserve) continue;
+    bilan.annonces++;
+    bilan.notifications += await envoyerPushCliente(admin, p.cliente_id as string, {
+      titre: "Nouveau programme bientôt 🗓️",
+      texte: texteAnnonceProgramme(p.debut_le as string, aujourdhui),
+      url: "/sport",
+    });
+  }
+  return bilan;
 }

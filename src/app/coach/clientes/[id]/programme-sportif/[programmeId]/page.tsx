@@ -8,7 +8,7 @@ import { exigerCoach } from "@/lib/auth";
 import { aujourdhuiParis, formaterDate } from "@/lib/bilan";
 import { compterExercices, echeanceRenouvellement, semaineProgramme, texteModification } from "@/lib/programme-sportif";
 import { lireProgrammeSportif, videosParExercice } from "@/lib/programme-sportif-serveur";
-import { ActionsProgramme, BoutonCopier, DateRenouvellement, FormulaireImport } from "../composants";
+import { ActionsProgramme, BoutonCopier, DateDebut, DateRenouvellement, FormulaireImport } from "../composants";
 
 export const metadata: Metadata = { title: "Programme sportif" };
 
@@ -41,6 +41,10 @@ export default async function PageProgramme({ params }: { params: Promise<{ id: 
             Publié le {dateCourte.format(new Date(p.publie_le ?? p.updated_at))}
             {p.vu_le ? ` · vu le ${dateCourte.format(new Date(p.vu_le))}` : " · pas encore vu"}
           </Etiquette>
+        ) : p.publie_le ? (
+          <Etiquette ton="sable">Terminé</Etiquette>
+        ) : p.debut_le ? (
+          <Etiquette>En ligne automatiquement le {dateCourte.format(new Date(`${p.debut_le}T12:00:00Z`))}</Etiquette>
         ) : (
           <Etiquette ton="sable">Brouillon</Etiquette>
         )}
@@ -66,6 +70,15 @@ export default async function PageProgramme({ params }: { params: Promise<{ id: 
             <h2 className="font-titre text-xl font-bold">Publier</h2>
             <ActionsProgramme clienteId={id} programmeId={p.id} publie={p.publie} prenom={c.profils.prenom} titre={p.titre} />
           </Carte>
+          {!p.publie && !p.publie_le && (
+            <Carte className="flex flex-col gap-3">
+              <h2 className="font-titre text-xl font-bold">Mise en ligne automatique</h2>
+              <p className="text-[14px] text-texte-2">
+                Il reste caché jusqu’à cette date, puis remplace son programme actuel. {c.profils.prenom} est prévenue 3 jours avant, puis le jour même.
+              </p>
+              <DateDebut clienteId={id} programmeId={p.id} date={p.debut_le} />
+            </Carte>
+          )}
           {p.publie && p.renouveler_le && (
             <Carte className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
