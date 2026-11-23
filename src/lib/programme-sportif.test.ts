@@ -103,17 +103,24 @@ describe("changement de programme", () => {
     expect(dateRenouvellement({ renouveler_le: null, publie_le: null })).toBeNull();
     expect(renouvellementParDefaut("2026-11-18")).toBe("2026-12-30");
   });
-  it("prévient une semaine avant puis le jour même, une seule fois chacun", () => {
+  it("prévient à J-7, J-3, le jour J, puis relance tous les 3 jours pendant 2 semaines", () => {
     const d = "2026-12-30";
     expect(rappelRenouvellementDu(d, "2026-12-22", null)).toBeNull();
     expect(rappelRenouvellementDu(d, "2026-12-23", null)).toBe("bientot");
     expect(rappelRenouvellementDu(d, "2026-12-24", "2026-12-23")).toBeNull();
     // tâche du matin manquée le 23 : le rappel part le 25
     expect(rappelRenouvellementDu(d, "2026-12-25", null)).toBe("bientot");
-    expect(rappelRenouvellementDu(d, "2026-12-30", "2026-12-23")).toBe("jour");
-    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-30")).toBeNull();
-    // pas encore changé et aucun rappel du jour J parti : il part
-    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-23")).toBe("jour");
+    expect(rappelRenouvellementDu(d, "2026-12-27", "2026-12-23")).toBe("relance");
+    expect(rappelRenouvellementDu(d, "2026-12-28", "2026-12-27")).toBeNull();
+    expect(rappelRenouvellementDu(d, "2026-12-30", "2026-12-27")).toBe("jour");
+    expect(rappelRenouvellementDu(d, "2027-01-01", "2026-12-30")).toBeNull();
+    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-30")).toBe("retard");
+    expect(rappelRenouvellementDu(d, "2027-01-05", "2027-01-02")).toBe("retard");
+    // plusieurs paliers sautés : un seul rappel, le plus récent
+    expect(rappelRenouvellementDu(d, "2027-01-02", "2026-12-23")).toBe("retard");
+    expect(rappelRenouvellementDu(d, "2027-01-11", "2027-01-08")).toBe("retard");
+    // au-delà de 2 semaines de retard : on arrête
+    expect(rappelRenouvellementDu(d, "2027-01-20", "2027-01-11")).toBeNull();
   });
   it("reporter la date réarme les rappels", () => {
     expect(rappelRenouvellementDu("2027-01-13", "2027-01-06", "2026-12-30")).toBe("bientot");

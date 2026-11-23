@@ -17,6 +17,16 @@ describe("rappel de changement de programme", () => {
     const c = contenuRappelProgrammes([{ clienteId: "c1", prenom: "Léa", date: "2026-11-18", type: "jour" }], "2026-11-18");
     expect(c.texte).toMatch(/arrive au bout de ses 6 semaines/);
   });
+  it("une cliente, 3 jours avant : le suivant n'est pas dans l'appli", () => {
+    const c = contenuRappelProgrammes([{ clienteId: "c1", prenom: "Léa", date: "2026-11-21", type: "relance" }], "2026-11-18");
+    expect(c.texte).toBe("Le programme sportif de Léa se termine le samedi 21 novembre (dans 3 j) et le suivant n’est pas encore dans l’appli.");
+  });
+  it("une cliente, en retard : relance", () => {
+    const c = contenuRappelProgrammes([{ clienteId: "c1", prenom: "Léa", date: "2026-11-15", type: "retard" }], "2026-11-18");
+    expect(c.titre).toMatch(/^Relance/);
+    expect(c.texte).toBe("Relance : le programme sportif de Léa est terminé depuis 3 jours et le suivant n’est pas encore dans l’appli.");
+    expect(c.sujet).toBe("Relance : programme sportif de Léa à changer");
+  });
   it("plusieurs clientes : un seul message", () => {
     const c = contenuRappelProgrammes(
       [

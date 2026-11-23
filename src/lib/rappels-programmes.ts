@@ -4,9 +4,9 @@ import { ajouterJours, aujourdhuiParis, formaterDate, joursEntre } from "@/lib/b
 import { configurationRappels, envoyerPushCliente } from "@/lib/envoi-rappels";
 import { activerProgrammesPlanifies, clientesAvecSuitePlanifiee } from "@/lib/programme-sportif-serveur";
 import { envoyerALaCoach, lirePrefsNotifCoach } from "@/lib/notifications-coach";
-import { ANNONCE_JOURS, dateRenouvellement, echeanceRenouvellement, rappelRenouvellementDu } from "@/lib/programme-sportif";
+import { ANNONCE_JOURS, dateRenouvellement, echeanceRenouvellement, rappelRenouvellementDu, type TypeRappelProgramme } from "@/lib/programme-sportif";
 
-type Rappel = { programmeId: string; clienteId: string; prenom: string; date: string; type: "bientot" | "jour" };
+type Rappel = { programmeId: string; clienteId: string; prenom: string; date: string; type: TypeRappelProgramme };
 
 /** Contenu de la notification à la coach (pur : testé). Un seul message, même pour plusieurs clientes. */
 export function contenuRappelProgrammes(rappels: Omit<Rappel, "programmeId">[], aujourdhui: string) {
@@ -14,16 +14,21 @@ export function contenuRappelProgrammes(rappels: Omit<Rappel, "programmeId">[], 
     const r = rappels[0];
     const qui = r.prenom.trim() || "une cliente";
     const e = echeanceRenouvellement(r.date, aujourdhui);
+    const quand = formaterDate(r.date, { weekday: "long", year: undefined });
     const texte =
-      e.jours <= 0
-        ? `Le programme sportif de ${qui} arrive au bout de ses 6 semaines : c’est le moment de publier le suivant.`
-        : `Le programme sportif de ${qui} est à changer le ${formaterDate(r.date, { weekday: "long", year: undefined })} (${e.texte}).`;
+      e.jours < 0
+        ? `Relance : le programme sportif de ${qui} est terminé depuis ${-e.jours} jour${e.jours < -1 ? "s" : ""} et le suivant n’est pas encore dans l’appli.`
+        : e.jours === 0
+          ? `Le programme sportif de ${qui} arrive au bout de ses 6 semaines et le suivant n’est pas encore dans l’appli : c’est le moment de le publier.`
+          : r.type === "relance"
+            ? `Le programme sportif de ${qui} se termine le ${quand} (${e.texte}) et le suivant n’est pas encore dans l’appli.`
+            : `Le programme sportif de ${qui} est à changer le ${quand} (${e.texte}).`;
     return {
-      titre: "Programme sportif à changer 🏋️",
+      titre: e.jours < 0 ? "Relance : programme sportif à changer ⏰" : "Programme sportif à changer 🏋️",
       texte,
       url: `/coach/clientes/${r.clienteId}/programme-sportif`,
       bouton: "Préparer son programme",
-      sujet: `Programme sportif de ${qui} à changer`,
+      sujet: `${e.jours < 0 ? "Relance : p" : "P"}rogramme sportif de ${qui} à changer`,
     };
   }
   const liste = rappels.map((r) => `${r.prenom.trim() || "une cliente"} (${echeanceRenouvellement(r.date, aujourdhui).texte})`).join(", ");
@@ -37,8 +42,9 @@ export function contenuRappelProgrammes(rappels: Omit<Rappel, "programmeId">[], 
 }
 
 /**
- * Tâche du matin : prévient la coach une semaine avant le changement de programme
- * d'une cliente, puis le jour même. Rien avant la mise à jour 0018.
+ * Tâche du matin : prévient la coach quand le programme d'une cliente arrive au bout et que
+ * le suivant n'est ni en ligne ni planifié (J-7, J-3, jour J, puis tous les 3 jours pendant
+ * 2 semaines). Rien avant la mise à jour 0018.
  */
 export async function executerRappelsProgrammes(admin: SupabaseClient, aujourdhui = aujourdhuiParis()) {
   const bilan = { rappels: 0, notifications: 0, emails: 0 };

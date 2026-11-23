@@ -256,15 +256,24 @@ export function renouvellementParDefaut(aujourdhui: string): string {
 }
 
 /**
- * Rappel à envoyer ce matin à la coach : « bientot » (à partir de J-7), puis « jour » (à partir du jour J).
- * Chaque rappel ne part qu'une fois, même si la tâche du matin a sauté un jour ;
+ * Quand relancer la coach, en jours par rapport à la date de changement, tant que le
+ * programme suivant n'est ni en ligne ni planifié : J-7, J-3, le jour J, puis tous les
+ * 3 jours pendant 2 semaines.
+ */
+export const PALIERS_RAPPEL = [-AVANCE_RAPPEL_JOURS, -3, 0, 3, 6, 9, 12] as const;
+export type TypeRappelProgramme = "bientot" | "relance" | "jour" | "retard";
+
+/**
+ * Rappel à envoyer ce matin à la coach : le dernier palier atteint, s'il n'a pas encore été envoyé.
+ * Chaque palier ne part qu'une fois (même si la tâche du matin a sauté un jour) ;
  * reporter la date réarme les rappels.
  */
-export function rappelRenouvellementDu(renouvelerLe: string, aujourdhui: string, envoyeLe: string | null): "bientot" | "jour" | null {
-  const debut = ajouterJours(renouvelerLe, -AVANCE_RAPPEL_JOURS);
-  if (aujourdhui >= renouvelerLe) return !envoyeLe || envoyeLe < renouvelerLe ? "jour" : null;
-  if (aujourdhui >= debut) return !envoyeLe || envoyeLe < debut ? "bientot" : null;
-  return null;
+export function rappelRenouvellementDu(renouvelerLe: string, aujourdhui: string, envoyeLe: string | null): TypeRappelProgramme | null {
+  const atteints = PALIERS_RAPPEL.filter((j) => ajouterJours(renouvelerLe, j) <= aujourdhui);
+  if (!atteints.length) return null;
+  const palier = atteints[atteints.length - 1];
+  if (envoyeLe && envoyeLe >= ajouterJours(renouvelerLe, palier)) return null;
+  return palier === 0 ? "jour" : palier > 0 ? "retard" : palier === -AVANCE_RAPPEL_JOURS ? "bientot" : "relance";
 }
 
 /** Où en est la cliente : « semaine 3 sur 6 ». `null` si les dates manquent ou sont incohérentes. */

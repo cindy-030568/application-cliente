@@ -732,7 +732,7 @@ Les programmes déjà publiés reçoivent automatiquement une date de changement
 
 - Quand tu **publies un nouveau programme**, le prochain changement est prévu **6 semaines plus tard**. Republier le même programme après une correction ne change pas la date.
 - **Tableau de bord** : la carte « Programmes sportifs à changer » liste les changements en retard ou dans les 14 jours.
-- **Rappel** : le matin, une semaine avant, puis le jour même, tu reçois une notification (et un email si tu les as activés dans Réglages → Notifications). Plusieurs clientes le même jour = un seul message.
+- **Rappel** : le matin, 7 jours avant, 3 jours avant, le jour même, puis tous les 3 jours pendant 2 semaines tant que le suivant n’est pas dans l’appli, tu reçois une notification (et un email si tu les as activés dans Réglages → Notifications). Plusieurs clientes le même jour = un seul message.
 - **Reporter** (vacances, blessure…) : ouvre son programme → carte **Changement de programme** → choisis une date, ou **Reporter d'une semaine**. Les rappels suivent la nouvelle date.
 - **Fiche cliente** : « Semaine 3 sur 6 · prochain programme le … ». Ta cliente voit aussi « Semaine 3 sur 6 » dans son onglet Sport.
 
@@ -866,3 +866,17 @@ Rien à installer, aucune mise à jour de la base.
 - La phrase reste ensuite toute la journée sous « Bonjour … » sur son accueil.
 - La phrase change chaque jour : la même pour toutes tes clientes, et aucune ne revient avant d'avoir fait le tour des 100 phrases (environ 3 mois).
 - Pour modifier ou ajouter des phrases : fichier `src/lib/encouragements.ts` (une phrase par ligne, entre guillemets).
+
+---
+
+# Relance programme sportif
+
+Rien à installer.
+
+Tant que le **programme suivant n'est ni en ligne ni planifié** dans l'appli, tu reçois un rappel (notification, et email si activés dans Réglages → Notifications) :
+- **7 jours avant** la fin de son programme ;
+- **3 jours avant** : « le suivant n'est pas encore dans l'appli » ;
+- **le jour J** ;
+- puis une **relance tous les 3 jours** pendant 2 semaines si rien n'a bougé.
+
+Les relances s'arrêtent dès que tu publies ou planifies son prochain programme, ou si tu reportes la date de changement. La cliente apparaît aussi dans ton tableau de bord (« en retard » si la date est passée).

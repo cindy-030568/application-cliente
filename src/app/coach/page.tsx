@@ -129,7 +129,10 @@ export default async function TableauDeBord() {
       type: "programme",
       date: p.renouveler_le,
       titre: nom.get(p.cliente_id) ?? "Cliente",
-      detail: "Préparer son nouveau programme sportif",
+      detail:
+        p.renouveler_le < auj
+          ? "Programme terminé : le suivant n’est pas encore dans l’appli"
+          : "Préparer son prochain programme sportif (pas encore dans l’appli)",
       lien: `/coach/clientes/${p.cliente_id}/programme-sportif`,
     });
   }
