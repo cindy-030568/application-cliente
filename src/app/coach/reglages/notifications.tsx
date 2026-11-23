@@ -22,7 +22,7 @@ function nomAppareil() {
   return "Appareil";
 }
 
-type Ligne = { cle: keyof PrefsNotifCoach; titre: string; aide: string; v0024?: boolean };
+type Ligne = { cle: keyof PrefsNotifCoach; titre: string; aide: string; v0024?: boolean; v0026?: boolean };
 const LIGNES: Ligne[] = [
   {
     cle: "notif_coach_alertes",
@@ -31,6 +31,12 @@ const LIGNES: Ligne[] = [
     v0024: true,
   },
   { cle: "notif_coach_bilans", titre: "Bilan envoyé", aide: "Dès qu’une cliente envoie son bilan." },
+  {
+    cle: "notif_coach_inscriptions",
+    titre: "Demande d’inscription",
+    aide: "Quand quelqu’un remplit ton formulaire d’inscription Tally : sa fiche t’attend dans Clientes, à valider.",
+    v0026: true,
+  },
   { cle: "notif_coach_journal", titre: "Journée remplie", aide: "Une fois par jour et par cliente. Notification seulement, jamais par email.", v0024: true },
   { cle: "notif_coach_seances", titre: "Séance de sport faite", aide: "Dès qu’une cliente valide une séance. Notification seulement, jamais par email.", v0024: true },
   {
@@ -47,11 +53,13 @@ const LIGNES: Ligne[] = [
 export function NotificationsCoach({
   prefs,
   sans0024,
+  sans0026 = false,
   clePublique,
   nbAppareils,
 }: {
   prefs: PrefsNotifCoach;
   sans0024: boolean;
+  sans0026?: boolean;
   clePublique: string | null;
   nbAppareils: number;
 }) {
@@ -124,7 +132,7 @@ export function NotificationsCoach({
         </Message>
       )}
       <ul className="flex flex-col divide-y divide-ligne">
-        {LIGNES.filter((l) => !(sans0024 && l.v0024)).map(({ cle, titre, aide }) => (
+        {LIGNES.filter((l) => !(sans0024 && l.v0024) && !(sans0026 && l.v0026)).map(({ cle, titre, aide }) => (
           <li key={cle}>
             <label className="flex cursor-pointer items-center justify-between gap-4 py-3">
               <span className="flex flex-col">

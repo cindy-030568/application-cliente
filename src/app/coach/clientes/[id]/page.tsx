@@ -93,6 +93,16 @@ export default async function PageFicheCliente({
     formulesUtilisees(supabase),
     supabase.from("clientes").select("suivi_sport").eq("id", id).maybeSingle<{ suivi_sport: boolean }>(),
   ]);
+  // Contrat accepté (0027) : lu à part.
+  const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }] = await Promise.all([
+    supabase
+      .from("acceptations_contrat")
+      .select("version, accepte_le")
+      .eq("cliente_id", id)
+      .order("accepte_le", { ascending: false })
+      .returns<{ version: string; accepte_le: string }[]>(),
+    supabase.from("reglages").select("contrat_version").maybeSingle<{ contrat_version: string | null }>(),
+  ]);
   const { data: jrn, error: sansJournal } = await supabase
     .from("clientes")
     .select("journal_actif")
@@ -295,6 +305,43 @@ export default async function PageFicheCliente({
             <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0010_formule_paiement_sport.sql (voir le guide).</Message>
           )}
         </Repliable>
+        {!sansContrat && (
+          <Repliable
+            titre="Contrat"
+            resume={
+              acceptations?.length
+                ? `Version ${acceptations[0].version} acceptée le ${dateCourte.format(new Date(acceptations[0].accepte_le))}`
+                : contratEnCours?.contrat_version
+                  ? "Pas encore accepté dans l’app"
+                  : "Pas de contrat dans Réglages"
+            }
+          >
+            {acceptations?.length ? (
+              <>
+                <ul className="flex flex-col gap-1 text-[14px]">
+                  {acceptations.map((a) => (
+                    <li key={a.version}>
+                      Version <strong className="font-medium">{a.version}</strong> acceptée le {dateNote.format(new Date(a.accepte_le))}, avec la
+                      renonciation au droit de rétractation (début immédiat).
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={`/coach/clientes/${c.id}/contrat`}
+                  className="inline-flex min-h-11 w-fit items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
+                >
+                  Télécharger la preuve (PDF)
+                </a>
+              </>
+            ) : (
+              <p className="text-[14px] text-texte-2">
+                {contratEnCours?.contrat_version
+                  ? "Elle n’a pas encore accepté de contrat dans l’app. Si elle était déjà en cours avant la mise en place du contrat, elle n’est pas bloquée."
+                  : "Ajoute ton contrat dans Réglages → Mon contrat pour que les nouvelles clientes l’acceptent à leur première connexion."}
+              </p>
+            )}
+          </Repliable>
+        )}
         <Repliable titre="Notes privées" resume={notes?.length ? `${notes.length} note${notes.length > 1 ? "s" : ""} · jamais visibles par elle` : "Jamais visibles par la cliente"}>
           <BlocNotes
             id={c.id}

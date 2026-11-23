@@ -15,6 +15,7 @@ const CLES = [
   "notif_coach_seances",
   "notif_coach_alertes",
   "notif_coach_programmes",
+  "notif_coach_inscriptions",
 ] as const;
 
 export async function changerNotifCoach(cle: string, valeur: boolean): Promise<EtatNotifCoach> {

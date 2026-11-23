@@ -12,13 +12,16 @@ const ENV_TEST = {
   NEXT_PUBLIC_SUPABASE_URL: SIMULE,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_test",
   SUPABASE_SECRET_KEY: "sb_secret_test",
-  NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}`,
+  SITE_URL: `http://localhost:${PORT}`,
   // Aucun envoi réel pendant les tests : ni email, ni notification.
   BREVO_API_KEY: "",
   VAPID_PRIVATE_KEY: "",
   NEXT_PUBLIC_VAPID_PUBLIC_KEY: "",
   CRON_SECRET: "secret-de-test",
-  ANTHROPIC_API_KEY: "",
+  // Formulaire Tally et API Claude : clés de test, l'API Claude est simulée elle aussi.
+  TALLY_SIGNING_SECRET: "tally-test",
+  ANTHROPIC_API_KEY: "sk-ant-test",
+  ANTHROPIC_BASE_URL: `${SIMULE}/anthropic`,
   NEXT_TELEMETRY_DISABLED: "1",
 };
 

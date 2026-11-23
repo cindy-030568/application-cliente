@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_RESTER, appliquerPreference } from "@/lib/session-preference";
 
 // /api/rappels : tâche quotidienne protégée par son propre secret (CRON_SECRET).
-const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm", "/api/rappels"];
+// /api/tally : formulaire d'inscription, protégé par la signature Tally (TALLY_SIGNING_SECRET).
+const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm", "/api/rappels", "/api/tally"];
 // /compte/mot-de-passe exige une session : il n'est pas public.
 
 /** Rafraîchit la session et renvoie vers /connexion si personne n'est connecté. */

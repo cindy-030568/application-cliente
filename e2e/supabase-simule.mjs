@@ -371,6 +371,28 @@ function routeCommunaute(req, res, u, uid, coach) {
   return null;
 }
 
+// ---- Phase 2 : demandes Tally, contrat, brouillon Claude (état en mémoire)
+const demandes = [];
+const acceptations = [];
+let derniereRequeteClaude = null;
+Object.assign(reglages, { brouillon_claude: true, contrat_texte: null, contrat_version: null, contrat_case_renonciation: null, contrat_depuis: null });
+const CONTRAT_TEST = { contrat_texte: "CONTRAT D'ACCOMPAGNEMENT (texte de test)\n\nArticle 1 - Objet\nAccompagnement nutrition et sport sur 3 mois.\n\nArticle 2 - Durée\n12 semaines à compter de la première connexion.", contrat_version: "1", contrat_case_renonciation: "Je demande que mon accompagnement commence immédiatement (phrase de test fournie par la coach).", contrat_depuis: new Date(Date.now() - 86400000).toISOString() };
+async function routeTest(req, res, u) {
+  const json = (corps) => { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(corps)); };
+  if (u.pathname === "/__test/contrat") { const b = await corpsJson(req); Object.assign(reglages, b?.actif ? CONTRAT_TEST : { contrat_texte: null, contrat_version: null, contrat_case_renonciation: null }); if (!b?.actif) acceptations.length = 0; return json({ ok: true }); }
+  if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
+  if (u.pathname === "/__test/demandes") return json(demandes);
+  res.writeHead(404); return res.end();
+}
+/** API Claude simulée (ANTHROPIC_BASE_URL) : renvoie un brouillon figé et garde la requête pour les tests. */
+async function routeClaude(req, res) {
+  derniereRequeteClaude = await corpsJson(req);
+  res.writeHead(200, { "content-type": "application/json" });
+  res.end(JSON.stringify({ id: "msg_test", type: "message", role: "assistant", model: derniereRequeteClaude?.model ?? "claude-opus-5-5", stop_reason: "end_turn", stop_sequence: null,
+    content: [{ type: "text", text: "Coucou [prénom] ! Bravo pour tes 3 séances 💪\n\nMa priorité pour toi ces 15 prochains jours : préparer tes lunchs le dimanche.\n\nOn laisse de côté le reste pour l'instant. Je suis fière de toi !" }],
+    usage: { input_tokens: 900, output_tokens: 120 } }));
+}
+
 // ---- Tâche du matin : passage du jour, à 7 h (horloge Supabase)
 const septHeures = new Date(); septHeures.setUTCHours(6, 0, 12, 0);
 const tachesDuMatin = [{ jour: iso(septHeures), source: "supabase", statut: "ok", debut_le: septHeures.toISOString(), fin_le: septHeures.toISOString(), compteurs: { rappels: 1 } }];
@@ -517,9 +539,20 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/rpc/ma_prochaine_bascule") { const jour = new Date().toISOString().slice(0, 10);
     const d = programmesSportifs.filter((p) => p.cliente_id === uid && !p.publie && !p.publie_le && p.debut_le && p.debut_le > jour).map((p) => p.debut_le).sort()[0] ?? null;
     res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(d)); }
+  if (u.pathname === "/rest/v1/rpc/contrat_a_accepter") {
+    const due = reglages.contrat_version && clientes.some((c) => c.id === uid) && !acceptations.some((a) => a.cliente_id === uid);
+    res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(due ? reglages.contrat_version : null));
+  }
+  if (u.pathname === "/rest/v1/rpc/accepter_contrat") return corpsJson(req).then((b) => {
+    const ok = b?.p_accepte && b?.p_renonciation && b?.p_version === reglages.contrat_version;
+    if (ok) acceptations.push({ id: crypto.randomUUID(), cliente_id: uid, version: reglages.contrat_version, texte: reglages.contrat_texte, accepte_le: new Date().toISOString(), renonciation_retractation: true, texte_renonciation: reglages.contrat_case_renonciation });
+    res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(Boolean(ok)));
+  });
   if (u.pathname.startsWith("/rest/v1/rpc/")) { res.writeHead(204); return res.end(); }
   if (u.pathname === "/auth/v1/user") return send({ id: uid, aud: "authenticated", role: "authenticated", email: profils[uid]?.email, user_metadata: { mot_de_passe_defini: true } });
   if (u.pathname.startsWith("/auth/v1/")) return routeAuth(req, res, u);
+  if (u.pathname.startsWith("/__test/")) return routeTest(req, res, u);
+  if (u.pathname === "/anthropic/v1/messages") return routeClaude(req, res);
   const eqId = (u.searchParams.get("id") || u.searchParams.get("cliente_id") || "").replace("eq.", "");
   const admin = String(req.headers.apikey || "").startsWith("sb_secret");
   const coach = profils[uid]?.role === "coach" || admin;
@@ -530,6 +563,11 @@ http.createServer((req, res) => {
       saisi_par: uid, envoye_le: new Date().toISOString(), modifie_le: null, bilan_valeurs: [], photos_bilan: [], retours_bilan: null, clientes: { statut: "active" } }),
   });
   if (u.pathname === "/rest/v1/bilan_valeurs") return routeValeurs(req, res, u, uid, coach);
+  if (u.pathname === "/rest/v1/demandes_inscription") return tableCommu(req, res, u, demandes, {
+    visibles: coach ? demandes : [],
+    creer: (b) => (admin ? { id: crypto.randomUUID(), recue_le: new Date().toISOString(), statut: "a_valider", nom: "", reponses: [], categories_exclues: [], doublon_de: null, cliente_id: null, ...b } : { erreur: "refusé" }),
+  });
+  if (u.pathname === "/rest/v1/acceptations_contrat") return tableCommu(req, res, u, acceptations, { visibles: coach ? acceptations : acceptations.filter((a) => a.cliente_id === uid), creer: () => ({ erreur: "refusé" }) });
   if (u.pathname === "/rest/v1/taches_du_matin") return tableCommu(req, res, u, tachesDuMatin, { visibles: coach ? tachesDuMatin : [], creer: () => ({ erreur: "refusé" }) });
   if (u.pathname === "/rest/v1/charges_series") {
     if (req.method === "POST") { corpsJson(req).then((b) => { for (const l of Array.isArray(b) ? b : [b]) { const ex = chargesSeries.find((x) => x.cliente_id === l.cliente_id && x.seance_ref === l.seance_ref && x.exercice_cle === l.exercice_cle && x.serie === l.serie); if (ex) Object.assign(ex, l); else chargesSeries.push({ faite_le: new Date().toISOString(), ...l }); } res.writeHead(201, { "content-type": "application/json" }); res.end("[]"); }); return; }

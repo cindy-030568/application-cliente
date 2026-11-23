@@ -15,6 +15,7 @@ export type PrefsNotifCoach = {
   notif_coach_programmes: boolean;
   notif_coach_signalements: boolean;
   notif_coach_messages: boolean;
+  notif_coach_inscriptions: boolean;
 };
 const COLONNES = "notif_coach_email, notif_coach_bilans, notif_coach_signalements, notif_coach_messages";
 /** Ajoutées par la mise à jour 0024 : lues à part, cochées tant qu'elle n'est pas faite. */
@@ -28,14 +29,25 @@ export const PAR_DEFAUT: PrefsNotifCoach = {
   notif_coach_programmes: true,
   notif_coach_signalements: true,
   notif_coach_messages: true,
+  notif_coach_inscriptions: true,
 };
 
 /** Préférences de la coach, ou null si la mise à jour 0012 n'est pas encore faite. */
-export async function lirePrefsNotifCoach(supabase: SupabaseClient): Promise<(PrefsNotifCoach & { sans0024: boolean }) | null> {
+export async function lirePrefsNotifCoach(supabase: SupabaseClient): Promise<(PrefsNotifCoach & { sans0024: boolean; sans0026: boolean }) | null> {
   const { data, error } = await supabase.from("reglages").select(COLONNES).maybeSingle();
   if (error || !data) return null;
-  const { data: plus, error: sans0024 } = await supabase.from("reglages").select(COLONNES_0024).maybeSingle();
-  return { ...PAR_DEFAUT, ...data, ...(sans0024 || !plus ? {} : plus), sans0024: Boolean(sans0024) };
+  const [{ data: plus, error: sans0024 }, { data: inscr, error: sans0026 }] = await Promise.all([
+    supabase.from("reglages").select(COLONNES_0024).maybeSingle(),
+    supabase.from("reglages").select("notif_coach_inscriptions").maybeSingle(),
+  ]);
+  return {
+    ...PAR_DEFAUT,
+    ...data,
+    ...(sans0024 || !plus ? {} : plus),
+    ...(sans0026 || !inscr ? {} : inscr),
+    sans0024: Boolean(sans0024),
+    sans0026: Boolean(sans0026),
+  };
 }
 
 export type EvenementCoach =
@@ -44,7 +56,8 @@ export type EvenementCoach =
   | { type: "message"; clienteId: string }
   | { type: "journal"; clienteId: string }
   | { type: "seance"; clienteId: string; nom: string }
-  | { type: "alerte"; clienteId: string; motif: MotifAlerte; source: "journal" | "seance" };
+  | { type: "alerte"; clienteId: string; motif: MotifAlerte; source: "journal" | "seance" }
+  | { type: "inscription"; prenom: string };
 
 /** Contenu de la notification (pur : utilisé aussi pour l'envoi de test). Jamais le texte de la cliente (données de santé). */
 export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
@@ -53,6 +66,14 @@ export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
     return { titre: "Nouveau bilan 📝", texte: `${qui} vient d’envoyer son bilan.`, url: `/coach/bilans/${e.bilanId}`, bouton: "Voir le bilan", sujet: `${qui} a envoyé son bilan` };
   if (e.type === "signalement")
     return { titre: "Message signalé ⚠️", texte: "Un message a été signalé dans la communauté.", url: "/coach/communaute", bouton: "Ouvrir la communauté", sujet: "Un message a été signalé" };
+  if (e.type === "inscription")
+    return {
+      titre: "Nouvelle demande d’inscription ✨",
+      texte: `${e.prenom.trim() || "Quelqu’un"} a rempli ton formulaire d’inscription : sa fiche t’attend, à vérifier avant de l’inviter.`,
+      url: "/coach/clientes#a-valider",
+      bouton: "Voir la demande",
+      sujet: "Nouvelle demande d’inscription",
+    };
   if (e.type === "journal")
     return { titre: "Journée remplie ✍️", texte: `${qui} a rempli sa journée.`, url: `/coach/clientes/${e.clienteId}/suivi`, bouton: "Voir son journal", sujet: `${qui} a rempli sa journée` };
   if (e.type === "seance")
@@ -84,6 +105,7 @@ const CASE: Record<EvenementCoach["type"], keyof PrefsNotifCoach> = {
   journal: "notif_coach_journal",
   seance: "notif_coach_seances",
   alerte: "notif_coach_alertes",
+  inscription: "notif_coach_inscriptions",
 };
 /** Trop fréquents pour un email : notification seulement. */
 const SANS_EMAIL: EvenementCoach["type"][] = ["message", "journal", "seance"];
@@ -145,7 +167,7 @@ export async function notifierCoach(e: EvenementCoach) {
       await admin.from("reglages").update({ notif_coach_dernier_message: new Date().toISOString() }).eq("id", true);
     }
     let prenom = "";
-    if (e.type !== "signalement") {
+    if (e.type !== "signalement" && e.type !== "inscription") {
       const { data } = await admin.from("profils").select("prenom").eq("id", e.clienteId).maybeSingle();
       prenom = (data?.prenom as string | undefined) ?? "";
     }

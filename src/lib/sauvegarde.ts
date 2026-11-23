@@ -11,7 +11,7 @@
 /** Tables exportées, dans l'ordre (les tables « parentes » avant celles qui en dépendent). */
 export const TABLES_SAUVEGARDEES = [
   // Réglages et comptes
-  "reglages", "profils", "clientes", "consentements", "notes_coach",
+  "reglages", "profils", "clientes", "consentements", "acceptations_contrat", "notes_coach", "demandes_inscription",
   // Plans PDF / liens et ressources
   "plans", "categories_ressource", "ressources", "ressources_clientes",
   // Bilans et suivi

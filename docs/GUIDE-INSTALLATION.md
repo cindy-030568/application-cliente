@@ -949,3 +949,98 @@ Une vérification automatique empêche désormais d'oublier une nouvelle table d
 1. **Réglages** → **Télécharger une sauvegarde** → ouvre le fichier avec un éditeur de texte : en haut, `"tables_illisibles": []` doit être vide (sinon, une mise à jour de la base n'est pas faite) et `"tables_exclues"` liste les 3 exceptions.
 2. Le lendemain de l'étape 2 : la ligne « Tâche du matin » dans **Réglages** (voir l'étape 3).
 3. Les tests des parcours principaux (connexion, bilan, recette, bilan côté coach) se lancent sur l'ordinateur du développeur avec `npm run test:e2e` : ils utilisent une base simulée, jamais ta vraie base.
+
+---
+
+# Formulaire Tally, contrat dans l'app, brouillon de réponse par Claude
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+Pour chacun de ces 3 fichiers, dans l'ordre : lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+1. [`0026_demandes_inscription.sql`](../supabase/migrations/0026_demandes_inscription.sql) (formulaire Tally)
+2. [`0027_contrat.sql`](../supabase/migrations/0027_contrat.sql) (contrat)
+3. [`0028_brouillon_claude.sql`](../supabase/migrations/0028_brouillon_claude.sql) (brouillon Claude)
+
+## 2. Formulaire Tally → fiche « à valider »
+
+Chaque réponse à ton formulaire d'inscription Tally crée une **fiche à valider** dans **Clientes**. La personne ne reçoit rien : tu vérifies, puis tu cliques sur **Vérifier et inviter**.
+
+**A. Préparer les questions de ton formulaire.** L'app reconnaît les questions par les mots de leur intitulé :
+
+| Champ de la fiche | L'intitulé de la question doit contenir… | Exemple |
+|---|---|---|
+| Prénom (obligatoire) | « prénom » | « Ton prénom » |
+| Nom | « nom » | « Ton nom » |
+| Email (obligatoire) | « email » ou « e-mail » (ou une question de type *Email*) | « Ton adresse email » |
+| Objectif | « objectif » | « Quel est ton objectif principal ? » |
+| Exclusions | « allergies », « intolérances », « évites », « n'aimes pas »… | « Allergies ou aliments que tu évites ? » |
+
+- Toutes les autres questions (rythme de vie, sport, etc.) sont gardées telles quelles : tu les lis dans « Toutes ses réponses ».
+- Pour l'objectif, l'app reconnaît « perdre », « tonifier », « prise de masse », « stabiliser »… Sinon, tu le choisis toi-même dans ses besoins.
+- Pour les exclusions, l'app propose des catégories : gluten, lactose → produits laitiers, végétarienne → viandes et poissons, cacahuètes → arachide, etc. Tu les vois avant de créer la fiche, et tu peux tout corriger ensuite.
+
+**B. Brancher Tally à l'app** (une seule fois)
+1. Tally → ton formulaire → onglet **Integrations** → **Webhooks** → **Connect**.
+2. **Endpoint URL** : `https://app.fitw-cindy.fr/api/tally`
+3. Active **Signing secret**. Écris une longue suite de lettres et de chiffres au hasard (ou garde celle que Tally propose) et **copie-la**.
+4. Vercel → ton projet → **Settings** → **Environment Variables** → **Add** : nom `TALLY_SIGNING_SECRET`, valeur = la suite copiée, coche **Sensitive** → **Save**. Puis **Deployments** → **⋯** → **Redeploy**.
+   (Le jour où tu passes sur Netlify, ajoute la même variable dans Netlify.)
+5. Dans Tally, clique sur **Save**.
+
+**Doublons** : si la même personne envoie le formulaire deux fois, sa demande est mise à jour, sans en créer une deuxième. Si un compte existe déjà avec cet email, la fiche affiche « ⚠️ Un compte existe déjà », avec un lien vers sa fiche.
+
+**Tester**
+1. Remplis toi-même ton formulaire Tally avec une adresse de test.
+2. Dans l'app : **Clientes** → en haut, **Fiches à valider (1)**, avec ses réponses et les exclusions proposées. Tu reçois aussi une notification « Nouvelle demande d'inscription » (case dans **Réglages → Mes notifications**).
+3. **Vérifier et inviter** → le formulaire de création est pré-rempli. Ajuste si besoin → **Créer sa fiche et l'inviter**. L'email de connexion ne part que si la case « Lui envoyer tout de suite l'email de connexion » est cochée.
+4. Si rien n'arrive : Tally → **Integrations** → 🕔 à côté du webhook → la liste des envois. « 401 » veut dire que la clé de signature ne correspond pas à celle de Vercel.
+
+## 3. Contrat accepté dans l'app avant le premier accès
+
+1. **Réglages** → **Mon contrat** :
+   - **Numéro de version** : par exemple `1` ;
+   - **Texte de ton contrat** : colle le texte complet ;
+   - **Phrase de la case « renonciation »** : colle la phrase exacte de ton contrat ou de ton conseil juridique (l'app n'invente aucun texte juridique) ;
+   - **Enregistrer le contrat**.
+2. À sa première connexion, juste après l'écran sur ses données, une nouvelle cliente lit le contrat et coche **deux cases obligatoires** :
+   - « J'ai lu et j'accepte le contrat ci-dessus (version 1) » ;
+   - ta phrase de renonciation.
+
+   On garde la version, le texte exact, la date et l'heure. On ne garde pas l'adresse IP, comme tu l'as choisi.
+3. **Changer de contrat** : modifie le texte **et le numéro de version** (l'app refuse de changer le texte d'une version déjà acceptée).
+   - Les nouvelles clientes acceptent la nouvelle version.
+   - Celles qui ont déjà accepté une version ne sont pas redemandées.
+   - Les clientes déjà en cours avant la mise en place du contrat ne sont jamais bloquées.
+4. Sur la fiche d'une cliente, rubrique **Contrat** : la version acceptée, la date et l'heure, et **Télécharger la preuve (PDF)**. Le PDF contient ses nom et email, la version, la date, les deux cases cochées et le texte complet accepté.
+
+**Tester** : crée une cliente de test (avec ta propre adresse email), connecte-toi avec elle sur ton téléphone, accepte l'écran des données puis le contrat. Ensuite, regarde sa fiche → **Contrat** → **Télécharger la preuve (PDF)**.
+
+## 4. Brouillon de réponse au bilan par Claude (facultatif, désactivé par défaut)
+
+Sur un bilan, le bouton **✨ Proposer un brouillon** demande à Claude une réponse écrite à ton nom (« je »). Le ton est chaleureux, avec :
+- une priorité, puis un ou deux points secondaires ;
+- ce qu'on laisse de côté pour l'instant ;
+- un recadrage bienveillant si ce qu'elle raconte ne colle pas avec ses chiffres.
+
+Le brouillon arrive dans ta zone de retour : tu le relis, tu le modifies, et **il ne part que quand tu cliques sur Envoyer**. Le bouton « Copier pour Claude » reste là.
+
+**Ce qui est envoyé à Claude** : exactement le texte de « Copier pour Claude », c'est-à-dire ses réponses et ses mesures.
+- Ni nom, ni email, ni photo, ni date précise ; son prénom est remplacé par « [prénom] » et remis seulement dans ta zone de retour.
+- L'envoi se fait depuis le serveur de l'app, jamais depuis le téléphone ou l'ordinateur.
+
+**Activer**
+1. Crée un compte sur **platform.claude.com** → **API Keys** → **Create Key** → copie la clé (elle commence par `sk-ant-`). Ne la colle jamais ailleurs que dans Vercel.
+2. Dans **Billing**, ajoute quelques euros de crédit et fixe une **limite de dépense mensuelle** (par exemple 5 €).
+3. Vercel → **Settings** → **Environment Variables** → **Add** : `ANTHROPIC_API_KEY` = ta clé, coche **Sensitive** → **Save** → **Redeploy**.
+4. Dans l'app : **Réglages** → **Brouillon de réponse par Claude** → active l'interrupteur.
+
+**Coût approximatif** : environ **2 à 5 centimes par brouillon** (modèle Claude Opus 5.5, à 4 $ par million de mots-jetons lus et 20 $ par million écrits ; un bilan, c'est environ 2 000 jetons lus et 500 à 2 000 écrits). Avec 15 clientes et 2 bilans par mois, ça fait **environ 1 à 1,50 € par mois**. Tu ne paies que les brouillons demandés.
+
+**Paragraphe à ajouter à ta politique de confidentialité** (à adapter avec ton conseil si besoin) :
+
+> **Aide à la rédaction des retours de bilan.** Pour m'aider à rédiger mes retours, je peux transmettre le contenu de ton bilan (tes réponses et tes mesures) à Anthropic PBC, éditeur de l'outil d'intelligence artificielle Claude. Ce contenu est pseudonymisé avant l'envoi : il ne contient ni ton nom, ni ton adresse email, ni tes photos, ni de date précise. La proposition obtenue est toujours relue et modifiée par moi avant de t'être envoyée ; aucune décision n'est prise automatiquement. Anthropic agit en tant que sous-traitant, n'utilise pas ces données pour entraîner ses modèles et les supprime après une courte durée de conservation, selon ses conditions commerciales. Anthropic étant situé aux États-Unis, ce transfert est encadré par les clauses contractuelles types de la Commission européenne. Tu peux t'opposer à cet usage à tout moment en me l'écrivant : je rédigerai alors mes retours sans cet outil.
+
+Avant de publier ce paragraphe, vérifie sur le site d'Anthropic leurs conditions actuelles (durée de conservation, accord de traitement des données) : elles peuvent évoluer.
+
+**Tester** : ouvre un bilan reçu → **✨ Proposer un brouillon** → en 10 à 60 secondes, le texte apparaît, commençant par « Coucou [son prénom] ». Modifie-le, puis **Envoyer**.

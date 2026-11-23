@@ -9,12 +9,23 @@ import { FormulaireRappels } from "./rappels";
 import { configurationRappels, lireReglagesRappels } from "@/lib/envoi-rappels";
 import { lirePrefsNotifCoach } from "@/lib/notifications-coach";
 import { NotificationsCoach } from "./notifications";
+import { FormulaireContrat, InterrupteurBrouillon, type ReglagesContrat } from "./contrat";
 
 export const metadata: Metadata = { title: "Réglages" };
 
 export default async function PageReglages() {
   const { supabase } = await exigerCoach();
-  const [reglages, champs, rappels, prefsNotif, { count: nbAppareils }, { data: derniereTache, error: sans0025 }] = await Promise.all([
+  const [
+    reglages,
+    champs,
+    rappels,
+    prefsNotif,
+    { count: nbAppareils },
+    { data: derniereTache, error: sans0025 },
+    { data: contrat, error: sans0027 },
+    { count: acceptations },
+    { data: brouillon, error: sans0028 },
+  ] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
     lireReglagesRappels(supabase),
@@ -27,6 +38,10 @@ export default async function PageReglages() {
       .order("jour", { ascending: false })
       .limit(1)
       .maybeSingle<{ jour: string; source: string; statut: string; debut_le: string }>(),
+    // Contrat (0027) et brouillon Claude (0028) : lus à part.
+    supabase.from("reglages").select("contrat_texte, contrat_version, contrat_case_renonciation, contrat_depuis").maybeSingle<ReglagesContrat>(),
+    supabase.from("acceptations_contrat").select("id", { count: "exact", head: true }),
+    supabase.from("reglages").select("brouillon_claude").maybeSingle<{ brouillon_claude: boolean }>(),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -43,6 +58,7 @@ export default async function PageReglages() {
           <NotificationsCoach
             prefs={prefsNotif}
             sans0024={prefsNotif.sans0024}
+            sans0026={prefsNotif.sans0026}
             clePublique={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
             nbAppareils={nbAppareils ?? 0}
           />
@@ -52,6 +68,28 @@ export default async function PageReglages() {
       </Carte>
       <Carte>
         <FormulaireReglages reglages={reglages} />
+      </Carte>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Mon contrat</h2>
+          <p className="text-[14px] text-texte-2">Accepté dans l’app par chaque nouvelle cliente avant son premier accès.</p>
+        </div>
+        {sans0027 || !contrat ? (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0027_contrat.sql (voir le guide).</Message>
+        ) : (
+          <FormulaireContrat contrat={contrat} acceptations={acceptations ?? 0} />
+        )}
+      </Carte>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Brouillon de réponse par Claude</h2>
+          <p className="text-[14px] text-texte-2">Option désactivée par défaut. Le bouton « Copier pour Claude » reste toujours là.</p>
+        </div>
+        {sans0028 || !brouillon ? (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0028_brouillon_claude.sql (voir le guide).</Message>
+        ) : (
+          <InterrupteurBrouillon actif={brouillon.brouillon_claude} cleConfiguree={Boolean(process.env.ANTHROPIC_API_KEY)} />
+        )}
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

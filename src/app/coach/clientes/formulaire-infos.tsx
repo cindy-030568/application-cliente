@@ -24,6 +24,7 @@ export function FormulaireInfos({
   suiviSport = true,
   journal = true,
   formules = [],
+  demandeId,
 }: {
   action: (etat: EtatAction, formData: FormData) => Promise<EtatAction>;
   valeurs?: ValeursInfos;
@@ -34,10 +35,13 @@ export function FormulaireInfos({
   journal?: boolean | null;
   /** Formules déjà utilisées, proposées à la création. */
   formules?: string[];
+  /** Création depuis une demande Tally « à valider » : ses exclusions et son objectif sont repris. */
+  demandeId?: string;
 }) {
   const [etat, envoyer] = useActionState(action, {});
   return (
     <form action={envoyer} className="flex flex-col gap-5">
+      {demandeId && <input type="hidden" name="demande_id" value={demandeId} />}
       <div className="grid gap-4 sm:grid-cols-2">
         <Champ label="Prénom" name="prenom" required defaultValue={valeurs?.prenom} autoComplete="off" />
         <Champ label="Nom" name="nom" defaultValue={valeurs?.nom} autoComplete="off" />
@@ -118,7 +122,7 @@ export function FormulaireInfos({
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
       <div>
         <BoutonEnvoi enCours="Enregistrement…">
-          {creation ? "Créer la cliente" : "Enregistrer"}
+          {demandeId ? "Créer sa fiche et l’inviter" : creation ? "Créer la cliente" : "Enregistrer"}
         </BoutonEnvoi>
       </div>
     </form>

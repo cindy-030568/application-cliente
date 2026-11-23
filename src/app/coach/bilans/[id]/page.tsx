@@ -6,26 +6,29 @@ import { Carte, Etiquette, Surtitre } from "@/components/ui";
 import { DetailBilan } from "@/components/suivi/detail-bilan";
 import { exigerCoach } from "@/lib/auth";
 import { formaterDate } from "@/lib/bilan";
-import { chargerBilan, chargerBilans, chargerChamps, urlsPhotos } from "@/lib/suivi";
+import { urlsPhotos } from "@/lib/suivi";
 import { ANGLES } from "@/lib/types";
 import { chargerFile } from "../donnees";
 import { FormulaireRetour } from "./formulaire-retour";
 import { CopierPourClaude } from "./copier-claude";
-import { texteBilanPourClaude } from "@/lib/bilan-claude";
+import { texteAnonymiseDuBilan } from "@/lib/bilan-claude-serveur";
+import { brouillonConfigure } from "@/lib/brouillon-claude";
 
 export const metadata: Metadata = { title: "Traiter un bilan" };
+// Le brouillon Claude peut prendre plusieurs dizaines de secondes.
+export const maxDuration = 90;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function PageTraitementBilan({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const { supabase, profil } = await exigerCoach();
-  const bilan = await chargerBilan(supabase, id);
-  if (!bilan) notFound();
+  // Même texte anonymisé pour « Copier pour Claude » et pour le brouillon (src/lib/bilan-claude-serveur.ts).
+  const anonyme = await texteAnonymiseDuBilan(supabase, id);
+  if (!anonyme) notFound();
+  const { bilan, precedent, champs, texte: pourClaude, prenom } = anonyme;
 
-  const [champs, historique, { data: c }, file] = await Promise.all([
-    chargerChamps(supabase, true),
-    chargerBilans(supabase, bilan.cliente_id),
+  const [{ data: c }, file, { data: reglage }] = await Promise.all([
     supabase
       .from("clientes")
       .select("mode_sans_chiffres, frequence_bilan_jours, date_debut, profils!inner(prenom, nom)")
@@ -37,24 +40,14 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
         profils: { prenom: string; nom: string };
       }>(),
     chargerFile(),
+    supabase.from("reglages").select("brouillon_claude").maybeSingle<{ brouillon_claude: boolean }>(),
   ]);
-  const index = historique.findIndex((b) => b.id === bilan.id);
-  const precedent = index >= 0 ? (historique[index + 1] ?? null) : null;
   const urls = await urlsPhotos(
     supabase,
     [...bilan.photos, ...(precedent?.photos ?? [])].map((p) => p.fichier_path),
   );
   const suivant = file.aTraiter.find((b) => b.id !== bilan.id)?.id ?? null;
-  const prenom = c?.profils.prenom ?? "";
-  const pourClaude = texteBilanPourClaude({
-    bilan,
-    precedent,
-    champs,
-    jours: c?.frequence_bilan_jours ?? 14,
-    dateDebut: c?.date_debut ?? null,
-    identite: [prenom, ...(c?.profils.nom ?? "").split(/\s+/)],
-    avecPhotos: bilan.photos.length > 0,
-  });
+  const avecBrouillon = Boolean(reglage?.brouillon_claude) && brouillonConfigure();
 
   return (
     <div className="flex flex-col gap-6">
@@ -126,6 +119,7 @@ export default async function PageTraitementBilan({ params }: { params: Promise<
             initial={bilan.retour?.contenu ?? ""}
             prenom={prenom}
             suivant={suivant}
+            avecBrouillon={avecBrouillon}
           />
           {bilan.retour?.lu_le && (
             <p className="text-[13px] text-texte-2">

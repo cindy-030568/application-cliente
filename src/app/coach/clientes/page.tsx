@@ -6,6 +6,8 @@ import { formaterDate } from "@/lib/bilan";
 import type { StatutCliente } from "@/lib/types";
 import { BadgeStatut } from "../badge-statut";
 import { listerClientes } from "../donnees";
+import { exigerCoach } from "@/lib/auth";
+import { FichesAValider, type Demande } from "./demandes";
 
 export const metadata: Metadata = { title: "Clientes" };
 
@@ -22,7 +24,18 @@ export default async function PageClientes({
   searchParams: Promise<{ statut?: string; supprimee?: string }>;
 }) {
   const { statut = "active", supprimee } = await searchParams;
-  const toutes = await listerClientes();
+  const { supabase } = await exigerCoach();
+  const [toutes, { data: demandes }, { data: categories }] = await Promise.all([
+    listerClientes(),
+    // Demandes Tally (mise à jour 0026) : rien avant.
+    supabase
+      .from("demandes_inscription")
+      .select("id, recue_le, prenom, nom, email, objectif, exclusions_texte, categories_exclues, reponses, doublon_de")
+      .eq("statut", "a_valider")
+      .order("recue_le", { ascending: false })
+      .returns<Demande[]>(),
+    supabase.from("categories_aliment").select("id, nom"),
+  ]);
   const clientes = statut === "toutes" ? toutes : toutes.filter((c) => c.statut === statut);
 
   return (
@@ -38,6 +51,8 @@ export default async function PageClientes({
       </div>
 
       {supprimee && <Message ton="succes">La cliente et toutes ses données ont été supprimées.</Message>}
+
+      <FichesAValider demandes={demandes ?? []} categories={new Map((categories ?? []).map((c) => [c.id as string, c.nom as string]))} />
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par statut">
         {FILTRES.map((f) => {

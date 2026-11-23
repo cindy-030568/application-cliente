@@ -47,9 +47,10 @@ export const lireReglages = cache(async () => {
 /**
  * Réservé aux clientes dont l'accès est ouvert.
  * Renvoie la coach vers son dashboard, une cliente fermée vers /acces-ferme,
- * et une cliente sans consentement vers /consentement.
+ * une cliente sans consentement vers /consentement, puis, s'il y a un contrat
+ * à accepter (première connexion), vers /contrat.
  */
-export const exigerCliente = cache(async (verifierConsentement: boolean = true) => {
+export const exigerCliente = cache(async (verifierConsentement: boolean = true, verifierContrat: boolean = verifierConsentement) => {
   const session = await exigerConnexion();
   if (session.profil.role === "coach") redirect("/coach");
 
@@ -71,6 +72,11 @@ export const exigerCliente = cache(async (verifierConsentement: boolean = true) 
       .eq("version", reglages.version_consentement)
       .maybeSingle();
     if (!consentement) redirect("/consentement");
+  }
+  if (verifierContrat) {
+    // Contrat (mise à jour 0027) : sans la fonction, rien ne bloque.
+    const { data: version } = await session.supabase.rpc("contrat_a_accepter");
+    if (typeof version === "string" && version) redirect("/contrat");
   }
 
   return { ...session, fiche, reglages };

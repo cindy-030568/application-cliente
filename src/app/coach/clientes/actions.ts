@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createEmailClient } from "@/lib/supabase/server";
 import { lireSaisiePaiement, sauverPaiement } from "@/lib/paiements-serveur";
 import type { StatutCliente } from "@/lib/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type EtatAction = { erreur?: string; succes?: string; lien?: string };
 
@@ -86,6 +87,9 @@ export async function creerCliente(_e: EtatAction, formData: FormData): Promise<
   }
 
   let suite = "creee=1";
+  // Créée depuis une demande Tally : on reprend ses exclusions et son objectif, et la demande est marquée « invitée ».
+  const demandeId = texte(formData, "demande_id", 36);
+  if (UUID.test(demandeId)) await reprendreDemande(supabase, demandeId, id);
   // Lus à part : la création fonctionne même avant la mise à jour 0010.
   if (formData.get("suivi_sport") !== "on") await supabase.from("clientes").update({ suivi_sport: false }).eq("id", id);
   if (formData.get("journal_actif") !== "on") await supabase.from("clientes").update({ journal_actif: false }).eq("id", id);
@@ -96,6 +100,39 @@ export async function creerCliente(_e: EtatAction, formData: FormData): Promise<
   }
   revalidatePath("/coach", "layout");
   redirect(`/coach/clientes/${id}?${suite}`);
+}
+
+/** Applique à la nouvelle fiche ce que la demande Tally contenait (exclusions proposées, objectif). */
+async function reprendreDemande(supabase: SupabaseClient, demandeId: string, clienteId: string) {
+  const { data: d } = await supabase
+    .from("demandes_inscription")
+    .select("categories_exclues, objectif_code")
+    .eq("id", demandeId)
+    .eq("statut", "a_valider")
+    .maybeSingle<{ categories_exclues: string[]; objectif_code: string | null }>();
+  if (!d) return;
+  if (d.categories_exclues.length) {
+    await supabase.from("exclusions").insert(d.categories_exclues.map((categorie_id) => ({ cliente_id: clienteId, categorie_id })));
+  }
+  if (d.objectif_code) {
+    // Objectif (mise à jour 0022) : sans effet tant qu'elle n'est pas faite.
+    await supabase.from("besoins_clientes").upsert({ cliente_id: clienteId, objectif: d.objectif_code }, { onConflict: "cliente_id" });
+  }
+  await supabase
+    .from("demandes_inscription")
+    .update({ statut: "invitee", cliente_id: clienteId, traitee_le: new Date().toISOString() })
+    .eq("id", demandeId);
+}
+
+/** Supprime une demande d'inscription (doublon, erreur, personne qui ne donne pas suite). */
+export async function supprimerDemande(demandeId: string): Promise<EtatAction> {
+  const session = await sessionCoach();
+  if (!session) return { erreur: SESSION_PERDUE };
+  if (!UUID.test(demandeId)) return { erreur: "Demande introuvable." };
+  const { error } = await session.supabase.from("demandes_inscription").delete().eq("id", demandeId);
+  if (error) return { erreur: "La demande n’a pas pu être supprimée." };
+  revalidatePath("/coach/clientes");
+  return { succes: "Demande supprimée." };
 }
 
 export async function modifierCliente(

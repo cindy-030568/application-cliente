@@ -25,11 +25,11 @@ npm run dev
 | `npm run typecheck` | vérification TypeScript |
 | `npm test` | tests unitaires (Vitest) |
 | `npm run test:rls` | migrations + tests de sécurité RLS sur un Postgres local jetable |
-| `npm run test:e2e` | parcours principaux dans un navigateur (Playwright) : connexion cliente, envoi d'un bilan, recette adaptée, bilan côté coach |
+| `npm run test:e2e` | parcours principaux dans un navigateur (Playwright) : connexion cliente, envoi d'un bilan, recette adaptée, bilan côté coach, contrat, formulaire Tally, brouillon Claude |
 
 ### Tests de parcours (Playwright)
 
-`npm run test:e2e` construit l'app puis la lance contre un **Supabase simulé en mémoire** (`e2e/supabase-simule.mjs`, données fictives, code de connexion `123456`). Les clés utilisées sont factices et définies dans `playwright.config.ts` : les tests ne contactent jamais la vraie base et n'envoient ni email ni notification. Chromium doit être installé (`npx playwright install chromium` si besoin). La sécurité des données (RLS) est vérifiée à part par `npm run test:rls`.
+`npm run test:e2e` construit l'app puis la lance contre un **Supabase simulé en mémoire** (`e2e/supabase-simule.mjs`, données fictives, code de connexion `123456`). Les clés utilisées sont factices et définies dans `playwright.config.ts` ; l'API Claude est simulée elle aussi (`ANTHROPIC_BASE_URL`) : les tests ne contactent jamais la vraie base et n'envoient ni email ni notification. Chromium doit être installé (`npx playwright install chromium` si besoin). La sécurité des données (RLS) est vérifiée à part par `npm run test:rls`.
 
 Migrations SQL : `supabase/migrations/` (à exécuter dans l'ordre dans l'éditeur SQL de Supabase). Toute nouvelle table doit être ajoutée à la sauvegarde (`src/lib/sauvegarde.ts`) : un test le vérifie.
 
