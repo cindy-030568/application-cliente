@@ -15,6 +15,7 @@ export const TABLES_SAUVEGARDEES = [
   // Plans PDF / liens et ressources
   "plans", "categories_ressource", "ressources", "ressources_clientes",
   // Bilans et suivi
+  "questions_arrivee", "reponses_arrivee",
   "champs_mesure", "bilans", "bilan_valeurs", "photos_bilan", "retours_bilan", "journal_quotidien",
   // Vidéos
   "filtres_video", "videos", "videos_filtres",

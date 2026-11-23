@@ -30,7 +30,7 @@ const LIGNES: Ligne[] = [
     aide: "Quand une cliente écrit (notes de sa journée, commentaire de séance) quelque chose qui parle de douleur, de santé, de moral ou d’une demande pour toi.",
     v0024: true,
   },
-  { cle: "notif_coach_bilans", titre: "Bilan envoyé", aide: "Dès qu’une cliente envoie son bilan." },
+  { cle: "notif_coach_bilans", titre: "Bilan envoyé", aide: "Dès qu’une cliente envoie son bilan (ou son questionnaire d’arrivée)." },
   {
     cle: "notif_coach_inscriptions",
     titre: "Demande d’inscription",

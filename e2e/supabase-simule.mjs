@@ -389,6 +389,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/questionnaire") { const b = await corpsJson(req); if (b) { questionnaireActif = Boolean(b.actif); if (!b.actif) reponsesArrivee.length = 0; } return json({ actif: questionnaireActif, reponses: reponsesArrivee, exclusions: exclusionsListe }); }
   res.writeHead(404); return res.end();
 }
 /** Même remplacement des variables que la fonction SQL rendre_contrat (version simplifiée pour les tests). */
@@ -411,6 +412,18 @@ async function routeClaude(req, res) {
     content: [{ type: "text", text: "Coucou [prénom] ! Bravo pour tes 3 séances 💪\n\nMa priorité pour toi ces 15 prochains jours : préparer tes lunchs le dimanche.\n\nOn laisse de côté le reste pour l'instant. Je suis fière de toi !" }],
     usage: { input_tokens: 900, output_tokens: 120 } }));
 }
+
+// ---- Phase 3 : questionnaire d'arrivée (désactivé tant qu'un test ne l'active pas)
+let questionnaireActif = false;
+const Q = (ordre, section, libelle, type, options = [], obligatoire = false, aide = null) => ({ id: crypto.randomUUID(), ordre, section, libelle, aide, type, options, obligatoire, actif: true });
+const questionsArrivee = [
+  Q(10, "Ton objectif", "Quel est ton objectif principal ?", "objectif", ["Perdre du gras", "Me sentir mieux sans viser un poids (maintien)", "Prendre du muscle ou du poids", "Me tonifier : perdre du gras et gagner du muscle"], true),
+  Q(20, "Ton objectif", "Dans 3 mois, qu'est-ce qui te ferait dire que l'accompagnement a réussi ?", "texte_long", [], true),
+  Q(30, "Ton alimentation", "Allergies, intolérances ou aliments que tu ne manges pas", "exclusions", [], false, "Coche ce qui te concerne."),
+  Q(40, "Ton alimentation", "Combien de repas prends-tu par jour, en général ?", "choix", ["2", "3", "4", "5 ou plus"], true),
+  Q(130, "Ton cycle (facultatif)", "Ton cycle", "choix", ["Règles régulières", "Cycle irrégulier", "Je préfère ne pas répondre"], false, "Facultatif."),
+];
+const reponsesArrivee = [];
 
 // ---- Tâche du matin : passage du jour, à 7 h (horloge Supabase)
 const septHeures = new Date(); septHeures.setUTCHours(6, 0, 12, 0);
@@ -572,6 +585,18 @@ http.createServer((req, res) => {
     const cible = b?.p_cliente ?? uid;
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(reglages.contrat_texte ? rendreContrat(cible, null, null) : null));
   });
+  if (u.pathname === "/rest/v1/rpc/questionnaire_a_remplir") {
+    const du = questionnaireActif && clientes.some((c) => c.id === uid) && !reponsesArrivee.some((r) => r.cliente_id === uid);
+    res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(du));
+  }
+  if (u.pathname === "/rest/v1/rpc/envoyer_questionnaire") return corpsJson(req).then((b) => {
+    const nouveau = !reponsesArrivee.some((r) => r.cliente_id === uid);
+    if (nouveau) {
+      reponsesArrivee.push({ cliente_id: uid, reponses: b?.p_reponses ?? [], envoye_le: new Date().toISOString(), objectif: b?.p_objectif ?? null });
+      for (const id of b?.p_categories ?? []) if (!exclusionsListe.some((e) => e.cliente_id === uid && e.categorie_id === id)) exclusionsListe.push({ cliente_id: uid, categorie_id: id, aliment_id: null, aliments: null });
+    }
+    res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(nouveau));
+  });
   if (u.pathname === "/rest/v1/rpc/mon_contrat_infos") {
     const t = String(reglages.contrat_texte ?? "");
     res.writeHead(200, { "content-type": "application/json" });
@@ -592,6 +617,11 @@ http.createServer((req, res) => {
       saisi_par: uid, envoye_le: new Date().toISOString(), modifie_le: null, bilan_valeurs: [], photos_bilan: [], retours_bilan: null, clientes: { statut: "active" } }),
   });
   if (u.pathname === "/rest/v1/bilan_valeurs") return routeValeurs(req, res, u, uid, coach);
+  if (u.pathname === "/rest/v1/questions_arrivee") return tableCommu(req, res, u, questionsArrivee, {
+    visibles: coach ? questionsArrivee : questionsArrivee.filter((q) => q.actif),
+    creer: (b) => (coach ? { id: crypto.randomUUID(), aide: null, options: [], obligatoire: false, actif: true, ordre: 0, section: "", ...b } : { erreur: "refusé" }),
+  });
+  if (u.pathname === "/rest/v1/reponses_arrivee") return tableCommu(req, res, u, reponsesArrivee, { visibles: coach ? reponsesArrivee : reponsesArrivee.filter((r) => r.cliente_id === uid), creer: () => ({ erreur: "refusé" }) });
   if (u.pathname === "/rest/v1/demandes_inscription") return tableCommu(req, res, u, demandes, {
     visibles: coach ? demandes : [],
     creer: (b) => (admin ? { id: crypto.randomUUID(), recue_le: new Date().toISOString(), statut: "a_valider", nom: "", reponses: [], categories_exclues: [], doublon_de: null, cliente_id: null, ...b } : { erreur: "refusé" }),

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Carte, Message, Surtitre, classesBouton } from "@/components/ui";
 import { exigerCoach, lireReglages } from "@/lib/auth";
 import { chargerChamps } from "@/lib/suivi";
@@ -79,6 +80,15 @@ export default async function PageReglages() {
         ) : (
           <FormulaireContrat contrat={contrat} acceptations={acceptations ?? 0} />
         )}
+      </Carte>
+      <Carte className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Questionnaire d’arrivée</h2>
+          <p className="text-[14px] text-texte-2">Les questions posées aux nouvelles clientes à leur première connexion.</p>
+        </div>
+        <Link href="/coach/reglages/questionnaire" className={classesBouton("contour")}>
+          Modifier les questions
+        </Link>
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

@@ -57,7 +57,8 @@ export type EvenementCoach =
   | { type: "journal"; clienteId: string }
   | { type: "seance"; clienteId: string; nom: string }
   | { type: "alerte"; clienteId: string; motif: MotifAlerte; source: "journal" | "seance" }
-  | { type: "inscription"; prenom: string };
+  | { type: "inscription"; prenom: string }
+  | { type: "questionnaire"; clienteId: string; prenom: string };
 
 /** Contenu de la notification (pur : utilisé aussi pour l'envoi de test). Jamais le texte de la cliente (données de santé). */
 export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
@@ -73,6 +74,14 @@ export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
       url: "/coach/clientes#a-valider",
       bouton: "Voir la demande",
       sujet: "Nouvelle demande d’inscription",
+    };
+  if (e.type === "questionnaire")
+    return {
+      titre: "Questionnaire d’arrivée reçu 📋",
+      texte: `${qui} a rempli son questionnaire d’arrivée : ses exclusions et son objectif sont pré-remplis dans sa fiche.`,
+      url: `/coach/clientes/${e.clienteId}`,
+      bouton: "Voir ses réponses",
+      sujet: `${qui} a rempli son questionnaire d’arrivée`,
     };
   if (e.type === "journal")
     return { titre: "Journée remplie ✍️", texte: `${qui} a rempli sa journée.`, url: `/coach/clientes/${e.clienteId}/suivi`, bouton: "Voir son journal", sujet: `${qui} a rempli sa journée` };
@@ -106,6 +115,7 @@ const CASE: Record<EvenementCoach["type"], keyof PrefsNotifCoach> = {
   seance: "notif_coach_seances",
   alerte: "notif_coach_alertes",
   inscription: "notif_coach_inscriptions",
+  questionnaire: "notif_coach_bilans",
 };
 /** Trop fréquents pour un email : notification seulement. */
 const SANS_EMAIL: EvenementCoach["type"][] = ["message", "journal", "seance"];

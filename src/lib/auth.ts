@@ -47,10 +47,14 @@ export const lireReglages = cache(async () => {
 /**
  * Réservé aux clientes dont l'accès est ouvert.
  * Renvoie la coach vers son dashboard, une cliente fermée vers /acces-ferme,
- * une cliente sans consentement vers /consentement, puis, s'il y a un contrat
- * à accepter (première connexion), vers /contrat.
+ * une cliente sans consentement vers /consentement, puis, à la première connexion,
+ * vers /contrat (contrat à accepter) et /questionnaire (questionnaire d'arrivée).
  */
-export const exigerCliente = cache(async (verifierConsentement: boolean = true, verifierContrat: boolean = verifierConsentement) => {
+export const exigerCliente = cache(async (
+  verifierConsentement: boolean = true,
+  verifierContrat: boolean = verifierConsentement,
+  verifierQuestionnaire: boolean = verifierContrat,
+) => {
   const session = await exigerConnexion();
   if (session.profil.role === "coach") redirect("/coach");
 
@@ -77,6 +81,11 @@ export const exigerCliente = cache(async (verifierConsentement: boolean = true, 
     // Contrat (mise à jour 0027) : sans la fonction, rien ne bloque.
     const { data: version } = await session.supabase.rpc("contrat_a_accepter");
     if (typeof version === "string" && version) redirect("/contrat");
+  }
+  if (verifierQuestionnaire) {
+    // Questionnaire d'arrivée (mise à jour 0031) : sans la fonction, rien ne bloque.
+    const { data: aRemplir } = await session.supabase.rpc("questionnaire_a_remplir");
+    if (aRemplir === true) redirect("/questionnaire");
   }
 
   return { ...session, fiche, reglages };

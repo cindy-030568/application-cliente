@@ -93,8 +93,8 @@ export default async function PageFicheCliente({
     formulesUtilisees(supabase),
     supabase.from("clientes").select("suivi_sport").eq("id", id).maybeSingle<{ suivi_sport: boolean }>(),
   ]);
-  // Contrat accepté (0027) : lu à part.
-  const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }] = await Promise.all([
+  // Contrat accepté (0027) et questionnaire d'arrivée (0031) : lus à part.
+  const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }, { data: questionnaire, error: sansQuestionnaire }] = await Promise.all([
     supabase
       .from("acceptations_contrat")
       .select("version, accepte_le")
@@ -102,6 +102,11 @@ export default async function PageFicheCliente({
       .order("accepte_le", { ascending: false })
       .returns<{ version: string; accepte_le: string }[]>(),
     supabase.from("reglages").select("contrat_version").maybeSingle<{ contrat_version: string | null }>(),
+    supabase
+      .from("reponses_arrivee")
+      .select("reponses, envoye_le")
+      .eq("cliente_id", id)
+      .maybeSingle<{ reponses: { question: string; reponse: string | string[] }[]; envoye_le: string }>(),
   ]);
   const { data: jrn, error: sansJournal } = await supabase
     .from("clientes")
@@ -344,6 +349,34 @@ export default async function PageFicheCliente({
               <Link href={`/coach/clientes/${c.id}/apercu-contrat`} className="w-fit text-[14px] font-medium underline underline-offset-4">
                 Voir son contrat tel qu’elle le lira
               </Link>
+            )}
+          </Repliable>
+        )}
+        {!sansQuestionnaire && (
+          <Repliable
+            titre="Questionnaire d’arrivée"
+            resume={questionnaire ? `Rempli le ${dateCourte.format(new Date(questionnaire.envoye_le))}` : "Pas encore rempli"}
+          >
+            {questionnaire ? (
+              <>
+                <dl className="flex flex-col gap-3 text-[14.5px]">
+                  {questionnaire.reponses.map((r, i) => (
+                    <div key={i}>
+                      <dt className="text-[13.5px] text-texte-2">{r.question}</dt>
+                      <dd className="whitespace-pre-line">{Array.isArray(r.reponse) ? r.reponse.join(" · ") : r.reponse}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="text-[13px] text-texte-2">
+                  Ses exclusions (catégories cochées) et son objectif ont été pré-remplis : corrige-les dans « Aliments exclus » et dans son plan
+                  alimentaire (ses besoins) si besoin. Les « autres aliments » écrits à la main sont à ajouter toi-même.
+                </p>
+              </>
+            ) : (
+              <p className="text-[14px] text-texte-2">
+                Les nouvelles clientes le remplissent à leur première connexion, après le contrat. Les questions se modifient dans Réglages → Questionnaire
+                d’arrivée.
+              </p>
             )}
           </Repliable>
         )}

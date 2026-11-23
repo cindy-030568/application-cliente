@@ -81,3 +81,16 @@ test("brouillon Claude : seul le texte anonymisé part, et rien n'est envoyé sa
   expect(texte).toContain("[prénom]");
   for (const interdit of ["Sophie", "Martin", "sophie@exemple.fr", ".jpg", "2026-"]) expect(texte).not.toContain(interdit);
 });
+
+test("Réglages : la coach modifie les questions du questionnaire d'arrivée", async ({ page }) => {
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/reglages");
+  await page.getByRole("link", { name: "Modifier les questions" }).click();
+  await expect(page.getByRole("heading", { name: "Questionnaire d’arrivée", level: 1 })).toBeVisible();
+  const ajout = page.locator("form").filter({ hasText: "Ajouter la question" });
+  await ajout.getByLabel("Question", { exact: true }).fill("Tes plats préférés ?");
+  await ajout.getByLabel("Section (titre du groupe)").fill("Ton alimentation");
+  await ajout.getByRole("button", { name: "Ajouter la question" }).click();
+  await expect(page.getByText("Question ajoutée.")).toBeVisible();
+  await page.screenshot({ path: "test-results/questionnaire-coach.png", fullPage: true });
+});

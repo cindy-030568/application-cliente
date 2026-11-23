@@ -1066,3 +1066,53 @@ Le brouillon arrive dans ta zone de retour : tu le relis, tu le modifies, et **i
 Avant de publier ce paragraphe, vérifie sur le site d'Anthropic leurs conditions actuelles (durée de conservation, accord de traitement des données) : elles peuvent évoluer.
 
 **Tester** : ouvre un bilan reçu → **✨ Proposer un brouillon** → en 10 à 60 secondes, le texte apparaît, commençant par « Coucou [son prénom] ». Modifie-le, puis **Envoyer**.
+
+---
+
+# Séance sans réseau et questionnaire d'arrivée
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+Pour chacun de ces 2 fichiers, dans l'ordre : lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+1. [`0030_seances_hors_connexion.sql`](../supabase/migrations/0030_seances_hors_connexion.sql) (séance sans réseau)
+2. [`0031_questionnaire_arrivee.sql`](../supabase/migrations/0031_questionnaire_arrivee.sql) (questionnaire d'arrivée)
+
+## 2. Programme sportif et séance guidée sans réseau
+
+Dans une salle en sous-sol, sans réseau, ta cliente peut quand même suivre sa séance guidée : minuteur, séries, poids notés.
+
+- **Ce qui est gardé sur son téléphone** : seulement son onglet Sport (son programme en cours) et ses séances guidées. Il faut qu'elle ait ouvert l'onglet Sport **avec du réseau** au moins une fois depuis son dernier changement de programme.
+- **Rien d'autre** n'est gardé : ni bilans, ni photos, ni mesures, ni recettes.
+- **Les vidéos d'exercices** ne marchent pas sans réseau (elles sont sur YouTube).
+- Un petit bandeau « **Hors connexion** » s'affiche en haut de l'écran.
+- La séance validée sans réseau et les poids notés sont **gardés sur son téléphone**, puis **envoyés tout seuls** dès que le réseau revient, à la prochaine ouverture de l'app. Une séance n'est jamais comptée deux fois.
+- **À la déconnexion**, tout ce qui est gardé sur le téléphone est effacé. S'il reste une séance pas encore envoyée, l'app la prévient avant.
+- Sur iPhone, si l'app n'est pas ouverte pendant plusieurs semaines, l'iPhone peut effacer ce qui est gardé : il suffit de rouvrir l'onglet Sport avec du réseau.
+
+**Tester sur iPhone (app installée sur l'écran d'accueil) puis sur Android**
+1. Avec du réseau, connecte-toi avec une cliente de test qui a un programme sportif, ouvre l'onglet **Sport** et attends 5 secondes.
+2. Active le **mode avion**.
+3. Ferme l'app complètement, puis rouvre-la depuis l'icône → onglet **Sport** → ouvre une séance. Le bandeau « Hors connexion » apparaît, la séance se déroule normalement.
+4. Note un poids, termine la séance et clique sur **Valider ma séance** : le message « Pas de réseau : ta séance est gardée sur ton téléphone… » s'affiche.
+5. Coupe le mode avion et rouvre l'app : le bandeau indique l'envoi, puis disparaît.
+6. Toi, sur sa fiche → **Programme sportif** : la séance apparaît dans les séances faites, à l'heure où elle a été faite, avec ses poids.
+7. Profil → **Me déconnecter** : tout est effacé du téléphone.
+
+## 3. Questionnaire d'arrivée
+
+À sa première connexion, après le contrat, une nouvelle cliente remplit un questionnaire de 5 minutes : objectif, alimentation (allergies et aliments évités, habitudes), rythme de vie, sport, cycle (facultatif).
+
+- Les **catégories d'aliments cochées** sont ajoutées à ses exclusions de recettes, et son **objectif** est pré-rempli dans ses besoins s'il n'y en avait pas encore. Tu corriges tout depuis sa fiche.
+- Les « autres aliments » écrits à la main restent dans ses réponses : ajoute-les toi-même dans « Aliments exclus ».
+- Tu reçois une notification quand elle l'a rempli (case « Bilan envoyé » dans Réglages → Mes notifications).
+- Sur sa fiche, rubrique **Questionnaire d'arrivée** : toutes ses réponses.
+- Les clientes déjà en cours ne le voient pas.
+- Ses réponses (dont le cycle) ne sont visibles que par elle et toi.
+
+**Modifier les questions** : **Réglages** → **Questionnaire d'arrivée** → **Modifier les questions**.
+- Tu peux changer le texte, l'aide, l'ordre, rendre une question obligatoire ou non, ne plus la poser, la supprimer, ou en ajouter une.
+- Une question « Objectif » a toujours 4 réponses, dans l'ordre : perte de gras, maintien, prise de muscle, tonification. Tu peux changer leur texte, pas leur ordre.
+- La case en haut de la page active ou coupe le questionnaire pour les nouvelles clientes.
+
+**Tester** : crée une cliente de test, connecte-toi avec elle. Après les écrans des données et du contrat, le questionnaire s'affiche. Remplis-le, puis regarde sa fiche : rubriques **Questionnaire d'arrivée** et **Aliments exclus**.
