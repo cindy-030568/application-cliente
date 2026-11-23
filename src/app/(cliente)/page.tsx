@@ -14,13 +14,14 @@ import {
 } from "@/components/icones";
 import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
+import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, echeanceOuverte, formaterDate, rdvAVenir } from "@/lib/bilan";
 import { CarteInstallation } from "@/components/pwa";
 import { accesCommunaute } from "@/lib/communaute-serveur";
 import { lireMonPaiement, lireSuiviSport } from "@/lib/paiements-serveur";
 import { mensualiteASignaler } from "@/components/mon-paiement";
 import { journalActif } from "@/lib/journal-serveur";
 import { AnnoncesAccueil } from "@/components/annonces";
+import { MarquerMessagesLus } from "@/components/messages-lus";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -67,6 +68,15 @@ export default async function PageAccueil() {
   ]);
   const rappelJournal = avecJournal && !sansJournal && !journeeDuJour;
   const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
+  // Petits mots envoyés par Cindy à elle seule ces 14 derniers jours (rien avant la mise à jour 0023).
+  const { data: mots } = await supabase
+    .from("messages_cliente")
+    .select("id, texte, lu_le")
+    .eq("statut", "envoye")
+    .gte("cree_le", `${ajouterJours(auj, -14)}T00:00:00Z`)
+    .order("cree_le", { ascending: false })
+    .limit(3);
+  const nonLus = (mots ?? []).filter((m) => !m.lu_le).map((m) => m.id as string);
 
   return (
     <>
@@ -84,7 +94,10 @@ export default async function PageAccueil() {
       />
 
       <div className="flex flex-col gap-4 px-5 pt-4">
-        <AnnoncesAccueil annonces={annonces ?? []} />
+        <AnnoncesAccueil
+          annonces={[...(mots ?? []).map((m) => ({ id: `m-${m.id}`, texte: m.texte as string, lien: null })), ...(annonces ?? [])]}
+        />
+        <MarquerMessagesLus ids={nonLus} />
 
         {retourNonLu && (
           <Link

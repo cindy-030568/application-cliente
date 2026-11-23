@@ -16,6 +16,7 @@ import {
   type Sexe,
 } from "@/lib/plan-alimentaire";
 import type { Besoins } from "@/lib/plan-alimentaire-serveur";
+import { OBJECTIFS } from "@/lib/analyse-cliente";
 import { enregistrerBesoins, type EtatPlanAlim } from "../../plan-alimentaire-actions";
 
 const nf = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
@@ -134,6 +135,28 @@ export function FormulaireBesoins({
         <label className="flex flex-col gap-1.5">
           <span className={libelle}>Masse grasse (%) · facultatif</span>
           <input name="masse_grasse_pct" inputMode="decimal" value={mg} onChange={(e) => setMg(e.target.value)} className={champ} />
+        </label>
+        <label className="flex flex-col gap-1.5">
+          <span className={libelle}>Son objectif</span>
+          <select name="objectif" defaultValue={initiaux.objectif ?? ""} className={champ}>
+            <option value="">— (déduit du poids objectif)</option>
+            {Object.entries(OBJECTIFS).map(([v, l]) => (
+              <option key={v} value={v}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1.5 sm:col-span-2">
+          <span className={libelle}>Ce qu’elle mange aujourd’hui (kcal/jour, estimation) · facultatif</span>
+          <input
+            name="kcal_actuelles"
+            inputMode="numeric"
+            defaultValue={initiaux.kcal_actuelles ?? ""}
+            placeholder="ex. 1200 (d’après son journal alimentaire ou Nutrium)"
+            className={champ}
+          />
+          <span className="text-[12.5px] text-texte-2">Sert à l’analyse : si elle mange nettement sous ses besoins, l’appli te propose une remontée progressive.</span>
         </label>
       </fieldset>
 

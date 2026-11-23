@@ -19,6 +19,7 @@ import { chargerCategoriesAliment } from "@/lib/aliments";
 import { echeanceRenouvellement, jourParisDe, semaineProgramme } from "@/lib/programme-sportif";
 import { lireRenouvellements } from "@/lib/programme-sportif-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
+import { chargerAnalyse } from "@/lib/analyse-cliente-serveur";
 import { COLONNES_FICHE, COLONNES_PLAN, type Plan } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Fiche cliente" };
@@ -67,6 +68,9 @@ export default async function PageFicheCliente({
   if (!c) notFound();
   const [renouvellements, seancesFaites] = await Promise.all([lireRenouvellements(supabase, id), lireSeancesFaites(supabase, { clienteId: id, limite: 50 })]);
   const programmeEnCours = renouvellements?.[0] ?? null;
+  const { analyse } = await chargerAnalyse(supabase, id, c, aujourdhuiParis());
+  const compte = (n: string) => analyse.conseils.filter((x) => x.niveau === n).length;
+  const aRegarder = analyse.conseils.filter((x) => x.niveau === "important" || x.niveau === "surveiller").slice(0, 3);
   const depuis = ajouterJours(aujourdhuiParis(), -6);
   const faitesSemaine = (seancesFaites ?? []).filter((s) => jourParisDe(s.faite_le) >= depuis).length;
   // Rappels (phase 8) : lus à part, la fiche reste utilisable avant la mise à jour de la base.
@@ -231,6 +235,34 @@ export default async function PageFicheCliente({
               className="inline-flex min-h-11 items-center justify-center rounded-full bg-creme px-5 text-[15px] font-medium text-chocolat"
             >
               Ouvrir son suivi
+            </Link>
+          </Carte>
+          <Carte className="flex flex-col gap-3 border-2 border-caramel/40">
+            <h2 className="font-titre text-xl font-bold">Analyse & conseils</h2>
+            <p className="text-[14px] text-texte-2">
+              {[
+                compte("important") && `${compte("important")} à traiter`,
+                compte("surveiller") && `${compte("surveiller")} à surveiller`,
+                compte("bravo") && `${compte("bravo")} réussite${compte("bravo") > 1 ? "s" : ""}`,
+              ]
+                .filter(Boolean)
+                .join(" · ") || "Rien de particulier à signaler pour l’instant."}
+            </p>
+            {aRegarder.length > 0 && (
+              <ul className="flex flex-col gap-1.5 text-[14.5px]">
+                {aRegarder.map((x) => (
+                  <li key={x.id} className="flex gap-2">
+                    <span aria-hidden className={x.niveau === "important" ? "mt-[7px] size-2 shrink-0 rounded-full bg-erreur" : "mt-[7px] size-2 shrink-0 rounded-full bg-caramel"} />
+                    {x.titre}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              href={`/coach/clientes/${c.id}/analyse`}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme"
+            >
+              Voir l’analyse et les conseils
             </Link>
           </Carte>
           <Carte className="flex flex-col gap-3 border-2 border-accent/40">

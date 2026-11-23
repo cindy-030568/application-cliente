@@ -19,6 +19,10 @@ export type Besoins = {
   pct_glucides: number;
   pct_proteines: number;
   fibres_g: number;
+  /** Ce qu'elle mange aujourd'hui (estimation, mise à jour 0022). */
+  kcal_actuelles: number | null;
+  /** perte | maintien | prise | recompo (mise à jour 0022). */
+  objectif: string | null;
 };
 
 export const BESOINS_PAR_DEFAUT: Besoins = {
@@ -36,6 +40,8 @@ export const BESOINS_PAR_DEFAUT: Besoins = {
   pct_glucides: 40,
   pct_proteines: 25,
   fibres_g: 30,
+  kcal_actuelles: null,
+  objectif: null,
 };
 
 const COLONNES_BESOINS =
@@ -49,6 +55,9 @@ export async function lireBesoins(supabase: SupabaseClient, clienteId: string): 
   if (error) return null;
   if (!data) return { besoins: BESOINS_PAR_DEFAUT, enregistres: false };
   const d = data as Record<string, unknown>;
+  // Colonnes de la mise à jour 0022, lues à part (vides si elle n'est pas faite).
+  const { data: extra } = await supabase.from("besoins_clientes").select("kcal_actuelles, objectif").eq("cliente_id", clienteId).maybeSingle();
+  const e = (extra ?? {}) as Record<string, unknown>;
   return {
     enregistres: true,
     besoins: {
@@ -66,6 +75,8 @@ export async function lireBesoins(supabase: SupabaseClient, clienteId: string): 
       pct_glucides: Number(d.pct_glucides),
       pct_proteines: Number(d.pct_proteines),
       fibres_g: Number(d.fibres_g),
+      kcal_actuelles: num(e.kcal_actuelles),
+      objectif: (e.objectif as string | null) ?? null,
     },
   };
 }

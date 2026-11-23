@@ -11,7 +11,9 @@ import { synthese } from "@/lib/revenus";
 import { lireMouvements } from "@/lib/revenus-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { CATEGORIE, classerTaches, enRetard, quand, resume, type Tache, type TypeTache } from "@/lib/tableau-de-bord";
+import { proposerMessages, type Proposition } from "@/lib/propositions-messages";
 import { CarteAnnonce } from "./annonce";
+import { PropositionsMessages } from "./propositions";
 import { chargerFile } from "./bilans/donnees";
 
 const dateLongue = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" });
@@ -23,8 +25,20 @@ export default async function TableauDeBord() {
   const dans14 = ajouterJours(auj, 14);
 
   // Chaque source est lue à part : une mise à jour de la base pas encore faite n'empêche pas le reste de s'afficher.
-  const [{ clientes, aTraiter, alertes }, { data: echeances }, renouvellements, avecSuite, planifies, { count: signalements }, annonces, mouvements, seances] =
-    await Promise.all([
+  const [
+    { clientes, aTraiter, alertes },
+    { data: echeances },
+    renouvellements,
+    avecSuite,
+    planifies,
+    { count: signalements },
+    annonces,
+    mouvements,
+    seances,
+    journal14,
+    objectifs,
+    dejaTraitees,
+  ] = await Promise.all([
       chargerFile(),
       supabase.from("echeances_paiement").select("id, cliente_id, date_echeance, montant").is("payee_le", null).lte("date_echeance", dans14),
       lireRenouvellements(supabase),
@@ -40,6 +54,10 @@ export default async function TableauDeBord() {
       supabase.from("annonces").select("id, texte, expire_le").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false }),
       lireMouvements(supabase),
       lireSeancesFaites(supabase, { limite: 300 }),
+      // Propositions de messages : 2 dernières semaines du journal, objectifs, propositions déjà traitées cette semaine.
+      supabase.from("journal_quotidien").select("cliente_id, jour, sommeil, hydratation, pas, stress, poids").gte("jour", ajouterJours(auj, -13)),
+      supabase.from("besoins_clientes").select("cliente_id, objectif"),
+      supabase.from("messages_cliente").select("cliente_id, proposition").gte("cree_le", ajouterJours(auj, -8)),
     ]);
 
   const suivies = clientes.filter((c) => c.statut !== "fermee");
@@ -149,6 +167,31 @@ export default async function TableauDeBord() {
 
   const agenda = classerTaches(taches, auj);
 
+  // ------------------------------------------------------------ Propositions de messages (semaine / semaine)
+  const traitees = new Set((dejaTraitees.error ? [] : (dejaTraitees.data ?? [])).map((m) => `${m.cliente_id}|${m.proposition}`));
+  const objectifDe = new Map((objectifs.error ? [] : (objectifs.data ?? [])).map((o) => [o.cliente_id as string, (o.objectif as string | null) ?? null]));
+  const avecProgramme = new Set((renouvellements ?? []).map((p) => p.cliente_id));
+  const lignesJournal = journal14.error ? [] : (journal14.data ?? []);
+  const num = (v: unknown) => (v == null ? null : Number(v));
+  const propositions: Proposition[] = actives.flatMap((c) =>
+    proposerMessages(
+      {
+        clienteId: c.id,
+        prenom: c.profils.prenom,
+        sansChiffres: c.mode_sans_chiffres,
+        objectif: objectifDe.get(c.id) ?? null,
+        avecProgramme: avecProgramme.has(c.id),
+        seancesFaites: (seances ?? []).filter((x) => x.cliente_id === c.id).map((x) => jourParisDe(x.faite_le)),
+        journal: lignesJournal
+          .filter((j) => j.cliente_id === c.id)
+          .map((j) => ({ jour: j.jour as string, sommeil: num(j.sommeil), hydratation: num(j.hydratation), pas: num(j.pas), stress: num(j.stress), poids: num(j.poids) })),
+      },
+      auj,
+    ).filter((p) => !traitees.has(`${c.id}|${p.cle}`)),
+  );
+  // Les relances d'abord.
+  propositions.sort((a, b) => Number(a.ton === "bravo") - Number(b.ton === "bravo"));
+
   // ------------------------------------------------------------ Chiffres du moment
   const an = Number(auj.slice(0, 4));
   const s = mouvements ? synthese(mouvements.mouvements, an, auj) : null;
@@ -207,6 +250,16 @@ export default async function TableauDeBord() {
             vide="Rien à faire pour l’instant. 🎉"
             accent
           />
+          <Carte id="messages" className="flex scroll-mt-20 flex-col gap-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <div>
+                <h2 className="font-titre text-[22px] font-bold leading-tight">Garder le contact 💬</h2>
+                <p className="text-[13.5px] text-texte-2">Ce qui a changé cette semaine chez tes clientes, avec un petit mot prêt à envoyer.</p>
+              </div>
+              {propositions.length > 0 && <span className="font-titre text-[22px] font-bold tabular-nums text-texte-2">{propositions.length}</span>}
+            </div>
+            <PropositionsMessages propositions={propositions} />
+          </Carte>
           <Bloc id="semaine" titre="Cette semaine" sousTitre="Dans les 7 prochains jours" taches={agenda.semaine} auj={auj} vide="Rien de prévu cette semaine." />
           <Bloc id="plus-tard" titre="Dans les 2 semaines" sousTitre="Pour anticiper" taches={agenda.plusTard} auj={auj} vide="Rien de prévu pour l’instant." />
         </div>

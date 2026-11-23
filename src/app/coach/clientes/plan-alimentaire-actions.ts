@@ -90,7 +90,19 @@ export async function enregistrerBesoins(clienteId: string, _e: EtatPlanAlim, fo
     updated_at: new Date().toISOString(),
   });
   if (error) return { erreur: ["42P01", "PGRST205"].includes(error.code) ? MIGRATION : "Les besoins n’ont pas pu être enregistrés. Réessaie." };
+  // Apport actuel et objectif (mise à jour 0022) : enregistrés à part, ignorés si la base n'est pas à jour.
+  const kcalActuelles = nombre(formData.get("kcal_actuelles"), 400, 6000);
+  const objectif = String(formData.get("objectif") ?? "");
+  if (Number.isNaN(kcalActuelles)) return { erreur: "Vérifie ce qu’elle mange aujourd’hui (400 à 6000 kcal), ou laisse vide." };
+  await v.supabase
+    .from("besoins_clientes")
+    .update({
+      kcal_actuelles: kcalActuelles == null ? null : Math.round(kcalActuelles),
+      objectif: ["perte", "maintien", "prise", "recompo"].includes(objectif) ? objectif : null,
+    })
+    .eq("cliente_id", clienteId);
   rafraichir(clienteId);
+  revalidatePath(`/coach/clientes/${clienteId}/analyse`);
   return { succes: "Besoins enregistrés." };
 }
 

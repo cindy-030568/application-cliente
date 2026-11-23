@@ -811,3 +811,47 @@ Chaque poids est enregistré dès qu'elle touche **Fait ✓** (et renvoyé à la
 ## 3. Pour toi
 
 Page **Programme sportif** de la cliente → carte **Poids utilisés** : pour chaque exercice, sa dernière séance, la précédente, et la progression (ex. **+1,5 kg**).
+
+---
+
+# Analyse & conseils (par cliente)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0022_besoins_objectif.sql`](../supabase/migrations/0022_besoins_objectif.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Pour des conseils complets
+
+Dans **Plan alimentaire → Ses besoins**, renseigne : taille, date de naissance, poids, **son objectif** (perte, maintien, prise de masse, recomposition) et **ce qu'elle mange aujourd'hui** (estimation en kcal/jour, d'après son journal alimentaire ou Nutrium).
+
+## 3. Ce que fait l'analyse
+
+Fiche cliente → carte **Analyse & conseils** → **Voir l'analyse et les conseils**. L'appli croise ses pesées et mensurations (bilans + journal), ses ressentis (énergie, sommeil, stress, faim, « le plan me convient ? »), son journal (pas, sommeil, eau, digestion), son plan alimentaire, ses séances et ses charges :
+
+- **Chiffres clés** : poids et évolution, rythme sur 4 semaines (kg et % par semaine), tour de taille, calories (mange / objectif / dépense), protéines en g/kg, séances par semaine, pas, sommeil.
+- **Plan de départ progressif** quand elle mange nettement sous ses besoins : +100 kcal par semaine jusqu'à sa maintenance, avec les paliers semaine par semaine.
+- **Conseils**, classés « À traiter en priorité », « À surveiller », « Bon à savoir » et « Ses réussites » : stagnation (vérifications, puis −5 %, diet break après 12 semaines de déficit), recomposition (poids stable mais taille qui baisse : ne rien couper), perte trop rapide, prise de masse qui ne monte pas, déficit trop fort, objectif sous le métabolisme de base, protéines basses, besoins à recalculer, plan ancien, fatigue, sommeil, stress, faim, plan qui ne convient pas, peu de pas, activité en baisse, hydratation, digestion, séances manquées, charges qui stagnent, bilans manqués, fin de suivi…
+
+Ce sont des pistes calculées à partir de repères de coaching courants : elles ne remplacent ni ton jugement ni un avis médical.
+
+---
+
+# Garder le contact (propositions de messages)
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0023_messages_cliente.sql`](../supabase/migrations/0023_messages_cliente.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Utilisation
+
+Sur ton **tableau de bord**, carte **Garder le contact 💬** : ce qui a changé cette semaine par rapport à la semaine d'avant (d'après son journal et ses séances), avec un petit mot prêt à envoyer.
+
+- **À relancer** : elle bouge moins (NEAT en baisse), dort moins, est plus stressée, boit moins, ne remplit plus son journal, n'a fait aucune séance.
+- **À féliciter** : plus de pas, meilleur sommeil, séances régulières, courbe de poids qui descend (jamais si elle est en mode sans chiffres).
+
+Pour chaque proposition, modifie le texte si tu veux, puis :
+- **Envoyer dans l'appli** : elle reçoit une notification et voit « Un mot de Cindy » sur son accueil pendant 14 jours ;
+- **Copier** : pour l'envoyer toi-même (WhatsApp, Instagram…) ;
+- **Ignorer**.
+
+Une proposition traitée ne revient pas de la semaine.
