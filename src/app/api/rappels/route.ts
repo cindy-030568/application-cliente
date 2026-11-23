@@ -1,26 +1,19 @@
-import { timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { executerTachesDuMatin } from "@/lib/envoi-rappels";
-import { executerProgrammesPlanifies, executerRappelsProgrammes } from "@/lib/rappels-programmes";
+import { lancerTacheDuMatin, sourceAppelPlanifie } from "@/lib/tache-du-matin";
 
 /**
- * Tâche quotidienne des rappels (bilans, paiements, changement de programme sportif), lancée par Vercel (voir vercel.json).
- * Vercel envoie « Authorization: Bearer <CRON_SECRET> » : sans ce secret, rien ne se passe.
+ * Tâche quotidienne des rappels (bilans, paiements, programmes sportifs).
+ * Lancée chaque matin par l'horloge de Supabase (supabase/horloge-rappels.sql, 7 h à Paris),
+ * et en secours par l'hébergeur (vercel.json ou netlify/functions) avec CRON_SECRET.
+ * Un seul passage par jour : les appels suivants répondent « déjà faite » sans rien envoyer.
  * La réponse ne contient que des compteurs (aucune donnée personnelle).
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  const recu = Buffer.from(request.headers.get("authorization") ?? "");
-  const attendu = Buffer.from(`Bearer ${secret}`);
-  if (!secret || recu.length !== attendu.length || !timingSafeEqual(recu, attendu)) {
-    return Response.json({ erreur: "non autorisé" }, { status: 401 });
-  }
   try {
     const admin = createAdminClient();
-    const bilan = await executerTachesDuMatin(admin);
-    const planifies = await executerProgrammesPlanifies(admin).catch(() => ({ misEnLigne: 0, annonces: 0, notifications: 0 }));
-    const programmes = await executerRappelsProgrammes(admin).catch(() => ({ rappels: 0, notifications: 0, emails: 0 }));
-    return Response.json({ ...bilan, programmes, planifies });
+    const source = await sourceAppelPlanifie(request.headers.get("authorization"), admin);
+    if (!source) return Response.json({ erreur: "non autorisé" }, { status: 401 });
+    return Response.json(await lancerTacheDuMatin(admin, source));
   } catch (e) {
     console.error("Rappels : échec de la tâche", e instanceof Error ? e.message : "erreur inconnue");
     return Response.json({ erreur: "échec" }, { status: 500 });

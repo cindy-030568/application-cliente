@@ -49,3 +49,7 @@ __pycache__/
 
 # Netlify
 .netlify
+
+# tests de parcours (Playwright)
+/test-results/
+/playwright-report/

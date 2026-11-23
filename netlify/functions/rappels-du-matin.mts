@@ -1,7 +1,7 @@
 /**
- * Tâche planifiée Netlify : chaque matin, déclenche l'envoi des rappels de bilan
- * (même rôle que la tâche « crons » de vercel.json). L'adresse /api/rappels refuse
- * toute demande qui n'a pas le secret CRON_SECRET.
+ * Tâche planifiée Netlify (secours) : chaque matin, déclenche la tâche du matin
+ * (même rôle que la tâche « crons » de vercel.json). L'horloge de Supabase la lance déjà à 7 h :
+ * elle ne s'exécute qu'une fois par jour. L'adresse /api/rappels refuse toute demande sans CRON_SECRET.
  */
 export default async function rappelsDuMatin(): Promise<Response> {
   const site = (process.env.SITE_URL || process.env.URL || "").replace(/\/+$/, "");

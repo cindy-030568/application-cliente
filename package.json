@@ -12,7 +12,8 @@
     "test:rls": "bash scripts/test-rls.sh",
     "postinstall": "node scripts/copier-pdfjs.mjs",
     "prebuild": "node scripts/copier-pdfjs.mjs",
-    "predev": "node scripts/copier-pdfjs.mjs"
+    "predev": "node scripts/copier-pdfjs.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -26,6 +27,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^22.20.5",
     "@types/pg": "^8.23.1",

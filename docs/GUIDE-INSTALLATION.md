@@ -467,6 +467,8 @@ Après 5 à 30 minutes, Vercel passe en « Valid Configuration » ✅ et le cade
 
 **Réglages** → **Télécharger une sauvegarde** : un fichier avec toutes les données. Fais-le une fois par mois et range-le dans un endroit privé.
 
+> Les fichiers (PDF des plans, photos de suivi, photos de la communauté) ne sont **pas** dans ce fichier : il contient seulement leur emplacement. Ils restent rangés dans Supabase (**Storage**).
+
 ## Étape 2 : relier Brevo à ton domaine (emails à ton nom, moins de spams)
 
 **A. Authentifier le domaine** (une seule fois, puis jusqu'à 48 h d'attente)
@@ -904,3 +906,46 @@ Les relances s'arrêtent dès que tu publies ou planifies son prochain programme
 Pour la confidentialité, la notification ne recopie jamais ce que la cliente a écrit : elle dit seulement de quoi il s'agit. Tu lis le texte dans l'appli.
 
 Le repérage se fait par mots-clés : il ne remplace pas ta lecture, mais il te prévient vite quand quelque chose ressemble à une alerte.
+
+---
+
+# Sauvegarde complète et tâche du matin indépendante de l'hébergeur
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0025_tache_du_matin.sql`](../supabase/migrations/0025_tache_du_matin.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Mettre l'horloge du matin en route (une seule fois)
+
+Jusqu'ici, les rappels de bilan, de paiement et la mise en ligne des programmes planifiés partaient grâce à Vercel. Si tu passes sur Netlify, Vercel ne les lancera plus. Désormais, c'est **Supabase** qui les lance chaque matin à **7 h (heure de Paris)**, quel que soit l'hébergeur.
+
+[`horloge-rappels.sql`](../supabase/horloge-rappels.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → colle → **Run** → « Success ».
+
+- C'est le même fichier que pour les rappels du journal : le relancer est sans danger, il ajoute simplement l'horloge du matin.
+- L'adresse de l'app est écrite dans ce fichier (`https://app.fitw-cindy.fr`). Si ton adresse change un jour, remplace-la aux deux endroits avant de cliquer sur **Run**.
+- Vercel (ou Netlify) garde sa propre tâche du matin, en secours. **Rien ne part en double** : le premier passage du jour fait le travail, les suivants voient « déjà faite » et ne font rien. Si un passage échoue, le suivant reprend.
+
+## 3. Vérifier que la tâche a bien tourné
+
+Le lendemain matin :
+- **Dans l'app** : **Réglages** → carte **Rappels de bilan** → « Tâche du matin : dernier passage lundi 24 novembre à 07:00 (horloge Supabase) · ✓ terminée ».
+- **Dans Supabase** : **Integrations** → **Cron** (ou Database → Cron Jobs) → « tache-du-matin » : deux exécutions par jour (à 5 h et 6 h, heure anglaise), toutes « Succeeded ». C'est normal : une seule des deux appelle l'app, celle qui tombe à 7 h à Paris (l'heure change entre l'été et l'hiver).
+- Si la ligne dans Réglages affiche **⚠️ en échec**, la tâche sera relancée au passage suivant (Vercel ou Netlify dans la matinée, sinon le lendemain). Si ça se répète, préviens-moi.
+
+## 4. La sauvegarde est maintenant complète
+
+**Réglages** → **Télécharger une sauvegarde** contient désormais toutes les tables : plans alimentaires, programmes sportifs, séances faites et poids utilisés, besoins, revenus, messages, annonces, communauté…
+
+Seules exceptions, volontaires :
+- les **listes de courses** (privées, tu n'y as pas accès) ;
+- les **abonnements aux notifications** (adresses techniques des téléphones, inutiles ailleurs).
+
+Rappel : les **fichiers** (PDF, photos) ne sont pas dans la sauvegarde, seulement leur emplacement. Ils restent dans Supabase → **Storage**. Pour en garder une copie, télécharge-les depuis cet écran.
+
+Une vérification automatique empêche désormais d'oublier une nouvelle table dans la sauvegarde.
+
+## 5. Tester
+
+1. **Réglages** → **Télécharger une sauvegarde** → ouvre le fichier avec un éditeur de texte : en haut, `"tables_illisibles": []` doit être vide (sinon, une mise à jour de la base n'est pas faite) et `"tables_exclues"` liste les 3 exceptions.
+2. Le lendemain de l'étape 2 : la ligne « Tâche du matin » dans **Réglages** (voir l'étape 3).
+3. Les tests des parcours principaux (connexion, bilan, recette, bilan côté coach) se lancent sur l'ordinateur du développeur avec `npm run test:e2e` : ils utilisent une base simulée, jamais ta vraie base.

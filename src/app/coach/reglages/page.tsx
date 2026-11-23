@@ -14,12 +14,19 @@ export const metadata: Metadata = { title: "Réglages" };
 
 export default async function PageReglages() {
   const { supabase } = await exigerCoach();
-  const [reglages, champs, rappels, prefsNotif, { count: nbAppareils }] = await Promise.all([
+  const [reglages, champs, rappels, prefsNotif, { count: nbAppareils }, { data: derniereTache, error: sans0025 }] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
     lireReglagesRappels(supabase),
     lirePrefsNotifCoach(supabase),
     supabase.from("abonnements_coach").select("id", { count: "exact", head: true }),
+    // Tâche du matin (0025) : dernier passage, lu à part.
+    supabase
+      .from("taches_du_matin")
+      .select("jour, source, statut, debut_le")
+      .order("jour", { ascending: false })
+      .limit(1)
+      .maybeSingle<{ jour: string; source: string; statut: string; debut_le: string }>(),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -53,6 +60,7 @@ export default async function PageReglages() {
             Par email et en notification sur le téléphone de tes clientes (si elles l’ont activé dans leur profil).
           </p>
         </div>
+        {!sans0025 && <DerniereTache tache={derniereTache} />}
         {rappels ? (
           <FormulaireRappels reglages={rappels} config={configurationRappels()} />
         ) : (
@@ -95,5 +103,26 @@ export default async function PageReglages() {
         <GestionChamps champs={champs} fenetre={reglages.fenetre_bilan_jours} intro={reglages.intro_bilan} />
       </Carte>
     </div>
+  );
+}
+
+/** Quand la tâche du matin (rappels de bilan, paiements, programmes) a tourné pour la dernière fois. */
+function DerniereTache({ tache }: { tache: { jour: string; source: string; statut: string; debut_le: string } | null }) {
+  if (!tache) {
+    return (
+      <p className="rounded-xl bg-sable/50 px-4 py-3 text-[14px]">
+        Tâche du matin : elle n’a pas encore tourné. Elle part chaque jour vers 7 h (voir le guide, « Tâche du matin »).
+      </p>
+    );
+  }
+  const quand = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(
+    new Date(tache.debut_le),
+  );
+  const qui = tache.source === "supabase" ? "horloge Supabase" : "hébergeur";
+  const etat = tache.statut === "ok" ? "✓ terminée" : tache.statut === "echec" ? "⚠️ en échec (elle sera relancée au prochain passage)" : "en cours";
+  return (
+    <p className={tache.statut === "echec" ? "rounded-xl bg-accent-pale px-4 py-3 text-[14px]" : "rounded-xl bg-sable/50 px-4 py-3 text-[14px]"}>
+      Tâche du matin : dernier passage {quand} ({qui}) · {etat}
+    </p>
   );
 }

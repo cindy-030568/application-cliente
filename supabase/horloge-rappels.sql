@@ -1,8 +1,11 @@
 -- =====================================================================
--- Horloge des rappels du journal (à lancer UNE fois, après la mise à jour 0014).
--- Toutes les 15 minutes, Supabase appelle l'app pour envoyer les rappels du journal
--- aux clientes dont l'heure choisie vient de passer.
--- Supabase crée lui-même la clé qui protège cet appel : rien à copier ailleurs.
+-- Horloges de Supabase (à lancer après les mises à jour 0014 et 0025).
+-- 1. Toutes les 15 minutes : rappels du journal (à l'heure choisie par chaque cliente).
+-- 2. Chaque matin à 7 h (heure de Paris) : la tâche du matin (rappels de bilan,
+--    de paiement, programmes planifiés et rappels de programme), sans dépendre
+--    de l'hébergeur (Vercel ou Netlify). Si l'hébergeur la lance aussi, elle ne
+--    part qu'une fois par jour.
+-- Supabase crée lui-même la clé qui protège ces appels : rien à copier ailleurs.
 -- Sans danger si relancé.
 -- =====================================================================
 
@@ -31,7 +34,7 @@ $$;
 revoke execute on function public.jeton_horloge_valide(text) from public, anon, authenticated;
 grant execute on function public.jeton_horloge_valide(text) to service_role;
 
--- 3. L'horloge : toutes les 15 minutes.
+-- 3. Horloge du journal : toutes les 15 minutes.
 select cron.unschedule('rappels-journal') where exists (select 1 from cron.job where jobname = 'rappels-journal');
 select cron.schedule(
   'rappels-journal',
@@ -44,5 +47,25 @@ select cron.schedule(
       'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'horloge_rappels')
     )
   );
+  $$
+);
+
+-- 4. Tâche du matin : 7 h à Paris. Les horloges de Supabase sont à l'heure UTC :
+--    on se réveille à 5 h et 6 h UTC, et on n'appelle l'app que s'il est 7 h à Paris
+--    (5 h UTC en été, 6 h UTC en hiver).
+select cron.unschedule('tache-du-matin') where exists (select 1 from cron.job where jobname = 'tache-du-matin');
+select cron.schedule(
+  'tache-du-matin',
+  '0 5,6 * * *',
+  $$
+  select net.http_get(
+    url := 'https://app.fitw-cindy.fr/api/rappels',
+    headers := jsonb_build_object(
+      'Authorization',
+      'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'horloge_rappels')
+    ),
+    timeout_milliseconds := 60000
+  )
+  where extract(hour from now() at time zone 'Europe/Paris') = 7;
   $$
 );
