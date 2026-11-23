@@ -7,8 +7,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
 select public.definir_coach('coach12@test.fr');
 insert into public.clientes (id, statut) values ('00000000-0000-0000-0000-0000000000ac', 'active');
 
-select test.verifier((select notif_coach_bilans and notif_coach_email and not notif_coach_messages from public.reglages),
-  'par défaut : bilans par email et notification, pas les messages');
+select test.verifier((select notif_coach_bilans and notif_coach_email and notif_coach_messages from public.reglages),
+  'par défaut : tout est coché (messages compris depuis la mise à jour 0024)');
 
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000cc"}', false);

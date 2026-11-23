@@ -1,7 +1,10 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
+import { detecterAlerte } from "@/lib/alertes-notes";
+import { notifierCoach } from "@/lib/notifications-coach";
 import { cleExercice } from "@/lib/programme-sportif";
 import { lireMonProgramme } from "@/lib/programme-sportif-serveur";
 
@@ -43,6 +46,13 @@ export async function validerSeance(
     return { erreur: "La séance n’a pas pu être enregistrée. Vérifie ta connexion et réessaie." };
   }
   revalidatePath("/sport");
+  const clienteId = session.profil.id;
+  const nom = s.nom.slice(0, 100);
+  const motif = detecterAlerte(infos.commentaire);
+  after(async () => {
+    if (motif) await notifierCoach({ type: "alerte", clienteId, motif, source: "seance" });
+    await notifierCoach({ type: "seance", clienteId, nom });
+  });
   return { succes: "Séance enregistrée : Cindy la verra. Bravo ! 💪" };
 }
 

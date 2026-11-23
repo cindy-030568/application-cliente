@@ -880,3 +880,27 @@ Tant que le **programme suivant n'est ni en ligne ni planifié** dans l'appli, t
 - puis une **relance tous les 3 jours** pendant 2 semaines si rien n'a bougé.
 
 Les relances s'arrêtent dès que tu publies ou planifies son prochain programme, ou si tu reportes la date de changement. La cliente apparaît aussi dans ton tableau de bord (« en retard » si la date est passée).
+
+---
+
+# Notifications : tout ce qui se passe dans l'appli
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+[`0024_notifications_coach_tout.sql`](../supabase/migrations/0024_notifications_coach_tout.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+## 2. Choisir ce que tu reçois
+
+**Réglages → Mes notifications** : tout est coché au départ, décoche ce que tu ne veux pas.
+
+- **Note à lire vite ⚠️** : une cliente écrit, dans les notes de sa journée ou en commentaire de séance, quelque chose qui parle de **douleur / blessure**, de **santé** (malaise, médecin, enceinte…), de **moral ou de rapport à la nourriture** (crise, angoisse, envie d'abandonner…) ou d'une **demande pour toi** (« urgent », « appelle-moi », une question à Cindy…). Notification + email. Elle apparaît aussi en tête de ton tableau de bord pendant 3 jours.
+- **Bilan envoyé** (notification + email).
+- **Journée remplie** : une fois par jour et par cliente (notification seulement).
+- **Séance de sport faite** (notification seulement).
+- **Programme sportif à changer** : 7 j et 3 j avant, le jour J, puis relance tous les 3 jours (notification + email).
+- **Message signalé** et **nouveau message dans la communauté**.
+- **Recevoir aussi un email**.
+
+Pour la confidentialité, la notification ne recopie jamais ce que la cliente a écrit : elle dit seulement de quoi il s'agit. Tu lis le texte dans l'appli.
+
+Le repérage se fait par mots-clés : il ne remplace pas ta lecture, mais il te prévient vite quand quelque chose ressemble à une alerte.

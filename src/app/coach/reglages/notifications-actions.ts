@@ -6,14 +6,23 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { SESSION_PERDUE, sessionCoach } from "../clientes/verification";
 
 export type EtatNotifCoach = { erreur?: string; succes?: string };
-const CLES = ["notif_coach_email", "notif_coach_bilans", "notif_coach_signalements", "notif_coach_messages"] as const;
+const CLES = [
+  "notif_coach_email",
+  "notif_coach_bilans",
+  "notif_coach_signalements",
+  "notif_coach_messages",
+  "notif_coach_journal",
+  "notif_coach_seances",
+  "notif_coach_alertes",
+  "notif_coach_programmes",
+] as const;
 
 export async function changerNotifCoach(cle: string, valeur: boolean): Promise<EtatNotifCoach> {
   const session = await sessionCoach();
   if (!session) return { erreur: SESSION_PERDUE };
   if (!(CLES as readonly string[]).includes(cle)) return { erreur: "Réglage inconnu." };
   const { error } = await session.supabase.from("reglages").update({ [cle]: valeur === true }).eq("id", true);
-  if (error) return { erreur: "Ça n’a pas fonctionné. As-tu fait la mise à jour 0012 dans Supabase ?" };
+  if (error) return { erreur: "Ça n’a pas fonctionné. As-tu fait les mises à jour 0012 et 0024 dans Supabase ?" };
   revalidatePath("/coach/reglages");
   return {};
 }

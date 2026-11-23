@@ -51,3 +51,19 @@ describe("agenda de la coach", () => {
     expect(resume(classerTaches([t("p", "programme", "2026-11-25")], AUJ))).toBe("Rien d’urgent aujourd’hui. Voici ce qui arrive cette semaine.");
   });
 });
+
+describe("notes à lire vite", () => {
+  it("en tête de « maintenant », jamais « en retard »", () => {
+    const auj = "2026-11-23";
+    const agenda = classerTaches(
+      [
+        { id: "p", type: "paiement", date: "2026-11-23", titre: "A", detail: "", lien: "" },
+        { id: "n", type: "note", date: "2026-11-22", titre: "B", detail: "", lien: "" },
+      ],
+      auj,
+    );
+    expect(agenda.maintenant.map((t) => t.id)).toEqual(["n", "p"]);
+    expect(agenda.enRetard).toBe(0);
+    expect(quand(agenda.maintenant[0], auj)).toBe("écrit hier");
+  });
+});

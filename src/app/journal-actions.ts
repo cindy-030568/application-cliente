@@ -1,9 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
 import { aujourdhuiParis } from "@/lib/bilan";
 import { lireHeures, lireNombre } from "@/lib/journal";
+import { detecterAlerte } from "@/lib/alertes-notes";
+import { notifierCoach } from "@/lib/notifications-coach";
 
 export type EtatJournal = { erreur?: string; succes?: string };
 
@@ -43,8 +46,25 @@ export async function enregistrerJournee(_e: EtatJournal, formData: FormData): P
   ligne.regles = formData.get("regles") === "on";
   ligne.observations = texte("observations").trim().slice(0, 1000) || null;
 
+  // Ce qui existait déjà ce jour-là : la coach n'est prévenue qu'une fois par journée, et d'une note à lire vite que si elle est nouvelle.
+  const { data: avant } = await session.supabase
+    .from("journal_quotidien")
+    .select("observations")
+    .eq("cliente_id", session.profil.id)
+    .eq("jour", jour)
+    .maybeSingle<{ observations: string | null }>();
   const { error } = await session.supabase.from("journal_quotidien").upsert(ligne, { onConflict: "cliente_id,jour" });
   if (error) return { erreur: "Ta journée n’a pas pu être enregistrée. Réessaie dans un instant." };
+  const clienteId = session.profil.id;
+  const note = ligne.observations as string | null;
+  const motif = note && note !== avant?.observations ? detecterAlerte(note) : null;
+  const nouvelle = !avant;
+  if (motif || nouvelle) {
+    after(async () => {
+      if (motif) await notifierCoach({ type: "alerte", clienteId, motif, source: "journal" });
+      if (nouvelle) await notifierCoach({ type: "journal", clienteId });
+    });
+  }
   revalidatePath("/suivi/journal");
   revalidatePath("/");
   return { succes: "Journée enregistrée ✓" };

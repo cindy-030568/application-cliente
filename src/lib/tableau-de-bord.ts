@@ -6,6 +6,7 @@
 import { joursEntre } from "./bilan";
 
 export type TypeTache =
+  | "note"
   | "bilan_recu"
   | "bilan_manquant"
   | "bilan_prevu"
@@ -32,6 +33,7 @@ export type Tache = {
 
 /** Catégorie affichée sur chaque ligne. */
 export const CATEGORIE: Record<TypeTache, string> = {
+  note: "À lire vite",
   bilan_recu: "Bilan",
   bilan_manquant: "Bilan",
   bilan_prevu: "Bilan",
@@ -47,9 +49,10 @@ export const CATEGORIE: Record<TypeTache, string> = {
 /** Ce qui n'attend rien de la coach (simple information) : jamais « en retard ». */
 const INFORMATIF: TypeTache[] = ["bilan_prevu", "programme_auto"];
 /** À traiter dès que ça arrive, quelle que soit la date. */
-const IMMEDIAT: TypeTache[] = ["bilan_recu", "bilan_manquant", "decrochage", "signalement", "rgpd"];
+const IMMEDIAT: TypeTache[] = ["note", "bilan_recu", "bilan_manquant", "decrochage", "signalement", "rgpd"];
 /** Ordre dans une même journée : ce qui demande une action d'abord. */
 const PRIORITE: TypeTache[] = [
+  "note",
   "signalement",
   "bilan_recu",
   "paiement",
@@ -86,7 +89,7 @@ export function classerTaches(taches: Tache[], aujourdhui: string): Agenda {
 
 /** En retard : une échéance dépassée (paiement, programme, bilan manquant), ou un bilan reçu qui attend depuis plus de 2 jours. */
 export function enRetard(t: Tache, aujourdhui: string): boolean {
-  if (INFORMATIF.includes(t.type) || t.type === "signalement" || t.type === "decrochage" || t.type === "rgpd") return false;
+  if (INFORMATIF.includes(t.type) || t.type === "note" || t.type === "signalement" || t.type === "decrochage" || t.type === "rgpd") return false;
   if (t.type === "bilan_recu") return joursEntre(t.date, aujourdhui) > 2;
   if (t.type === "bilan_manquant") return true;
   return t.date < aujourdhui;
@@ -99,6 +102,7 @@ export function quand(t: Tache, aujourdhui: string): string {
   const j = joursEntre(aujourdhui, t.date);
   if (t.type === "bilan_recu") return j === 0 ? "reçu aujourd’hui" : j === -1 ? "reçu hier" : `reçu il y a ${-j} j`;
   if (t.type === "bilan_manquant") return `attendu depuis ${-j} j`;
+  if (t.type === "note") return j === 0 ? "écrit aujourd’hui" : j === -1 ? "écrit hier" : `écrit il y a ${-j} j`;
   if (t.type === "signalement" || t.type === "decrochage" || t.type === "rgpd") return "à regarder";
   if (j < 0) return `en retard de ${-j} j`;
   if (j === 0) return "aujourd’hui";

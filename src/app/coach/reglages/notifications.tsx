@@ -22,14 +22,39 @@ function nomAppareil() {
   return "Appareil";
 }
 
-const LIGNES: { cle: keyof PrefsNotifCoach; titre: string; aide: string }[] = [
+type Ligne = { cle: keyof PrefsNotifCoach; titre: string; aide: string; v0024?: boolean };
+const LIGNES: Ligne[] = [
+  {
+    cle: "notif_coach_alertes",
+    titre: "Note à lire vite ⚠️",
+    aide: "Quand une cliente écrit (notes de sa journée, commentaire de séance) quelque chose qui parle de douleur, de santé, de moral ou d’une demande pour toi.",
+    v0024: true,
+  },
   { cle: "notif_coach_bilans", titre: "Bilan envoyé", aide: "Dès qu’une cliente envoie son bilan." },
+  { cle: "notif_coach_journal", titre: "Journée remplie", aide: "Une fois par jour et par cliente. Notification seulement, jamais par email.", v0024: true },
+  { cle: "notif_coach_seances", titre: "Séance de sport faite", aide: "Dès qu’une cliente valide une séance. Notification seulement, jamais par email.", v0024: true },
+  {
+    cle: "notif_coach_programmes",
+    titre: "Programme sportif à changer",
+    aide: "7 jours et 3 jours avant, le jour J, puis une relance tous les 3 jours tant que le suivant n’est pas dans l’appli.",
+    v0024: true,
+  },
   { cle: "notif_coach_signalements", titre: "Message signalé", aide: "Quand une cliente signale un message de la communauté." },
   { cle: "notif_coach_messages", titre: "Nouveau message dans la communauté", aide: "Au plus une notification par heure, jamais par email." },
-  { cle: "notif_coach_email", titre: "Recevoir aussi un email", aide: "À ton adresse de connexion, en plus des notifications." },
+  { cle: "notif_coach_email", titre: "Recevoir aussi un email", aide: "À ton adresse de connexion, en plus des notifications (bilans, notes à lire vite, programmes, signalements)." },
 ];
 
-export function NotificationsCoach({ prefs, clePublique, nbAppareils }: { prefs: PrefsNotifCoach; clePublique: string | null; nbAppareils: number }) {
+export function NotificationsCoach({
+  prefs,
+  sans0024,
+  clePublique,
+  nbAppareils,
+}: {
+  prefs: PrefsNotifCoach;
+  sans0024: boolean;
+  clePublique: string | null;
+  nbAppareils: number;
+}) {
   const appareil = useAppareil();
   const [valeurs, setValeurs] = useState(prefs);
   const [abonne, setAbonne] = useState<boolean | null>(null);
@@ -92,8 +117,14 @@ export function NotificationsCoach({ prefs, clePublique, nbAppareils }: { prefs:
 
   return (
     <div className="flex flex-col gap-5">
+      {sans0024 && (
+        <Message ton="info">
+          Pour choisir aussi les journées remplies, les séances, les notes à lire vite et les programmes, fais la mise à jour 0024 dans
+          Supabase (voir le guide). En attendant, elles sont toutes envoyées.
+        </Message>
+      )}
       <ul className="flex flex-col divide-y divide-ligne">
-        {LIGNES.map(({ cle, titre, aide }) => (
+        {LIGNES.filter((l) => !(sans0024 && l.v0024)).map(({ cle, titre, aide }) => (
           <li key={cle}>
             <label className="flex cursor-pointer items-center justify-between gap-4 py-3">
               <span className="flex flex-col">

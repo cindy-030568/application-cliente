@@ -10,6 +10,7 @@ import { clientesAvecSuitePlanifiee, lireRenouvellements } from "@/lib/programme
 import { synthese } from "@/lib/revenus";
 import { lireMouvements } from "@/lib/revenus-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
+import { LIBELLE_MOTIF, detecterAlerte } from "@/lib/alertes-notes";
 import { CATEGORIE, classerTaches, enRetard, quand, resume, type Tache, type TypeTache } from "@/lib/tableau-de-bord";
 import { proposerMessages, type Proposition } from "@/lib/propositions-messages";
 import { CarteAnnonce } from "./annonce";
@@ -38,6 +39,7 @@ export default async function TableauDeBord() {
     journal14,
     objectifs,
     dejaTraitees,
+    notesRecentes,
   ] = await Promise.all([
       chargerFile(),
       supabase.from("echeances_paiement").select("id, cliente_id, date_echeance, montant").is("payee_le", null).lte("date_echeance", dans14),
@@ -58,6 +60,8 @@ export default async function TableauDeBord() {
       supabase.from("journal_quotidien").select("cliente_id, jour, sommeil, hydratation, pas, stress, poids").gte("jour", ajouterJours(auj, -13)),
       supabase.from("besoins_clientes").select("cliente_id, objectif"),
       supabase.from("messages_cliente").select("cliente_id, proposition").gte("cree_le", ajouterJours(auj, -8)),
+      // Notes à lire vite : notes du journal des 3 derniers jours.
+      supabase.from("journal_quotidien").select("cliente_id, jour, observations").gte("jour", ajouterJours(auj, -2)).not("observations", "is", null),
     ]);
 
   const suivies = clientes.filter((c) => c.statut !== "fermee");
@@ -68,6 +72,28 @@ export default async function TableauDeBord() {
   // ------------------------------------------------------------ Toutes les actions, d'une seule liste
   const taches: Tache[] = [];
 
+  // Notes à lire vite (journal et commentaires de séance des 3 derniers jours) : en tête de liste.
+  const depuis3 = ajouterJours(auj, -2);
+  const notes = [
+    ...(notesRecentes.data ?? [])
+      .filter((n) => (n.jour as string) >= depuis3)
+      .map((n) => ({ id: `nj-${n.cliente_id}-${n.jour}`, clienteId: n.cliente_id as string, jour: n.jour as string, texte: n.observations as string, source: "journal" as const })),
+    ...(seances ?? [])
+      .filter((x) => x.commentaire && jourParisDe(x.faite_le) >= depuis3)
+      .map((x) => ({ id: `ns-${x.id}`, clienteId: x.cliente_id, jour: jourParisDe(x.faite_le), texte: x.commentaire as string, source: "seance" as const })),
+  ];
+  for (const n of notes) {
+    const motif = ouverte.has(n.clienteId) ? detecterAlerte(n.texte) : null;
+    if (!motif) continue;
+    taches.push({
+      id: n.id,
+      type: "note",
+      date: n.jour,
+      titre: nom.get(n.clienteId) ?? "Cliente",
+      detail: `${n.source === "journal" ? "Dans son journal" : "Après sa séance"} : quelque chose qui concerne ${LIBELLE_MOTIF[motif]}`,
+      lien: n.source === "journal" ? `/coach/clientes/${n.clienteId}/suivi` : `/coach/clientes/${n.clienteId}/programme-sportif`,
+    });
+  }
   for (const b of aTraiter) {
     taches.push({ id: `br-${b.id}`, type: "bilan_recu", date: jourParisDe(b.envoye_le), titre: b.nom, detail: "Bilan reçu : à lire et à commenter", lien: `/coach/bilans/${b.id}` });
   }
@@ -312,6 +338,7 @@ export default async function TableauDeBord() {
 }
 
 const TON: Record<TypeTache, "rose" | "sable" | "sombre" | "vert"> = {
+  note: "rose",
   bilan_recu: "sable",
   bilan_manquant: "sable",
   bilan_prevu: "sable",

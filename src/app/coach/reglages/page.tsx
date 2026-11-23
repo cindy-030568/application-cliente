@@ -30,11 +30,12 @@ export default async function PageReglages() {
       <Carte className="flex flex-col gap-4">
         <div>
           <h2 className="font-titre text-xl font-bold">Mes notifications</h2>
-          <p className="text-[14px] text-texte-2">Pour être prévenue quand il se passe quelque chose dans l’app.</p>
+          <p className="text-[14px] text-texte-2">Coche ce que tu veux recevoir : tu es prévenue dès qu’il se passe quelque chose dans l’app.</p>
         </div>
         {prefsNotif ? (
           <NotificationsCoach
             prefs={prefsNotif}
+            sans0024={prefsNotif.sans0024}
             clePublique={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
             nbAppareils={nbAppareils ?? 0}
           />

@@ -50,6 +50,8 @@ export async function executerRappelsProgrammes(admin: SupabaseClient, aujourdhu
   const bilan = { rappels: 0, notifications: 0, emails: 0 };
   const config = configurationRappels();
   if (!config.push && !config.email) return bilan;
+  const prefs = await lirePrefsNotifCoach(admin);
+  if (prefs && !prefs.notif_coach_programmes) return bilan;
   const { data: programmes, error } = await admin
     .from("programmes_sportifs")
     .select("id, cliente_id, publie_le, renouveler_le, rappel_renouvellement_le")
@@ -88,7 +90,6 @@ export async function executerRappelsProgrammes(admin: SupabaseClient, aujourdhu
   if (!rappels.length) return bilan;
 
   rappels.sort((a, b) => a.date.localeCompare(b.date));
-  const prefs = await lirePrefsNotifCoach(admin);
   const envoi = await envoyerALaCoach(admin, contenuRappelProgrammes(rappels, aujourdhui), prefs?.notif_coach_email ?? true);
   return { rappels: rappels.length, notifications: envoi.notifications, emails: envoi.emails };
 }
