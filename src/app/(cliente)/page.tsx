@@ -22,6 +22,7 @@ import { mensualiteASignaler } from "@/components/mon-paiement";
 import { journalActif } from "@/lib/journal-serveur";
 import { AnnoncesAccueil } from "@/components/annonces";
 import { MarquerMessagesLus } from "@/components/messages-lus";
+import { encouragementDuJour } from "@/lib/encouragements";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -88,7 +89,7 @@ export default async function PageAccueil() {
         }
         sousTitre={
           <span className="font-main text-[24px] leading-tight text-caramel-texte">
-            On avance ensemble, à ton rythme.
+            {encouragementDuJour(auj)}
           </span>
         }
       />

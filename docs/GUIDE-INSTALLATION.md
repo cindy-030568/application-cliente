@@ -855,3 +855,14 @@ Pour chaque proposition, modifie le texte si tu veux, puis :
 - **Ignorer**.
 
 Une proposition traitée ne revient pas de la semaine.
+
+---
+
+# Petit mot du jour
+
+Rien à installer, aucune mise à jour de la base.
+
+- À la **première ouverture de l'appli dans la journée**, ta cliente voit une petite fenêtre « Ton petit mot du jour », signée Cindy 💛. Elle la ferme avec « Merci, belle journée ✨ ».
+- La phrase reste ensuite toute la journée sous « Bonjour … » sur son accueil.
+- La phrase change chaque jour : la même pour toutes tes clientes, et aucune ne revient avant d'avoir fait le tour des 100 phrases (environ 3 mois).
+- Pour modifier ou ajouter des phrases : fichier `src/lib/encouragements.ts` (une phrase par ligne, entre guillemets).
