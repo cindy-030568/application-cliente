@@ -12,6 +12,20 @@ export type ReglagesContrat = {
   contrat_depuis: string | null;
 };
 
+const VARIABLES: [string, string][] = [
+  ["{{prenom}}", "son prénom"],
+  ["{{nom}}", "son nom"],
+  ["{{email}}", "son email"],
+  ["{{adresse}}", "son adresse (elle la tape sur l’écran du contrat)"],
+  ["{{date_naissance}}", "sa date de naissance (idem, pré-remplie si tu la connais)"],
+  ["{{formule}}", "sa formule"],
+  ["{{montant_total}}", "le montant total, ex. 750 €"],
+  ["{{paiement}}", "« Intégral » ou « Échelonné (en 3 fois) »"],
+  ["{{jour_echeance}}", "le jour du mois des versements"],
+  ["{{date_debut}}", "la date de début du coaching"],
+  ["{{date}}", "la date d’acceptation"],
+];
+
 export function FormulaireContrat({ contrat, acceptations }: { contrat: ReglagesContrat; acceptations: number }) {
   const [etat, envoyer] = useActionState(enregistrerContrat, {});
   return (
@@ -35,6 +49,21 @@ export function FormulaireContrat({ contrat, acceptations }: { contrat: Reglages
         defaultValue={contrat.contrat_version ?? ""}
         aide="Change-le à chaque modification du texte : les nouvelles clientes acceptent la nouvelle version, celles qui ont accepté une version précédente ne sont pas redemandées."
       />
+      <details className="rounded-xl bg-creme/70 px-4 py-3 text-[14px]">
+        <summary className="cursor-pointer font-medium">Les informations remplies automatiquement pour chaque cliente</summary>
+        <p className="mt-2 text-texte-2">Écris ces mots, avec les doubles accolades, là où l’information doit apparaître :</p>
+        <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+          {VARIABLES.map(([v, aide]) => (
+            <li key={v}>
+              <code className="rounded bg-sable/60 px-1.5 py-0.5 text-[13px]">{v}</code> <span className="text-texte-2">{aide}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-texte-2">
+          Sa formule, le montant et le paiement viennent de sa fiche (Formule et paiement) : remplis-les avant de l’inviter. Une
+          information manquante s’affiche « — ». Sur sa fiche, rubrique Contrat, tu peux voir son contrat tel qu’elle le lira.
+        </p>
+      </details>
       <ZoneTexte
         label="Texte de ton contrat"
         name="contrat_texte"

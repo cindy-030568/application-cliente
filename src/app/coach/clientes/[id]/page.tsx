@@ -340,6 +340,11 @@ export default async function PageFicheCliente({
                   : "Ajoute ton contrat dans Réglages → Mon contrat pour que les nouvelles clientes l’acceptent à leur première connexion."}
               </p>
             )}
+            {contratEnCours?.contrat_version && !acceptations?.length && (
+              <Link href={`/coach/clientes/${c.id}/apercu-contrat`} className="w-fit text-[14px] font-medium underline underline-offset-4">
+                Voir son contrat tel qu’elle le lira
+              </Link>
+            )}
           </Repliable>
         )}
         <Repliable titre="Notes privées" resume={notes?.length ? `${notes.length} note${notes.length > 1 ? "s" : ""} · jamais visibles par elle` : "Jamais visibles par la cliente"}>

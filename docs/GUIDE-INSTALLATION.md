@@ -961,6 +961,7 @@ Pour chacun de ces 3 fichiers, dans l'ordre : lien → **Copy raw file** → Sup
 1. [`0026_demandes_inscription.sql`](../supabase/migrations/0026_demandes_inscription.sql) (formulaire Tally)
 2. [`0027_contrat.sql`](../supabase/migrations/0027_contrat.sql) (contrat)
 3. [`0028_brouillon_claude.sql`](../supabase/migrations/0028_brouillon_claude.sql) (brouillon Claude)
+4. [`0029_contrat_variables.sql`](../supabase/migrations/0029_contrat_variables.sql) (contrat rempli pour chaque cliente)
 
 ## 2. Formulaire Tally → fiche « à valider »
 
@@ -1015,6 +1016,27 @@ Chaque réponse à ton formulaire d'inscription Tally crée une **fiche à valid
 4. Sur la fiche d'une cliente, rubrique **Contrat** : la version acceptée, la date et l'heure, et **Télécharger la preuve (PDF)**. Le PDF contient ses nom et email, la version, la date, les deux cases cochées et le texte complet accepté.
 
 **Tester** : crée une cliente de test (avec ta propre adresse email), connecte-toi avec elle sur ton téléphone, accepte l'écran des données puis le contrat. Ensuite, regarde sa fiche → **Contrat** → **Télécharger la preuve (PDF)**.
+
+### Contrat rempli automatiquement pour chaque cliente
+
+**Mettre à jour la base (une seule fois)** : [`0029_contrat_variables.sql`](../supabase/migrations/0029_contrat_variables.sql) → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+Dans le texte du contrat, écris ces mots avec les doubles accolades : l'app les remplace par les informations de chaque cliente.
+
+| Écris | Remplacé par |
+|---|---|
+| `{{prenom}}` · `{{nom}}` · `{{email}}` | sa fiche |
+| `{{adresse}}` | son adresse : elle la tape sur l'écran du contrat |
+| `{{date_naissance}}` | sa date de naissance : elle la tape (pré-remplie si tu l'as saisie dans ses besoins) |
+| `{{formule}}` · `{{montant_total}}` | sa fiche → Formule et paiement |
+| `{{paiement}}` | « Intégral » ou « Échelonné (en 3 fois) » |
+| `{{jour_echeance}}` | le jour du mois de ses versements (d'après son échéancier) |
+| `{{date_debut}}` | la date de début de son coaching |
+| `{{date}}` | la date à laquelle elle accepte |
+
+- Remplis sa **Formule et paiement** avant de l'inviter : une information manquante s'affiche « — ».
+- Sur sa fiche, rubrique **Contrat** → **Voir son contrat tel qu'elle le lira**.
+- La preuve (PDF) contient le contrat **rempli**, exactement tel qu'elle l'a lu et accepté.
 
 ## 4. Brouillon de réponse au bilan par Claude (facultatif, désactivé par défaut)
 

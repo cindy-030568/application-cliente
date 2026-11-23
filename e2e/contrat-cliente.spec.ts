@@ -9,7 +9,13 @@ test("première connexion : la cliente lit et accepte le contrat avant d'entrer"
     await seConnecter(page, "sophie@exemple.fr");
     await page.waitForURL(/\/contrat/);
     await expect(page.getByRole("heading", { name: "Ton contrat d’accompagnement" })).toBeVisible();
-    await expect(page.getByLabel("Texte du contrat")).toContainText("Article 1 - Objet");
+    const texte = page.getByLabel("Texte du contrat");
+    await expect(texte).toContainText("Article 1 - Objet");
+    // Les variables sont remplies avec sa fiche ; l'adresse et la date de naissance lui sont demandées.
+    await expect(texte).toContainText("Cliente : Sophie Martin – sophie@exemple.fr");
+    await expect(texte).toContainText("[ton adresse, à remplir ci-dessous]");
+    await page.getByLabel("Ton adresse postale").fill("12 rue des Lilas, 68000 Colmar");
+    await page.getByLabel("Ta date de naissance").fill("1990-04-12");
     // Les deux cases sont obligatoires.
     await page.getByLabel(/J’ai lu et j’accepte le contrat ci-dessus \(version 1\)/).check();
     await page.getByRole("button", { name: /J’accepte et je commence/ }).click();

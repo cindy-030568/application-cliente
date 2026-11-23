@@ -376,13 +376,25 @@ const demandes = [];
 const acceptations = [];
 let derniereRequeteClaude = null;
 Object.assign(reglages, { brouillon_claude: true, contrat_texte: null, contrat_version: null, contrat_case_renonciation: null, contrat_depuis: null });
-const CONTRAT_TEST = { contrat_texte: "CONTRAT D'ACCOMPAGNEMENT (texte de test)\n\nArticle 1 - Objet\nAccompagnement nutrition et sport sur 3 mois.\n\nArticle 2 - Durée\n12 semaines à compter de la première connexion.", contrat_version: "1", contrat_case_renonciation: "Je demande que mon accompagnement commence immédiatement (phrase de test fournie par la coach).", contrat_depuis: new Date(Date.now() - 86400000).toISOString() };
+const CONTRAT_TEST = { contrat_texte: "CONTRAT D'ACCOMPAGNEMENT (texte de test)\n\nCliente : {{prenom}} {{nom}} – {{email}}\nAdresse : {{adresse}}\nNée le : {{date_naissance}}\n\nArticle 1 - Objet\nFormule : {{formule}} – {{montant_total}} – paiement {{paiement}}.\n\nArticle 2 - Durée\n12 semaines à compter de la première connexion.", contrat_version: "1", contrat_case_renonciation: "Je demande que mon accompagnement commence immédiatement (phrase de test fournie par la coach).", contrat_depuis: new Date(Date.now() - 86400000).toISOString() };
 async function routeTest(req, res, u) {
   const json = (corps) => { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(corps)); };
   if (u.pathname === "/__test/contrat") { const b = await corpsJson(req); Object.assign(reglages, b?.actif ? CONTRAT_TEST : { contrat_texte: null, contrat_version: null, contrat_case_renonciation: null }); if (!b?.actif) acceptations.length = 0; return json({ ok: true }); }
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   res.writeHead(404); return res.end();
+}
+/** Même remplacement des variables que la fonction SQL rendre_contrat (version simplifiée pour les tests). */
+function rendreContrat(id, adresse, naissance) {
+  const p = profils[id] ?? clientes.find((c) => c.id === id)?.profils ?? {};
+  const pai = paiementsClientes.find((x) => x.cliente_id === id);
+  const fr = (d) => d.split("-").reverse().join("/");
+  return String(reglages.contrat_texte ?? "")
+    .replaceAll("{{prenom}}", p.prenom || "—").replaceAll("{{nom}}", p.nom || "—").replaceAll("{{email}}", p.email || "—")
+    .replaceAll("{{adresse}}", adresse || "[ton adresse, à remplir ci-dessous]")
+    .replaceAll("{{date_naissance}}", naissance ? fr(naissance) : "[ta date de naissance, à remplir ci-dessous]")
+    .replaceAll("{{formule}}", pai?.formule || "—").replaceAll("{{montant_total}}", pai?.montant_total != null ? `${pai.montant_total} €` : "—")
+    .replaceAll("{{paiement}}", !pai ? "—" : pai.nb_fois > 1 ? `Échelonné (en ${pai.nb_fois} fois)` : "Intégral");
 }
 /** API Claude simulée (ANTHROPIC_BASE_URL) : renvoie un brouillon figé et garde la requête pour les tests. */
 async function routeClaude(req, res) {
@@ -545,9 +557,19 @@ http.createServer((req, res) => {
   }
   if (u.pathname === "/rest/v1/rpc/accepter_contrat") return corpsJson(req).then((b) => {
     const ok = b?.p_accepte && b?.p_renonciation && b?.p_version === reglages.contrat_version;
-    if (ok) acceptations.push({ id: crypto.randomUUID(), cliente_id: uid, version: reglages.contrat_version, texte: reglages.contrat_texte, accepte_le: new Date().toISOString(), renonciation_retractation: true, texte_renonciation: reglages.contrat_case_renonciation });
+    if (ok && (!b.p_adresse || !b.p_date_naissance)) { res.writeHead(400, { "content-type": "application/json" }); return res.end(JSON.stringify({ code: "23514", message: "adresse manquante" })); }
+    if (ok) acceptations.push({ id: crypto.randomUUID(), cliente_id: uid, version: reglages.contrat_version, texte: rendreContrat(uid, b.p_adresse, b.p_date_naissance), accepte_le: new Date().toISOString(), renonciation_retractation: true, texte_renonciation: reglages.contrat_case_renonciation, adresse: b.p_adresse, date_naissance: b.p_date_naissance });
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(Boolean(ok)));
   });
+  if (u.pathname === "/rest/v1/rpc/mon_contrat_apercu" || u.pathname === "/rest/v1/rpc/apercu_contrat") return corpsJson(req).then((b) => {
+    const cible = b?.p_cliente ?? uid;
+    res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(reglages.contrat_texte ? rendreContrat(cible, null, null) : null));
+  });
+  if (u.pathname === "/rest/v1/rpc/mon_contrat_infos") {
+    const t = String(reglages.contrat_texte ?? "");
+    res.writeHead(200, { "content-type": "application/json" });
+    return res.end(JSON.stringify({ demande_adresse: t.includes("{{adresse}}"), demande_date_naissance: t.includes("{{date_naissance}}"), date_naissance: null }));
+  }
   if (u.pathname.startsWith("/rest/v1/rpc/")) { res.writeHead(204); return res.end(); }
   if (u.pathname === "/auth/v1/user") return send({ id: uid, aud: "authenticated", role: "authenticated", email: profils[uid]?.email, user_metadata: { mot_de_passe_defini: true } });
   if (u.pathname.startsWith("/auth/v1/")) return routeAuth(req, res, u);
