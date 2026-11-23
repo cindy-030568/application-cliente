@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { IconeRetour } from "@/components/icones";
 import { Carte, Message } from "@/components/ui";
+import { LIBELLES_STATUT } from "@/lib/types";
+import { formaterEuros } from "@/lib/paiements";
 import { exigerCoach } from "@/lib/auth";
 import { ajouterJours, aujourdhuiParis, bilanAvecPhotos, formaterDate, prochainBilan } from "@/lib/bilan";
 import type { ClienteListe } from "../../donnees";
@@ -117,6 +119,18 @@ export default async function PageFicheCliente({
         date: dateCourte.format(new Date(p.created_at)),
         vu: p.vu_le ? dateCourte.format(new Date(p.vu_le)) : null,
       }));
+  const echeancesEnRetard = paiement ? paiement.echeances.filter((e) => !e.payee_le && e.date_echeance < auj).length : 0;
+  const resumePaiement = !paiement
+    ? "Mise à jour 0010 à faire"
+    : [
+        paiement.paiement?.formule,
+        paiement.paiement?.montant_total ? formaterEuros(paiement.paiement.montant_total) : null,
+        paiement.paiement && paiement.paiement.nb_fois > 1 ? `en ${paiement.paiement.nb_fois} fois` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || "Pas encore renseignés";
+  const nbPlans = (type: Plan["type"]) => (plans ?? []).filter((p) => p.type === type && p.actif).length;
+  const resumePlans = `Nutrition : ${nbPlans("nutrition") ? "en ligne" : "aucun"} · Sport : ${nbPlans("sport") ? "en ligne" : "aucun"}`;
   const dateNote = new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "long",
     timeStyle: "short",
@@ -139,7 +153,6 @@ export default async function PageFicheCliente({
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-[14px] text-texte-2">
             <BadgeStatut statut={c.statut} />
-            {bilan && <span>Prochain bilan : {formaterDate(bilan)}{bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, bilan) ? " · avec photos 📸" : ""}</span>}
             {c.ferme_le && <span>Accès fermé le {formaterDate(c.ferme_le)}</span>}
           </div>
         </div>
@@ -158,212 +171,255 @@ export default async function PageFicheCliente({
         </Message>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <Section titre="Infos et accès">
-            <FormulaireInfos
-              action={modifierCliente.bind(null, c.id)}
-              valeurs={{ ...c.profils, ...c }}
-              suiviSport={sansSport ? null : (sport?.suivi_sport ?? true)}
-              journal={sansJournal ? null : (jrn?.journal_actif ?? true)}
-            />
-          </Section>
-          <Section titre="Formule et paiement" sousTitre="Ta cliente voit sa formule et son échéancier dans son profil. Ta note reste privée.">
-            {paiement ? (
-              <BlocPaiement
-                clienteId={c.id}
-                paiement={paiement.paiement}
-                echeances={paiement.echeances}
-                formules={formules}
-                premiereParDefaut={paiement.echeances[0]?.date_echeance ?? c.date_debut ?? auj}
-                aujourdhui={auj}
-              />
-            ) : (
-              <Message ton="info">
-                Fais d’abord la mise à jour de la base : fichier 0010_formule_paiement_sport.sql (voir le guide).
-              </Message>
-            )}
-          </Section>
-          <Section titre="Plans" sousTitre="PDF dans l’app, lien Drive ou Nutrium. Les anciennes versions restent consultables.">
-            <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />
-            <hr className="border-ligne" />
-            <BlocPlan clienteId={c.id} type="sport" plans={plansAffiches("sport")} />
-          </Section>
-          <Section titre="Repas et cibles" sousTitre="Les cibles de chaque repas de son plan. Les kcal sont calculées automatiquement.">
-            <BlocRepas
-              clienteId={c.id}
-              initiaux={(repas ?? []).map((r) => ({
-                type_repas: r.type_repas as string,
-                libelle: r.libelle as string,
-                proteines_g: Number(r.proteines_g),
-                glucides_g: Number(r.glucides_g),
-                lipides_g: Number(r.lipides_g),
-              }))}
-            />
-          </Section>
-          <Section titre="Aliments exclus" sousTitre="Allergies, aversions, végétarienne… Les recettes concernées ne lui seront pas proposées.">
-            <BlocExclusions
-              clienteId={c.id}
-              categories={categoriesAliment}
-              categoriesInitiales={(exclusions ?? []).flatMap((e) => (e.categorie_id ? [e.categorie_id as string] : []))}
-              alimentsInitiaux={(exclusions ?? []).flatMap((e) => {
-                const a = (Array.isArray(e.aliments) ? e.aliments[0] : e.aliments) as { id: string; nom: string } | null;
-                return a ? [{ id: a.id, nom: a.nom }] : [];
-              })}
-            />
-          </Section>
-          <Section titre="Notes privées" sousTitre="Jamais visibles par la cliente.">
-            <BlocNotes
-              id={c.id}
-              notes={(notes ?? []).map((n) => ({
-                id: n.id,
-                contenu: n.contenu,
-                date: dateNote.format(new Date(n.created_at)),
-              }))}
-            />
-          </Section>
+      {/* 1. Son suivi, en premier */}
+      <section className="flex flex-col gap-4 rounded-carte bg-chocolat p-5 text-creme shadow-douce">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-titre text-[24px] font-bold leading-tight">Son suivi</h2>
+            <p className="text-[14px] text-texte-clair">Graphiques, photos, bilans, rendez-vous et export pour ton classeur.</p>
+          </div>
+          <Link
+            href={`/coach/clientes/${c.id}/suivi`}
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-creme px-5 text-[15px] font-medium text-chocolat"
+          >
+            Ouvrir son suivi et ses bilans
+          </Link>
         </div>
+        <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Chiffre libelle="Prochain bilan" valeur={bilan ? formaterDate(bilan, { year: undefined }) : "—"} detail={bilan && bilanAvecPhotos(c.date_debut, c.frequence_bilan_jours, bilan) ? "avec photos 📸" : undefined} />
+          <Chiffre libelle="Prochain rendez-vous" valeur={c.prochain_rdv ? dateCourte.format(new Date(c.prochain_rdv)) : "—"} />
+          <Chiffre libelle="Dernière visite" valeur={c.derniere_visite ? dateCourte.format(new Date(c.derniere_visite)) : "jamais"} />
+          <Chiffre libelle="Séances (7 jours)" valeur={seancesFaites ? String(faitesSemaine) : "—"} />
+        </dl>
+      </section>
 
-        <div className="flex flex-col gap-6">
-          <Carte className="flex flex-col gap-3 bg-chocolat text-creme">
-            <h2 className="font-titre text-xl font-bold">Suivi et bilans</h2>
-            <p className="text-[14px] text-texte-clair">
-              Ses graphiques, photos, bilans, rendez-vous et l’export pour ton classeur.
+      {/* 2. Accès rapides */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Carte className="flex flex-col gap-3 border-2 border-caramel/40">
+          <h2 className="font-titre text-xl font-bold">Analyse & conseils</h2>
+          <p className="text-[14px] text-texte-2">
+            {[
+              compte("important") && `${compte("important")} à traiter`,
+              compte("surveiller") && `${compte("surveiller")} à surveiller`,
+              compte("bravo") && `${compte("bravo")} réussite${compte("bravo") > 1 ? "s" : ""}`,
+            ]
+              .filter(Boolean)
+              .join(" · ") || "Rien de particulier à signaler pour l’instant."}
+          </p>
+          {aRegarder.length > 0 && (
+            <ul className="flex flex-col gap-1.5 text-[14.5px]">
+              {aRegarder.map((x) => (
+                <li key={x.id} className="flex gap-2">
+                  <span aria-hidden className={x.niveau === "important" ? "mt-[7px] size-2 shrink-0 rounded-full bg-erreur" : "mt-[7px] size-2 shrink-0 rounded-full bg-caramel"} />
+                  {x.titre}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href={`/coach/clientes/${c.id}/analyse`}
+            className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme"
+          >
+            Voir l’analyse et les conseils
+          </Link>
+        </Carte>
+        <Carte className="flex flex-col gap-3">
+          <h2 className="font-titre text-xl font-bold">Programme sportif</h2>
+          {programmeEnCours ? (
+            <ProgrammeEnCours publieLe={programmeEnCours.publie_le} renouvelerLe={programmeEnCours.renouveler_le} />
+          ) : (
+            <p className="text-[14px] text-texte-2">Construit avec Claude, collé ici, puis publié dans son onglet Sport.</p>
+          )}
+          {seancesFaites && seancesFaites.length > 0 && (
+            <p className="text-[14px]">
+              Dernière séance : {seancesFaites[0].seance_nom}, {formaterDate(jourParisDe(seancesFaites[0].faite_le), { year: undefined })}
             </p>
-            <Link
-              href={`/coach/clientes/${c.id}/suivi`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-creme px-5 text-[15px] font-medium text-chocolat"
-            >
-              Ouvrir son suivi
-            </Link>
-          </Carte>
-          <Carte className="flex flex-col gap-3 border-2 border-caramel/40">
-            <h2 className="font-titre text-xl font-bold">Analyse & conseils</h2>
-            <p className="text-[14px] text-texte-2">
-              {[
-                compte("important") && `${compte("important")} à traiter`,
-                compte("surveiller") && `${compte("surveiller")} à surveiller`,
-                compte("bravo") && `${compte("bravo")} réussite${compte("bravo") > 1 ? "s" : ""}`,
-              ]
-                .filter(Boolean)
-                .join(" · ") || "Rien de particulier à signaler pour l’instant."}
-            </p>
-            {aRegarder.length > 0 && (
-              <ul className="flex flex-col gap-1.5 text-[14.5px]">
-                {aRegarder.map((x) => (
-                  <li key={x.id} className="flex gap-2">
-                    <span aria-hidden className={x.niveau === "important" ? "mt-[7px] size-2 shrink-0 rounded-full bg-erreur" : "mt-[7px] size-2 shrink-0 rounded-full bg-caramel"} />
-                    {x.titre}
+          )}
+          <Link
+            href={`/coach/clientes/${c.id}/programme-sportif`}
+            className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
+          >
+            Son programme sportif
+          </Link>
+        </Carte>
+        <Carte className="flex flex-col gap-3">
+          <h2 className="font-titre text-xl font-bold">Plan alimentaire</h2>
+          <p className="text-[14px] text-texte-2">Ses besoins, puis son plan repas par repas. Elle le reçoit dans son onglet Nutrition.</p>
+          <Link
+            href={`/coach/clientes/${c.id}/plan-alimentaire`}
+            className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-medium text-white"
+          >
+            Son plan alimentaire
+          </Link>
+        </Carte>
+        <Carte className="flex flex-col gap-3">
+          <h2 className="font-titre text-xl font-bold">Ses recettes</h2>
+          <p className="text-[14px] text-texte-2">Les recettes qu’elle voit pour chaque repas, avec les quantités calculées pour ses cibles.</p>
+          <Link
+            href={`/coach/clientes/${c.id}/recettes`}
+            className="mt-auto inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
+          >
+            Aperçu des recettes
+          </Link>
+        </Carte>
+      </div>
+
+      {/* 3. Sa fiche : menus repliables */}
+      <div className="flex flex-col gap-3">
+        <h2 className="font-titre text-[24px] font-bold leading-tight">Sa fiche</h2>
+        <Repliable titre="Infos et accès" resume={[c.profils.email, c.date_debut ? `début le ${formaterDate(c.date_debut)}` : null].filter(Boolean).join(" · ")}>
+          <FormulaireInfos
+            action={modifierCliente.bind(null, c.id)}
+            valeurs={{ ...c.profils, ...c }}
+            suiviSport={sansSport ? null : (sport?.suivi_sport ?? true)}
+            journal={sansJournal ? null : (jrn?.journal_actif ?? true)}
+          />
+        </Repliable>
+        <Repliable
+          titre="Formule et paiement"
+          resume={resumePaiement}
+          alerte={echeancesEnRetard > 0 ? `${echeancesEnRetard} échéance${echeancesEnRetard > 1 ? "s" : ""} en retard` : undefined}
+          ouvert={paiementEchec === "echec"}
+        >
+          <p className="text-[13.5px] text-texte-2">Ta cliente voit sa formule et son échéancier dans son profil. Ta note reste privée.</p>
+          {paiement ? (
+            <BlocPaiement
+              clienteId={c.id}
+              paiement={paiement.paiement}
+              echeances={paiement.echeances}
+              formules={formules}
+              premiereParDefaut={paiement.echeances[0]?.date_echeance ?? c.date_debut ?? auj}
+              aujourdhui={auj}
+            />
+          ) : (
+            <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0010_formule_paiement_sport.sql (voir le guide).</Message>
+          )}
+        </Repliable>
+        <Repliable titre="Notes privées" resume={notes?.length ? `${notes.length} note${notes.length > 1 ? "s" : ""} · jamais visibles par elle` : "Jamais visibles par la cliente"}>
+          <BlocNotes
+            id={c.id}
+            notes={(notes ?? []).map((n) => ({
+              id: n.id,
+              contenu: n.contenu,
+              date: dateNote.format(new Date(n.created_at)),
+            }))}
+          />
+        </Repliable>
+        <Repliable titre="Repas et cibles" resume={repas?.length ? `${repas.length} repas : ${repas.map((r) => r.libelle).join(", ")}` : "Aucun repas défini"}>
+          <p className="text-[13.5px] text-texte-2">Les cibles de chaque repas de son plan. Les kcal sont calculées automatiquement.</p>
+          <BlocRepas
+            clienteId={c.id}
+            initiaux={(repas ?? []).map((r) => ({
+              type_repas: r.type_repas as string,
+              libelle: r.libelle as string,
+              proteines_g: Number(r.proteines_g),
+              glucides_g: Number(r.glucides_g),
+              lipides_g: Number(r.lipides_g),
+            }))}
+          />
+        </Repliable>
+        <Repliable titre="Aliments exclus" resume={exclusions?.length ? `${exclusions.length} exclusion${exclusions.length > 1 ? "s" : ""}` : "Aucune exclusion"}>
+          <p className="text-[13.5px] text-texte-2">Allergies, aversions, végétarienne… Les recettes concernées ne lui seront pas proposées.</p>
+          <BlocExclusions
+            clienteId={c.id}
+            categories={categoriesAliment}
+            categoriesInitiales={(exclusions ?? []).flatMap((e) => (e.categorie_id ? [e.categorie_id as string] : []))}
+            alimentsInitiaux={(exclusions ?? []).flatMap((e) => {
+              const a = (Array.isArray(e.aliments) ? e.aliments[0] : e.aliments) as { id: string; nom: string } | null;
+              return a ? [{ id: a.id, nom: a.nom }] : [];
+            })}
+          />
+        </Repliable>
+        <Repliable titre="Plans en PDF ou en lien" resume={resumePlans}>
+          <p className="text-[13.5px] text-texte-2">PDF dans l’app, lien Drive ou Nutrium. Les anciennes versions restent consultables.</p>
+          <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />
+          <hr className="border-ligne" />
+          <BlocPlan clienteId={c.id} type="sport" plans={plansAffiches("sport")} />
+        </Repliable>
+        {!sansRappels && (
+          <Repliable
+            titre="Rappels de bilan"
+            resume={`Emails ${prefRappels?.rappels_email === false ? "coupés" : "oui"} · notifications ${appareils ? "activées" : "pas activées"}`}
+          >
+            <ul className="flex flex-col gap-1 text-[14px]">
+              <li>Emails : {prefRappels?.rappels_email === false ? "coupés par elle" : "oui"}</li>
+              <li>Notifications : {appareils ? `activées sur ${appareils} appareil${appareils > 1 ? "s" : ""}` : "pas activées"}</li>
+            </ul>
+            {rappels && rappels.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-ligne text-[13.5px]">
+                {rappels.map((r) => (
+                  <li key={r.id as string} className="flex justify-between gap-3 py-2">
+                    <span>
+                      {r.type === "relance" ? "Relance" : "Bilan ouvert"} · <span className="text-texte-2">{dateCourte.format(new Date(r.envoye_le as string))}</span>
+                    </span>
+                    <span className="text-texte-2">
+                      {(r.canaux as string[]).length ? (r.canaux as string[]).map((x) => (x === "push" ? "notification" : x)).join(" + ") : "aucun canal"}
+                    </span>
                   </li>
                 ))}
               </ul>
+            ) : (
+              <p className="text-[13.5px] text-texte-2">Aucun rappel envoyé pour l’instant.</p>
             )}
-            <Link
-              href={`/coach/clientes/${c.id}/analyse`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme"
-            >
-              Voir l’analyse et les conseils
-            </Link>
-          </Carte>
-          <Carte className="flex flex-col gap-3 border-2 border-accent/40">
-            <h2 className="font-titre text-xl font-bold">Plan alimentaire</h2>
-            <p className="text-[14px] text-texte-2">
-              Ses besoins, puis son plan repas par repas avec les alternatives. Elle le reçoit dans son onglet Nutrition.
-            </p>
-            <Link
-              href={`/coach/clientes/${c.id}/plan-alimentaire`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-medium text-white"
-            >
-              Faire son plan alimentaire
-            </Link>
-          </Carte>
-          <Carte className="flex flex-col gap-3">
-            <h2 className="font-titre text-xl font-bold">Programme sportif</h2>
-            <p className="text-[14px] text-texte-2">
-              Construit avec Claude, collé ici, puis publié dans son onglet Sport.
-            </p>
-            {programmeEnCours && (
-              <ProgrammeEnCours publieLe={programmeEnCours.publie_le} renouvelerLe={programmeEnCours.renouveler_le} />
-            )}
-            {seancesFaites && seancesFaites.length > 0 && (
-              <p className="text-[14px]">
-                <strong className="font-medium">{faitesSemaine}</strong> séance{faitesSemaine > 1 ? "s" : ""} faite{faitesSemaine > 1 ? "s" : ""} ces 7 derniers jours · dernière :{" "}
-                {seancesFaites[0].seance_nom}, {formaterDate(jourParisDe(seancesFaites[0].faite_le), { year: undefined })}
-              </p>
-            )}
-            <Link
-              href={`/coach/clientes/${c.id}/programme-sportif`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
-            >
-              Son programme sportif
-            </Link>
-          </Carte>
-          <Section titre="Connexion">
-            <BlocConnexion id={c.id} prenom={c.profils.prenom} />
-          </Section>
-          <Section titre="Statut">
-            <BlocStatut id={c.id} statut={c.statut} />
-          </Section>
-          {!sansRappels && (
-            <Section titre="Rappels de bilan">
-              <ul className="flex flex-col gap-1 text-[14px]">
-                <li>Emails : {prefRappels?.rappels_email === false ? "coupés par elle" : "oui"}</li>
-                <li>
-                  Notifications :{" "}
-                  {appareils ? `activées sur ${appareils} appareil${appareils > 1 ? "s" : ""}` : "pas activées"}
-                </li>
-              </ul>
-              {rappels && rappels.length > 0 ? (
-                <ul className="flex flex-col divide-y divide-ligne text-[13.5px]">
-                  {rappels.map((r) => (
-                    <li key={r.id as string} className="flex justify-between gap-3 py-2">
-                      <span>
-                        {r.type === "relance" ? "Relance" : "Bilan ouvert"} ·{" "}
-                        <span className="text-texte-2">{dateCourte.format(new Date(r.envoye_le as string))}</span>
-                      </span>
-                      <span className="text-texte-2">
-                        {(r.canaux as string[]).length
-                          ? (r.canaux as string[]).map((x) => (x === "push" ? "notification" : x)).join(" + ")
-                          : "aucun canal"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-[13.5px] text-texte-2">Aucun rappel envoyé pour l’instant.</p>
-              )}
-            </Section>
-          )}
-          <Carte className="flex flex-col gap-3">
-            <h2 className="font-titre text-xl font-bold">Ses recettes</h2>
-            <p className="text-[14px] text-texte-2">
-              Les recettes qu’elle verra pour chaque repas, avec les quantités calculées pour ses cibles.
-            </p>
-            <Link
-              href={`/coach/clientes/${c.id}/recettes`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-chocolat px-5 text-[15px] font-medium text-chocolat"
-            >
-              Aperçu des recettes
-            </Link>
-          </Carte>
-          <Section titre="Zone sensible">
-            <BlocSuppression id={c.id} prenom={c.profils.prenom} />
-          </Section>
-        </div>
+          </Repliable>
+        )}
+        <Repliable titre="Connexion" resume="Renvoyer l’email ou créer un lien à partager">
+          <BlocConnexion id={c.id} prenom={c.profils.prenom} />
+        </Repliable>
+        <Repliable titre="Statut" resume={LIBELLES_STATUT[c.statut]}>
+          <BlocStatut id={c.id} statut={c.statut} />
+        </Repliable>
+        <Repliable titre="Zone sensible" resume="Supprimer la cliente et ses données">
+          <BlocSuppression id={c.id} prenom={c.profils.prenom} />
+        </Repliable>
       </div>
     </div>
   );
 }
 
-function Section({ titre, sousTitre, children }: { titre: string; sousTitre?: string; children: ReactNode }) {
+/** Une rubrique de la fiche, fermée par défaut : le titre et un résumé d'une ligne. */
+function Repliable({
+  titre,
+  resume,
+  alerte,
+  ouvert,
+  children,
+}: {
+  titre: string;
+  resume?: string;
+  alerte?: string;
+  ouvert?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <Carte className="flex flex-col gap-4">
-      <div>
-        <h2 className="font-titre text-xl font-bold">{titre}</h2>
-        {sousTitre && <p className="text-[13.5px] text-texte-2">{sousTitre}</p>}
-      </div>
-      {children}
-    </Carte>
+    <details open={ouvert || undefined} className="group rounded-carte bg-blanc-casse shadow-douce">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3.5 [&::-webkit-details-marker]:hidden">
+        <span className="flex min-w-0 flex-col">
+          <span className="font-titre text-[18px] font-bold leading-tight">{titre}</span>
+          {(resume || alerte) && (
+            <span className="truncate text-[13.5px] text-texte-2">
+              {alerte && <span className="font-medium text-erreur">{alerte}</span>}
+              {alerte && resume ? " · " : ""}
+              {resume}
+            </span>
+          )}
+        </span>
+        <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sable/60 text-texte-2 transition-transform group-open:rotate-180">
+          ⌄
+        </span>
+      </summary>
+      <div className="flex flex-col gap-4 border-t border-ligne px-5 pb-5 pt-4">{children}</div>
+    </details>
+  );
+}
+
+function Chiffre({ libelle, valeur, detail }: { libelle: string; valeur: string; detail?: string }) {
+  return (
+    <div className="flex flex-col rounded-xl bg-creme/10 px-3 py-2.5">
+      <dt className="text-[12.5px] text-texte-clair">{libelle}</dt>
+      <dd className="font-titre text-[17px] font-bold leading-tight">{valeur}</dd>
+      {detail && <dd className="text-[12.5px] text-texte-clair">{detail}</dd>}
+    </div>
   );
 }
 
