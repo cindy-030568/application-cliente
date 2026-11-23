@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { IconeVideo } from "@/components/icones";
 import { Bouton, Message, cx } from "@/components/ui";
 import { cleExercice, type Exercice, type Seance } from "@/lib/programme-sportif";
+import { ajouterAFile, estCoupureReseau, nouvelId } from "@/lib/hors-connexion";
 import {
   RESSENTIS,
   chargeProposee,
@@ -60,7 +61,9 @@ type Proprietes = {
   retour: string;
   videos?: Record<string, string>;
   lienVideo?: string | null;
-  valider?: (infos: Infos) => Promise<Resultat>;
+  valider?: (infos: Infos, ref?: string | null) => Promise<Resultat>;
+  /** Sans réseau (salle en sous-sol) : séance et poids gardés sur le téléphone, envoyés au retour du réseau. */
+  horsConnexion?: { programmeId: string; seance: number; nom: string };
   /** Poids notés les fois précédentes, par exercice. */
   historique?: HistoriqueCharges;
   /** Enregistre les poids de la séance (absent = aperçu coach : rien n'est enregistré). */
@@ -81,7 +84,7 @@ function lireSauvegarde(stockage: string, n: number): Etat | null {
   return null;
 }
 
-function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, historique = {}, noterCharges }: Proprietes) {
+function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, historique = {}, noterCharges, horsConnexion }: Proprietes) {
   const etapes = useMemo(() => etapesSeance(seance), [seance]);
   const n = etapes.length;
   const stockage = `seance-guidee:${cle}`;
@@ -136,15 +139,23 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
   };
   const envoyer = (ref: string, aEnvoyer: [string, Charge][]) => {
     if (!noterCharges || !aEnvoyer.length) return Promise.resolve(true);
-    return noterCharges(
-      ref,
-      aEnvoyer.map(([, c]) => ({ exercice: c.nom, serie: c.serie, kg: c.kg })),
-    )
+    const lignes = aEnvoyer.map(([, c]) => ({ exercice: c.nom, serie: c.serie, kg: c.kg }));
+    const marquer = () =>
+      setEtat((x) => ({ ...x, charges: Object.fromEntries(Object.entries(x.charges).map(([k, c]) => [k, aEnvoyer.some(([j]) => j === k) ? { ...c, envoye: true } : c])) }));
+    // Sans réseau : les poids sont gardés sur le téléphone et repartiront tout seuls.
+    const garder = () => {
+      if (!horsConnexion) return false;
+      ajouterAFile({ id: nouvelId(), type: "charges", programmeId: horsConnexion.programmeId, ref, lignes });
+      marquer();
+      return true;
+    };
+    if (horsConnexion && typeof navigator !== "undefined" && navigator.onLine === false) return Promise.resolve(garder());
+    return noterCharges(ref, lignes)
       .then((ok) => {
-        if (ok) setEtat((x) => ({ ...x, charges: Object.fromEntries(Object.entries(x.charges).map(([k, c]) => [k, aEnvoyer.some(([j]) => j === k) ? { ...c, envoye: true } : c])) }));
+        if (ok) marquer();
         return ok;
       })
-      .catch(() => false);
+      .catch((e) => (estCoupureReseau(e) ? garder() : false));
   };
   const serieFaite = (e: EtapeSerie) => {
     const { k, texte } = poids(e, etat.index);
@@ -326,8 +337,24 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
           valider={
             valider &&
             (async (infos: Infos) => {
-              await rattraper();
-              return valider(infos);
+              const ref = etat.ref ?? nouvelleRef();
+              // Séance gardée sur le téléphone s'il n'y a pas de réseau.
+              const garder = (): Resultat | null => {
+                if (!horsConnexion) return null;
+                ajouterAFile({ id: nouvelId(), type: "seance", ...horsConnexion, infos, ref, faiteLe: new Date().toISOString() });
+                return { succes: "Pas de réseau : ta séance est gardée sur ton téléphone. Elle sera envoyée à Cindy dès que le réseau revient 💪" };
+              };
+              if (horsConnexion && typeof navigator !== "undefined" && navigator.onLine === false) {
+                await rattraper();
+                return garder()!;
+              }
+              try {
+                await rattraper();
+                return await valider(infos, ref);
+              } catch (e) {
+                const garde = estCoupureReseau(e) ? garder() : null;
+                return garde ?? { erreur: "La séance n’a pas pu être enregistrée. Réessaie dans un instant." };
+              }
             })
           }
           charges={Object.values(etat.charges)}

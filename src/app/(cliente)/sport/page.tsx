@@ -12,6 +12,7 @@ import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { EnTete } from "../composants";
 import { PagePlan } from "../page-plan";
 import { MarquerProgrammeVu } from "./marquer-vu";
+import { PreparerHorsConnexion } from "@/components/hors-connexion";
 
 export const metadata: Metadata = { title: "Sport" };
 
@@ -19,7 +20,7 @@ const dateLongue = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "lo
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ version?: string; pdf?: string }> }) {
   const { version, pdf } = await searchParams;
-  const { supabase } = await exigerCliente();
+  const { supabase, profil } = await exigerCliente();
   const { count } = await supabase.from("videos").select("id", { count: "exact", head: true });
   const nbVideos = count ?? 0;
   // Son programme planifié passe en ligne dès sa date, même avant la tâche du matin.
@@ -46,6 +47,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
             sousTitre={`${programme.titre} · mis à jour le ${dateLongue.format(new Date(programme.publie_le ?? programme.updated_at))}`}
           />
           {!programme.vu_le && <MarquerProgrammeVu programmeId={programme.id} />}
+          <PreparerHorsConnexion proprietaire={profil.id} nbSeances={programme.contenu.seances.length} />
           <div className="flex flex-col gap-4 px-5 pt-3">
             {(!programme.vu_le || semaine) && (
               <div className="flex flex-wrap items-center gap-2">

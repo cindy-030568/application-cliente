@@ -318,6 +318,12 @@ function routePlanAlim(req, res, u, uid, coach) {
   return null;
 }
 const programmesSportifs = [];
+// Programme en ligne pour Sophie (séance hors connexion) : une séance courte, 1 exercice, 2 séries.
+programmesSportifs.push({ id: "9b000000-0000-4000-8000-0000000000f1", cliente_id: ALICE, titre: "Programme semaines 1 à 6", publie: true, publie_le: new Date(Date.now() - 7 * 864e5).toISOString(), vu_le: new Date().toISOString(),
+  renouveler_le: new Date(Date.now() + 35 * 864e5).toISOString().slice(0, 10), rappel_renouvellement_le: null, debut_le: null, annonce_le: null, created_at: "2026-11-01T08:00:00Z", updated_at: "2026-11-01T08:00:00Z",
+  contenu: { titre: "Programme semaines 1 à 6", duree: "6 semaines", frequence: "2 séances par semaine", conseils: null, seances: [
+    { nom: "Bas du corps", jour: "Lundi", duree: "20 min", echauffement: null, retour_au_calme: null, notes: null, blocs: [{ titre: null, format: null, exercices: [
+      { nom: "Squat goblet", series: "2", repetitions: "10", charge: null, repos: "30 s", tempo: null, consignes: "Dos droit" }] }] }] } });
 const seancesFaites = [];
 // Une séance précédente (il y a 3 jours) pour le rappel « la dernière fois ».
 const chargesSeries = [1, 2, 3, 4].map((serie) => ({ cliente_id: "00000000-0000-0000-0000-00000000000a", seance_ref: "21000000-0000-4000-8000-000000000001", exercice_cle: "squat goblet", exercice_nom: "Squat goblet", serie, charge_kg: serie < 3 ? "12.0" : "14.0", faite_le: new Date(Date.now() - 3 * 864e5 + serie * 60000).toISOString() }));
@@ -382,6 +388,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/contrat") { const b = await corpsJson(req); Object.assign(reglages, b?.actif ? CONTRAT_TEST : { contrat_texte: null, contrat_version: null, contrat_case_renonciation: null }); if (!b?.actif) acceptations.length = 0; return json({ ok: true }); }
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
+  if (u.pathname === "/__test/seances") return json(seancesFaites);
   res.writeHead(404); return res.end();
 }
 /** Même remplacement des variables que la fonction SQL rendre_contrat (version simplifiée pour les tests). */
@@ -601,7 +608,10 @@ http.createServer((req, res) => {
   });
   if (u.pathname === "/rest/v1/seances_faites") return tableCommu(req, res, u, seancesFaites, {
     visibles: coach ? seancesFaites : seancesFaites.filter((x) => x.cliente_id === uid),
-    creer: (b) => ({ id: "5f000000-0000-4000-8000-" + String(seancesFaites.length + 1).padStart(12, "0"), cliente_id: uid, faite_le: new Date().toISOString(), duree_minutes: null, ressenti: null, commentaire: null, ...b }),
+    // Même identifiant de séance (ref_locale) : déjà enregistrée, rien en plus (comme la contrainte unique de la base).
+    creer: (b) => (b.ref_locale && seancesFaites.some((x) => x.cliente_id === uid && x.ref_locale === b.ref_locale)
+      ? { remplace: true }
+      : { id: "5f000000-0000-4000-8000-" + String(seancesFaites.length + 1).padStart(12, "0"), cliente_id: uid, faite_le: new Date().toISOString(), duree_minutes: null, ressenti: null, commentaire: null, ...b }),
   });
   if (u.pathname === "/rest/v1/annonces") return tableCommu(req, res, u, annonces, {
     visibles: coach ? annonces : annonces.filter((a) => a.expire_le > new Date().toISOString()),

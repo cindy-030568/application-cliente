@@ -1,3 +1,4 @@
+import { BoutonDeconnexion } from "@/components/hors-connexion";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IconeDeconnexion, IconeFleche, IconeRetour } from "@/components/icones";
@@ -76,14 +77,9 @@ export default async function PageProfil() {
         </a>
       )}
 
-      <form action="/auth/deconnexion" method="post">
-        <button
-          type="submit"
-          className="inline-flex items-center gap-2 text-[15px] font-medium text-erreur"
-        >
-          <IconeDeconnexion className="size-5" /> Me déconnecter
-        </button>
-      </form>
+      <BoutonDeconnexion className="inline-flex items-center gap-2 text-[15px] font-medium text-erreur">
+        <IconeDeconnexion className="size-5" /> Me déconnecter
+      </BoutonDeconnexion>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { exigerCliente } from "@/lib/auth";
 import { aujourdhuiParis, visiteANoter } from "@/lib/bilan";
 import { encouragementDuJour } from "@/lib/encouragements";
 import { EncouragementDuJour } from "@/components/encouragement";
+import { BandeauHorsConnexion } from "@/components/hors-connexion";
 import { accesCommunaute } from "@/lib/communaute-serveur";
 import { lireSuiviSport } from "@/lib/paiements-serveur";
 import { EnregistrementServiceWorker } from "@/components/pwa";
@@ -15,7 +16,12 @@ export default async function LayoutCliente({ children }: { children: React.Reac
   const jour = aujourdhuiParis();
   return (
     <>
-      <div className="pb-onglets mx-auto min-h-dvh w-full max-w-lg">{children}</div>
+      <div className="pb-onglets mx-auto min-h-dvh w-full max-w-lg">
+        <div className="px-5">
+          <BandeauHorsConnexion />
+        </div>
+        {children}
+      </div>
       <BarreOnglets communaute={communaute ? { nonLus: communaute.nonLus } : null} sport={sport} />
       <EnregistrementServiceWorker />
       <EncouragementDuJour jour={jour} phrase={encouragementDuJour(jour)} />

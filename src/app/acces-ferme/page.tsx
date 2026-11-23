@@ -1,3 +1,4 @@
+import { BoutonDeconnexion } from "@/components/hors-connexion";
 import type { Metadata } from "next";
 import { Logo } from "@/components/ui";
 
@@ -14,11 +15,7 @@ export default function PageAccesFerme() {
           reprendre un accompagnement, écris directement à Cindy : elle sera ravie d’avoir de tes
           nouvelles.
         </p>
-        <form action="/auth/deconnexion" method="post">
-          <button className="underline underline-offset-4" type="submit">
-            Me déconnecter
-          </button>
-        </form>
+        <BoutonDeconnexion className="underline underline-offset-4">Me déconnecter</BoutonDeconnexion>
       </div>
     </main>
   );
