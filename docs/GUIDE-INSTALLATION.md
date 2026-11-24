@@ -1324,3 +1324,62 @@ Sur sa fiche, **« Voir son bilan de fin tel qu'elle le voit »** ouvre un aper�
 2. Ouvre ce lien dans une fenêtre de navigation privée : à la dernière page, la question « Code de parrainage » est déjà remplie.
 3. Envoie le formulaire avec un email de test : la fiche à valider affiche « Parrainée par… ».
 4. Pour l'avis : **Profil** → **Laisser un témoignage**, coche la case de publication, choisis le nom, envoie, puis regarde le menu **Avis**.
+
+---
+
+# Séances express, défis du mois, fiches audio
+
+## Phase 1 : séances express (séances de secours à la carte)
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0040_seances_express.sql`](../supabase/migrations/0040_seances_express.sql)
+
+### 2. Créer tes séances express
+
+Menu **Séances express** (côté coach).
+
+1. **Préparer la séance avec Claude** :
+   - « **Copier la consigne** » : colle-la dans Claude, décris la séance voulue (par exemple « 15 min de renfo à la maison, sans matériel, pour une débutante »), puis dis « format application ».
+   - Ou « **Copier le message pour une séance déjà écrite** » : colle-le dans Claude avec ta séance en PDF ou en texte, et il la retranscrit fidèlement.
+2. **Nouvelle séance** :
+   - colle la réponse de Claude ;
+   - choisis le titre, la petite description, la durée (5, 10, 15, 20 ou 30 min), le type, le niveau (tous niveaux, débutante, intermédiaire, confirmée) et le matériel (rien de coché = sans matériel) ;
+   - choisis qui peut la voir : toutes les clientes, ou certaines.
+3. Elle arrive en **brouillon**. Clique sur « **▶ Tester le mode séance** » pour la faire comme ta cliente, puis sur **Publier**.
+4. Pour la modifier : « Copier pour la modifier avec Claude », puis recolle sa réponse dans « Nouvelle version ».
+
+La **liste du matériel** et la **liste des types** se modifient dans **Réglages → Séances express** (une valeur par ligne).
+
+### 3. Pour tes clientes
+
+- **Qui y a accès** : toutes tes clientes en cours de suivi, même sans suivi sportif. Pour une cliente au **suivi terminé** : seulement jusqu'à la date que tu choisis sur sa fiche (rubrique **Séances express** → « Accès après la fin de son suivi, jusqu'au »). Laisse vide pour couper l'accès. Plus tard, l'abonnement Stripe remplira cette date tout seul après chaque paiement.
+- Elles les trouvent :
+  - avec le lien « **Pas le temps aujourd'hui ?** » sur leur accueil et dans l'onglet Sport ;
+  - ou directement à l'adresse /seances-express.
+- **Filtres** : durée, type, sans matériel ou « J'ai : tapis, haltères… », et **♥ Mes favoris**.
+- « **▶ C'est parti** » lance le **mode séance guidée** habituel : minuteur, repos, poids notés.
+- **Sans réseau** : une séance express ouverte une fois avec du réseau marche ensuite sans réseau, comme le programme. Elle est envoyée toute seule au retour du réseau.
+
+### 4. Le suivi
+
+- Une séance express faite est enregistrée comme « **séance libre** », à part du programme. Elle ne change rien au suivi des séances prévues du programme.
+- Sur la fiche → **Programme sportif**, elle apparaît dans les séances faites avec l'étiquette « ⚡ Séance express ».
+- Sur la fiche, la rubrique **Séances express** donne le nombre de séances express faites.
+- Dans l'**analyse**, elles sont comptées à part. Si elle fait des séances express mais pas son programme, l'analyse te le signale.
+- Elles comptent dans la **régularité**, les **victoires** et le **récap de la semaine**.
+- Tu reçois la notification « Séance faite » comme pour une séance du programme.
+
+### 5. Tester
+
+1. Crée une séance express, teste-la avec « ▶ Tester le mode séance », puis publie-la.
+2. Connecte-toi avec une cliente de test :
+   - le lien « Pas le temps aujourd'hui ? » apparaît sur son accueil ;
+   - filtre par durée, mets la séance en favori, puis « ▶ C'est parti » et valide la séance ;
+   - sur sa fiche → Programme sportif, la séance apparaît avec « ⚡ Séance express ».
+3. **Sur ton iPhone** (app installée) :
+   - ouvre une séance express avec du réseau, puis active le mode avion ;
+   - ferme et rouvre l'app, puis rouvre la même séance : elle marche ;
+   - valide-la, coupe le mode avion et rouvre l'app : elle est envoyée.

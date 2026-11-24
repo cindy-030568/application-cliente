@@ -7,7 +7,7 @@ import { lireBesoins, lirePlansAlimentaires, type Besoins } from "./plan-aliment
 import { jourParisDe } from "./programme-sportif";
 import { lireProgrammes } from "./programme-sportif-serveur";
 import { regrouperCharges } from "./seance-guidee";
-import { lireCharges, lireSeancesFaites } from "./seances-faites-serveur";
+import { estSeanceExpress, lireCharges, lireSeancesFaites } from "./seances-faites-serveur";
 import { chargerBilans, chargerChamps } from "./suivi";
 
 type Fiche = {
@@ -154,7 +154,9 @@ export async function chargerAnalyse(
     ressentis,
     journal: journal.map(({ jour, sommeil, hydratation, pas, stress, digestion }) => ({ jour, sommeil, hydratation, pas, stress, digestion })),
     programme: programme ? { depuis: jourParisDe(programme.publie_le ?? programme.updated_at), seancesParSemaine: Math.max(1, Math.min(7, programme.contenu.seances.length)) } : null,
-    seancesFaites: (seances ?? []).map((s) => jourParisDe(s.faite_le)),
+    // Les séances express (séances libres) ne faussent pas le suivi du programme : comptées à part.
+    seancesFaites: (seances ?? []).filter((s) => !estSeanceExpress(s)).map((s) => jourParisDe(s.faite_le)),
+    seancesExpress: (seances ?? []).filter(estSeanceExpress).map((s) => jourParisDe(s.faite_le)),
     charges: Object.entries(historique).map(([cle, sessions]) => ({
       exercice: nomExercice.get(cle) ?? cle,
       seances: [...sessions].reverse().map((s) => ({ date: jourParisDe(s.date), max: Math.max(...s.series.map((x) => x.kg)) })),

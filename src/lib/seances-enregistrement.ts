@@ -5,6 +5,7 @@ import { detecterAlerte } from "@/lib/alertes-notes";
 import { notifierCoach } from "@/lib/notifications-coach";
 import { cleExercice, type Programme } from "@/lib/programme-sportif";
 import { lireMonProgramme } from "@/lib/programme-sportif-serveur";
+import { lireSeanceExpress } from "@/lib/seances-express-serveur";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type InfosSeance = { dureeMinutes: number | null; ressenti: number | null; commentaire: string };
@@ -63,6 +64,39 @@ export async function enregistrerSeance(
   return { ok: true, nouveau: true, nom: ligne.seance_nom };
 }
 
+/**
+ * Enregistre une séance express (« séance libre ») : à part des séances du programme (programme_id vide).
+ * Le nom vient de la bibliothèque (RLS : seulement une séance qui lui est destinée), sinon celui gardé sur le téléphone.
+ */
+export async function enregistrerSeanceExpress(
+  supabase: SupabaseClient,
+  clienteId: string,
+  p: { seanceExpressId: string; infos: InfosSeance; ref?: string | null; faiteLe?: string | null; nomSecours?: string | null },
+): Promise<{ ok: true; nouveau: boolean; nom: string } | { erreur: string; definitif: boolean }> {
+  if (!UUID.test(p.seanceExpressId)) return { erreur: "Séance introuvable.", definitif: true };
+  const s = await lireSeanceExpress(supabase, p.seanceExpressId);
+  const nom = s?.titre ?? (p.nomSecours?.trim() || undefined);
+  if (!nom) return { erreur: "Cette séance express n’est plus disponible : elle n’a pas pu être enregistrée.", definitif: true };
+  const duree = p.infos.dureeMinutes !== null && Number.isFinite(p.infos.dureeMinutes) ? Math.min(Math.max(Math.round(p.infos.dureeMinutes), 0), 600) : null;
+  const ressenti = p.infos.ressenti !== null && [1, 2, 3, 4, 5].includes(p.infos.ressenti) ? p.infos.ressenti : null;
+  const ligne = {
+    cliente_id: clienteId,
+    programme_id: null,
+    seance_express_id: s ? p.seanceExpressId : null,
+    seance_nom: nom.slice(0, 100),
+    duree_minutes: duree,
+    ressenti,
+    commentaire: String(p.infos.commentaire ?? "").trim().slice(0, 500) || null,
+    faite_le: heureSeance(p.faiteLe),
+  };
+  const ref = p.ref && UUID.test(p.ref) ? p.ref : null;
+  const { data, error } = ref
+    ? await supabase.from("seances_faites").upsert({ ...ligne, ref_locale: ref }, { onConflict: "cliente_id,ref_locale", ignoreDuplicates: true }).select("id")
+    : await supabase.from("seances_faites").insert(ligne).select("id");
+  if (error) return erreurSeance(error.code);
+  return { ok: true, nouveau: (data ?? []).length > 0, nom: ligne.seance_nom };
+}
+
 function erreurSeance(code: string): { erreur: string; definitif: boolean } {
   // Avant la mise à jour 0019 : rien ne casse.
   if (["42P01", "PGRST205"].includes(code)) return { erreur: "L’enregistrement des séances n’est pas encore activé. Bravo quand même ! 💪", definitif: true };
@@ -72,8 +106,9 @@ function erreurSeance(code: string): { erreur: string; definitif: boolean } {
 }
 
 /** Poids notés pendant une séance (même séance + même série = mise à jour : renvoyer ne crée pas de doublon). */
-export async function enregistrerCharges(supabase: SupabaseClient, clienteId: string, programmeId: string, seanceRef: string, lignes: ChargeNotee[]) {
-  if (!UUID.test(seanceRef) || !UUID.test(programmeId) || !Array.isArray(lignes)) return { ok: false, definitif: true };
+export async function enregistrerCharges(supabase: SupabaseClient, clienteId: string, programmeId: string | null, seanceRef: string, lignes: ChargeNotee[]) {
+  // programmeId vide : séance express (les poids comptent quand même dans sa progression).
+  if (!UUID.test(seanceRef) || (programmeId !== null && !UUID.test(programmeId)) || !Array.isArray(lignes)) return { ok: false, definitif: true };
   const propres = lignes
     .slice(0, 100)
     .filter((l) => l && typeof l.exercice === "string" && l.exercice.trim() && Number.isInteger(l.serie) && l.serie >= 1 && l.serie <= 50 && Number.isFinite(l.kg) && l.kg >= 0 && l.kg <= 500)

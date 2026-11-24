@@ -63,7 +63,7 @@ type Proprietes = {
   lienVideo?: string | null;
   valider?: (infos: Infos, ref?: string | null) => Promise<Resultat>;
   /** Sans réseau (salle en sous-sol) : séance et poids gardés sur le téléphone, envoyés au retour du réseau. */
-  horsConnexion?: { programmeId: string; seance: number; nom: string };
+  horsConnexion?: { programmeId: string | null; seance: number; nom: string; seanceExpressId?: string };
   /** Poids notés les fois précédentes, par exercice. */
   historique?: HistoriqueCharges;
   /** Enregistre les poids de la séance (absent = aperçu coach : rien n'est enregistré). */

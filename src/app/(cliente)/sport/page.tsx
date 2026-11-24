@@ -38,6 +38,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
       ])
     : [{}, { count: 0 }, null];
   const semaine = programme ? semaineProgramme(programme.publie_le, programme.renouveler_le, auj) : null;
+  // Séances express (0040) : seulement si elle en a.
+  const { count: nbExpress } = await supabase.from("seances_express").select("id", { count: "exact", head: true });
   return (
     <>
       {programme ? (
@@ -86,6 +88,18 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
         </>
       ) : (
         <PagePlan type="sport" version={version} />
+      )}
+      {(nbExpress ?? 0) > 0 && (
+        <Link
+          href="/seances-express"
+          className="mx-5 mt-6 flex items-center justify-between gap-3 rounded-carte border border-dashed border-caramel-clair px-4 py-3 text-[14.5px]"
+        >
+          <span>
+            <span className="font-medium">Pas le temps aujourd’hui ?</span>{" "}
+            <span className="text-texte-2">Pas de salle, en déplacement ? Fais une séance express de 5 à 30 min ⚡</span>
+          </span>
+          <IconeFleche className="size-4 shrink-0 text-texte-2" />
+        </Link>
       )}
       <section id="videos" className="mx-5 mt-8 flex scroll-mt-6 flex-col gap-3">
         <Surtitre>Vidéos d’exercices</Surtitre>

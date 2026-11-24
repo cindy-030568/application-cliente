@@ -87,6 +87,8 @@ export default async function PageAccueil() {
   ]);
   const nbComplements = complements?.length ?? 0;
   const resteComplements = nbComplements - (complementsPris ?? []).filter((p) => (complements ?? []).some((c) => c.id === p.complement_id)).length;
+  // Séances express (0040) : la RLS ne compte que celles publiées pour elle, si elle y a accès.
+  const { count: nbExpress } = await supabase.from("seances_express").select("id", { count: "exact", head: true });
   // Récap de la semaine : carte du dimanche 18 h au mardi soir (pour les clientes en cours de suivi).
   const recapPret = fiche.statut === "active" && recapRecent(auj, heureParis(new Date())) !== null;
   const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
@@ -267,6 +269,16 @@ export default async function PageAccueil() {
             <Tuile href="/ressources" icone={<IconeRessources className="size-6" />} titre="Ressources" />
           )}
         </div>
+
+        {(nbExpress ?? 0) > 0 && (
+          <Link href="/seances-express" className="flex items-center justify-between gap-3 rounded-carte border border-dashed border-caramel-clair px-4 py-3 text-[14.5px] apparition">
+            <span>
+              <span className="font-medium">Pas le temps aujourd’hui ?</span>{" "}
+              <span className="text-texte-2">Une séance express de 5 à 30 min ⚡</span>
+            </span>
+            <IconeFleche className="size-4 shrink-0 text-texte-2" />
+          </Link>
+        )}
 
         <Link
           href="/recettes"

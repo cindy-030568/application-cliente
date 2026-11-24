@@ -12,6 +12,7 @@ import {
   IconeRecettes,
   IconeReglages,
   IconeRessources,
+  IconeSport,
   IconeSuivi,
   IconeTableau,
   IconeVideo,
@@ -28,6 +29,7 @@ const LIENS = [
   { href: "/coach/recettes", label: "Recettes", Icone: IconeRecettes },
   { href: "/coach/aliments", label: "Aliments", Icone: IconeNutrition },
   { href: "/coach/videos", label: "Vidéos", Icone: IconeVideo },
+  { href: "/coach/seances-express", label: "Séances express", Icone: IconeSport },
   { href: "/coach/ressources", label: "Ressources", Icone: IconeRessources },
   { href: "/coach/reglages", label: "Réglages", Icone: IconeReglages },
 ];

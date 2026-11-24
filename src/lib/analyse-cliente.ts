@@ -48,6 +48,8 @@ export type DonneesAnalyse = {
   /** Programme sportif en ligne : séances prévues par semaine. */
   programme: { depuis: string; seancesParSemaine: number } | null;
   seancesFaites: string[];
+  /** Séances express (séances libres), à part du programme. */
+  seancesExpress?: string[];
   /** Par exercice : charge maximale de chaque séance, de la plus ancienne à la plus récente. */
   charges: { exercice: string; seances: { date: string; max: number }[] }[];
 };
@@ -586,7 +588,21 @@ export function analyserCliente(d: DonneesAnalyse): Analyse {
       seancesParSemaine = faites28 / (joursProgramme / 7);
       const prevues = d.programme.seancesParSemaine;
       const faites14 = d.seancesFaites.filter((x) => joursEntre(x, auj) < 14 && joursEntre(x, auj) >= 0).length;
-      if (faites14 === 0) {
+      const express14 = (d.seancesExpress ?? []).filter((x) => joursEntre(x, auj) < 14 && joursEntre(x, auj) >= 0).length;
+      if (faites14 === 0 && express14 > 0) {
+        ajouter({
+          id: "seances-express-a-la-place",
+          niveau: "surveiller",
+          domaine: "Entraînement",
+          titre: "Des séances express, mais pas son programme",
+          constat: `${express14} séance${express14 > 1 ? "s" : ""} express ces 2 dernières semaines, aucune séance de son programme (${prevues} prévue${prevues > 1 ? "s" : ""} par semaine).`,
+          actions: [
+            "La féliciter d’avoir bougé quand même : c’est exactement le but des séances express.",
+            "Lui demander ce qui bloque pour son programme (temps, lieu, matériel) et l’adapter si besoin.",
+          ],
+          lien: lienSport,
+        });
+      } else if (faites14 === 0) {
         ajouter({
           id: "plus-de-seances",
           niveau: "important",
@@ -621,6 +637,19 @@ export function analyserCliente(d: DonneesAnalyse): Analyse {
         });
       }
     }
+  }
+
+  // ---------- Séances express (à part du programme)
+  const express28 = (d.seancesExpress ?? []).filter((x) => joursEntre(x, auj) < 28 && joursEntre(x, auj) >= 0).length;
+  if (express28 >= 3) {
+    ajouter({
+      id: "seances-express",
+      niveau: "bravo",
+      domaine: "Entraînement",
+      titre: "Elle utilise les séances express",
+      constat: `${express28} séances express ces 4 dernières semaines, en plus de son programme.`,
+      actions: ["La féliciter : même courtes, ces séances entretiennent la régularité."],
+    });
   }
 
   const plateaux: string[] = [];

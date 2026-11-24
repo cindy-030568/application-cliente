@@ -13,6 +13,7 @@ import { NotificationsCoach } from "./notifications";
 import { FormulaireContrat, InterrupteurBrouillon, type ReglagesContrat } from "./contrat";
 import { FormulaireFinSuivi } from "./fin";
 import { FormulaireLienInscription } from "../avis/boutons";
+import { FormulaireListesExpress } from "../seances-express/reglages";
 import { lireOffres } from "@/lib/bilan-fin";
 
 export const metadata: Metadata = { title: "Réglages" };
@@ -31,6 +32,7 @@ export default async function PageReglages() {
     { data: brouillon, error: sans0028 },
     { data: fin, error: sans0038 },
     { data: inscription, error: sans0039 },
+    { data: express, error: sans0040 },
   ] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
@@ -52,6 +54,8 @@ export default async function PageReglages() {
     supabase.from("reglages").select("fin_texte, fin_offres").maybeSingle<{ fin_texte: string; fin_offres: unknown }>(),
     // Parrainage (0039) : lien du formulaire d'inscription.
     supabase.from("reglages").select("lien_inscription").maybeSingle<{ lien_inscription: string | null }>(),
+    // Séances express (0040) : listes de matériel et de types.
+    supabase.from("reglages").select("express_materiel, express_types").maybeSingle<{ express_materiel: string[]; express_types: string[] }>(),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -110,6 +114,19 @@ export default async function PageReglages() {
           <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0038_bilan_fin.sql (voir le guide).</Message>
         ) : (
           <FormulaireFinSuivi texte={fin.fin_texte} offres={lireOffres(fin.fin_offres)} />
+        )}
+      </Carte>
+      <Carte id="seances-express" className="flex scroll-mt-6 flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Séances express</h2>
+          <p className="text-[14px] text-texte-2">
+            Le matériel et les types proposés quand tu crées une séance express. Tes clientes s’en servent comme filtres.
+          </p>
+        </div>
+        {sans0040 || !express ? (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0040_seances_express.sql (voir le guide).</Message>
+        ) : (
+          <FormulaireListesExpress materiel={express.express_materiel} types={express.express_types} />
         )}
       </Carte>
       <Carte className="flex flex-col gap-4">

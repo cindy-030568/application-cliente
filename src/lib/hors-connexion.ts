@@ -14,14 +14,17 @@ export type ElementFile =
   | {
       id: string;
       type: "seance";
-      programmeId: string;
+      /** Vide pour une séance express. */
+      programmeId: string | null;
       seance: number;
+      /** Séance express (séance libre), à part du programme. */
+      seanceExpressId?: string;
       nom: string;
       infos: { dureeMinutes: number | null; ressenti: number | null; commentaire: string };
       ref: string;
       faiteLe: string;
     }
-  | { id: string; type: "charges"; programmeId: string; ref: string; lignes: { exercice: string; serie: number; kg: number }[] };
+  | { id: string; type: "charges"; programmeId: string | null; ref: string; lignes: { exercice: string; serie: number; kg: number }[] };
 
 type Stockage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 const stockageParDefaut = (): Stockage | null => {

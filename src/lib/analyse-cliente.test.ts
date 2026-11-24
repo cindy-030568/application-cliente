@@ -133,6 +133,16 @@ describe("récupération, activité, entraînement, suivi", () => {
     const toutes = Array.from({ length: 12 }, (_, i) => ajouterJours(AUJ, -2 * i - 1));
     expect(ids({ programme, seancesFaites: toutes })).toContain("bravo-sport");
   });
+  it("séances express : comptées à part, sans fausser le suivi du programme", () => {
+    const programme = { depuis: "2026-10-01", seancesParSemaine: 3 };
+    const express = [ajouterJours(AUJ, -2), ajouterJours(AUJ, -5), ajouterJours(AUJ, -9)];
+    const r = ids({ programme, seancesFaites: ["2026-11-01"], seancesExpress: express });
+    expect(r).toContain("seances-express-a-la-place");
+    expect(r).not.toContain("plus-de-seances");
+    expect(r).toContain("seances-express");
+    // Elles ne comptent pas comme des séances du programme.
+    expect(ids({ programme, seancesFaites: [], seancesExpress: Array.from({ length: 12 }, (_, i) => ajouterJours(AUJ, -2 * i - 1)) })).not.toContain("bravo-sport");
+  });
   it("charges : plateau et progrès", () => {
     const charges = [
       { exercice: "Squat goblet", seances: [{ date: "2026-10-20", max: 12 }, { date: "2026-11-02", max: 16 }, { date: "2026-11-10", max: 16 }, { date: "2026-11-20", max: 16 }] },

@@ -1,6 +1,7 @@
 /*
  * Service worker fitw_cindy : notifications, et séance sans réseau.
- * Seuls sont gardés sur le téléphone : l'onglet Sport (programme en cours), les pages de séance guidée
+ * Seuls sont gardés sur le téléphone : l'onglet Sport (programme en cours), les pages de séance guidée,
+ * les séances express déjà ouvertes
  * et les fichiers techniques de l'app (/_next/static). Jamais les bilans, photos, mesures ni autres pages.
  * Tout est effacé à la déconnexion (/auth/deconnexion) et par l'app (src/lib/hors-connexion.ts).
  */
@@ -12,7 +13,12 @@ self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 /** Pages gardées pour la séance sans réseau. */
-const pageSport = (chemin) => chemin === "/sport" || /^\/seance\/\d{1,2}$/.test(chemin);
+const pageSport = (chemin) =>
+  chemin === "/sport" ||
+  /^\/seance\/\d{1,2}$/.test(chemin) ||
+  // Séances express : la liste et chaque séance ouverte une fois avec du réseau.
+  chemin === "/seances-express" ||
+  /^\/seance\/express\/[0-9a-f-]{36}$/.test(chemin);
 
 const effacer = () => Promise.all([caches.delete(CACHE_SPORT), caches.delete(CACHE_STATIQUE)]);
 
@@ -49,7 +55,7 @@ async function sport(requete, chemin, navigation) {
     if (garde) return garde;
     if (!navigation) throw erreur;
     return new Response(
-      '<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors connexion</title><body style="font-family:system-ui;background:#f5ecdc;color:#3b2314;padding:32px;text-align:center"><h1>Pas de réseau</h1><p>Cette page n’est pas disponible hors connexion. Ton programme sportif et tes séances le sont, si tu as ouvert l’onglet Sport avec du réseau auparavant.</p><p><a href="/sport" style="color:#d6336c">Mon programme sportif</a></p></body></html>',
+      '<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors connexion</title><body style="font-family:system-ui;background:#f5ecdc;color:#3b2314;padding:32px;text-align:center"><h1>Pas de réseau</h1><p>Cette page n’est pas disponible hors connexion. Ton programme sportif, tes séances et les séances express déjà ouvertes le sont, si tu les as ouverts avec du réseau auparavant.</p><p><a href="/sport" style="color:#d6336c">Mon programme sportif</a></p></body></html>',
       { status: 503, headers: { "content-type": "text/html; charset=utf-8" } },
     );
   }

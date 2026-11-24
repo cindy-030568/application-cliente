@@ -1,6 +1,6 @@
 import { Carte, Message } from "@/components/ui";
 import { RESSENTIS, formaterKg, regrouperCharges, type LigneCharge, type SeanceCharges } from "@/lib/seance-guidee";
-import type { SeanceFaite } from "@/lib/seances-faites-serveur";
+import { estSeanceExpress, type SeanceFaite } from "@/lib/seances-faites-serveur";
 
 const date = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
 
@@ -10,7 +10,7 @@ export function SeancesFaites({ seances, prenom }: { seances: SeanceFaite[] | nu
     <Carte className="flex flex-col gap-4">
       <div>
         <h2 className="font-titre text-xl font-bold">Séances faites</h2>
-        <p className="text-[14px] text-texte-2">Validées par {prenom} à la fin du mode séance, avec son ressenti.</p>
+        <p className="text-[14px] text-texte-2">Validées par {prenom} à la fin du mode séance, avec son ressenti. Les séances express (⚡) sont à part de son programme.</p>
       </div>
       {seances === null ? (
         <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0019_seances_faites.sql (voir le guide).</Message>
@@ -27,6 +27,7 @@ export function SeancesFaites({ seances, prenom }: { seances: SeanceFaite[] | nu
                   <span className="text-[13px] text-texte-2">{date.format(new Date(s.faite_le))}</span>
                 </span>
                 <span className="flex flex-wrap gap-1.5 text-[12.5px]">
+                  {estSeanceExpress(s) && <span className="rounded-full bg-accent-pale px-2 py-0.5 font-medium">⚡ Séance express</span>}
                   {s.duree_minutes !== null && <span className="rounded-full bg-sable/70 px-2 py-0.5">{s.duree_minutes} min</span>}
                   {r && (
                     <span className="rounded-full bg-sable/70 px-2 py-0.5">

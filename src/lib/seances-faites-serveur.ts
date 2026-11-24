@@ -11,20 +11,32 @@ export type SeanceFaite = {
   duree_minutes: number | null;
   ressenti: number | null;
   commentaire: string | null;
+  /** Séance express (« séance libre ») : à part des séances du programme. Absent avant la mise à jour 0040. */
+  seance_express_id?: string | null;
 };
 
 /** Séances faites (les plus récentes d'abord). null tant que la mise à jour 0019 n'est pas faite. */
 export async function lireSeancesFaites(supabase: SupabaseClient, options: { clienteId?: string; programmeId?: string; limite?: number } = {}): Promise<SeanceFaite[] | null> {
-  let requete = supabase
-    .from("seances_faites")
-    .select("id, cliente_id, programme_id, seance_nom, faite_le, duree_minutes, ressenti, commentaire")
-    .order("faite_le", { ascending: false })
-    .limit(options.limite ?? 50);
-  if (options.clienteId) requete = requete.eq("cliente_id", options.clienteId);
-  if (options.programmeId) requete = requete.eq("programme_id", options.programmeId);
-  const { data, error } = await requete.returns<SeanceFaite[]>();
-  return error ? null : (data ?? []);
+  const lire = (colonnes: string) => {
+    let requete = supabase
+      .from("seances_faites")
+      .select(colonnes)
+      .order("faite_le", { ascending: false })
+      .limit(options.limite ?? 50);
+    if (options.clienteId) requete = requete.eq("cliente_id", options.clienteId);
+    if (options.programmeId) requete = requete.eq("programme_id", options.programmeId);
+    return requete.returns<SeanceFaite[]>();
+  };
+  const base = "id, cliente_id, programme_id, seance_nom, faite_le, duree_minutes, ressenti, commentaire";
+  // Avec la colonne des séances express (0040) ; sinon comme avant.
+  const avec = await lire(`${base}, seance_express_id`);
+  if (!avec.error) return avec.data ?? [];
+  const sans = await lire(base);
+  return sans.error ? null : (sans.data ?? []);
 }
+
+/** Séance express (séance libre) ? */
+export const estSeanceExpress = (s: Pick<SeanceFaite, "seance_express_id">) => Boolean(s.seance_express_id);
 
 /** Poids notés pour ces exercices (noms normalisés). null tant que la mise à jour 0021 n'est pas faite. */
 export async function lireCharges(

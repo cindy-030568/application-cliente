@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(),
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(), express_jusqu_au: null,
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -25,7 +25,7 @@ const clientes = [
 ];
 // Sophie termine son suivi dans 5 jours : son bilan de fin de suivi est visible.
 clientes[0].date_fin = iso(new Date(Date.now() + 5 * 86400000));
-const reglages = { lien_inscription: "https://tally.so/r/EkdN0A", fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
+const reglages = { express_materiel: ["Aucun", "Tapis", "Élastique", "Haltères", "Kettlebell", "Chaise ou banc", "Corde à sauter"], express_types: ["Renfo", "Cardio", "Mobilité", "Étirements", "Marche à la maison", "Gainage"], lien_inscription: "https://tally.so/r/EkdN0A", fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
   message_formation: "Envie d'aller plus loin ? Découvre la Fitw_cindy Academy ✨", lien_contact: "https://wa.me/33600000000",
   tolerance_pct: 10, tolerance_g: 3, hors_tolerance: "masquer", rappels_actifs: true, relance_jours: 2, texte_rappel: "Coucou {prenom} ! Ton bilan est prêt : prends 5 minutes pour faire le point 💛", texte_relance: "{prenom}, ton bilan t'attend toujours. Quelques minutes suffisent, même imparfait 💛", fenetre_bilan_jours: 3, intro_bilan: "Voici les points pour faire le point sur ces {jours} derniers jours. Réponds en toute simplicité, avec tes mots à toi. Pas besoin d’être parfaite : ce bilan, c’est ton espace pour faire le point et avancer 💛" };
 const jour = (n) => iso(new Date(Date.now() + n * 86400000));
@@ -305,6 +305,19 @@ if (process.env.ANALYSE_DEMO) {
 for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
   journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
+
+// ---- Séances express (0040)
+const seancesExpress = [
+  { id: "e5000000-0000-4000-8000-000000000001", titre: "Cardio salon sans matériel", description: "Pour les jours où tu n’as que 10 minutes et ton salon.", duree_minutes: 10, materiel: [], type: "Cardio", niveau: "tous", publiee: true, visibilite: "toutes",
+    contenu: { nom: "Cardio salon sans matériel", duree: "10 min", echauffement: null, blocs: [{ titre: "Circuit", format: "2 séries", exercices: [{ nom: "Squats", series: "2", repetitions: "15", repos: "10 s" }, { nom: "Jumping jacks", series: "2", repetitions: "30 s", repos: "10 s" }] }], retour_au_calme: null, notes: null } },
+  { id: "e5000000-0000-4000-8000-000000000002", titre: "Mobilité du dos au tapis", description: null, duree_minutes: 15, materiel: ["Tapis"], type: "Mobilité", niveau: "debutante", publiee: true, visibilite: "toutes",
+    contenu: { nom: "Mobilité du dos au tapis", blocs: [{ titre: "Mobilité", format: "1 série", exercices: [{ nom: "Chat-vache", series: "1", repetitions: "10" }] }] } },
+  { id: "e5000000-0000-4000-8000-000000000003", titre: "Brouillon pas prêt", description: null, duree_minutes: 5, materiel: [], type: "Renfo", niveau: "tous", publiee: false, visibilite: "toutes",
+    contenu: { nom: "Brouillon", blocs: [{ titre: "x", format: "1 série", exercices: [{ nom: "Pompes", series: "1", repetitions: "5" }] }] } },
+];
+const seancesExpressClientes = [];
+const seancesExpressFavoris = [];
+const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.statut === "active" || (c.statut === "terminee" && c.express_jusqu_au && c.express_jusqu_au >= new Date().toISOString().slice(0, 10))); };
 
 // ---- Avis (0039)
 const avisListe = [];
@@ -696,6 +709,18 @@ http.createServer((req, res) => {
       creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
     });
   }
+  if (u.pathname === "/rest/v1/seances_express") {
+    if (!coach && req.method !== "GET" && req.method !== "HEAD") { res.writeHead(403); return res.end(); }
+    return tableCommu(req, res, u, seancesExpress, {
+      visibles: coach ? seancesExpress : seancesExpress.filter((x) => x.publiee && accesExpress(uid) && (x.visibilite === "toutes" || seancesExpressClientes.some((l) => l.seance_id === x.id && l.cliente_id === uid))),
+      creer: (b) => ({ id: "e5000000-0000-4000-8000-" + String(seancesExpress.length + 10).padStart(12, "0"), description: null, materiel: [], niveau: "tous", publiee: false, visibilite: "toutes", ...b }),
+    });
+  }
+  if (u.pathname === "/rest/v1/seances_express_clientes") return tableCommu(req, res, u, seancesExpressClientes, { visibles: coach ? seancesExpressClientes : seancesExpressClientes.filter((x) => x.cliente_id === uid), creer: (b) => (coach ? b : { erreur: "interdit" }) });
+  if (u.pathname === "/rest/v1/seances_express_favoris") return tableCommu(req, res, u, seancesExpressFavoris, {
+    visibles: coach ? seancesExpressFavoris : seancesExpressFavoris.filter((x) => x.cliente_id === uid),
+    creer: (b) => (coach ? { erreur: "interdit" } : seancesExpressFavoris.some((x) => x.cliente_id === uid && x.seance_id === b.seance_id) ? { remplace: true } : { created_at: new Date().toISOString(), ...b, cliente_id: uid }),
+  });
   if (u.pathname === "/rest/v1/avis") return tableCommu(req, res, u, avisListe, {
     visibles: coach ? avisListe : avisListe.filter((x) => x.cliente_id === uid),
     enrichir: (x) => { const c = clientes.find((y) => y.id === x.cliente_id); return { ...x, clientes: c ? { profils: { prenom: c.profils.prenom, nom: c.profils.nom } } : null }; },

@@ -49,8 +49,9 @@ export function BandeauHorsConnexion() {
  * Sur l'onglet Sport, avec du réseau : garde sur le téléphone le programme en cours et chaque séance guidée
  * (et les fichiers nécessaires pour les afficher), pour qu'elles marchent dans une salle sans réseau.
  */
-export function PreparerHorsConnexion({ proprietaire, nbSeances }: { proprietaire: string; nbSeances: number }) {
+export function PreparerHorsConnexion({ proprietaire, nbSeances = 0, pages: autres }: { proprietaire: string; nbSeances?: number; pages?: string[] }) {
   const [, setPret] = useState(false);
+  const liste = autres ? autres.join("|") : null;
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !navigator.onLine) return;
     let annule = false;
@@ -58,7 +59,8 @@ export function PreparerHorsConnexion({ proprietaire, nbSeances }: { proprietair
       await verifierProprietaire(proprietaire);
       await synchroniser();
       await navigator.serviceWorker.ready;
-      const pages = ["/sport", ...Array.from({ length: Math.min(nbSeances, 14) }, (_, i) => `/seance/${i}`)];
+      // Par défaut : l'onglet Sport et les séances du programme. Sinon, les pages données (séances express ouvertes).
+      const pages = liste !== null ? liste.split("|").filter(Boolean) : ["/sport", ...Array.from({ length: Math.min(nbSeances, 14) }, (_, i) => `/seance/${i}`)];
       const fichiers = new Set<string>();
       for (const page of pages) {
         if (annule) return;
@@ -83,7 +85,7 @@ export function PreparerHorsConnexion({ proprietaire, nbSeances }: { proprietair
     return () => {
       annule = true;
     };
-  }, [proprietaire, nbSeances]);
+  }, [proprietaire, nbSeances, liste]);
   return null;
 }
 
