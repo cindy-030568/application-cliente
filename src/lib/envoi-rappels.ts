@@ -7,6 +7,7 @@ import { heureParis, rappelJournalDu } from "@/lib/journal";
 import { SITE_URL } from "@/lib/env";
 import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappel } from "@/lib/rappels";
 import { recapADonner, texteNotificationRecap } from "@/lib/recap-semaine";
+import { rappelComplementsDu, texteRappelComplements } from "@/lib/complements";
 import { chargerRecaps } from "@/lib/recap-semaine-serveur";
 
 /** Ce qui est configuré dans Vercel (sans jamais exposer les valeurs). */
@@ -397,6 +398,63 @@ export async function executerRappelsJournal(admin: SupabaseClient, maintenant =
     let parti = false;
     for (const a of siens) {
       const r = await envoyerPush(a, { titre: "Ton journal du jour 📒", texte: "1 minute pour noter ta journée : sommeil, eau, pas, ressenti 💛", url: "/suivi/journal" });
+      if (r === "ok") parti = true;
+      else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+      else bilan.erreurs++;
+    }
+    if (parti) bilan.rappels++;
+  }
+  return bilan;
+}
+
+// ---------------------------------------------------------------- Rappel des compléments (heure choisie par la cliente)
+
+/**
+ * Rappel discret des compléments, une fois par jour à l'heure choisie par la cliente (appelé toutes
+ * les 15 minutes avec les rappels du journal), seulement s'il lui reste quelque chose à prendre.
+ */
+export async function executerRappelsComplements(admin: SupabaseClient, maintenant = new Date()) {
+  const bilan = { rappels: 0, erreurs: 0 };
+  if (!configurationRappels().push) return bilan;
+  const aujourdhui = aujourdhuiParis();
+  const heure = heureParis(maintenant);
+  const { data: clientes, error } = await admin
+    .from("clientes")
+    .select("id, rappel_complements_heure, rappel_complements_envoye")
+    .neq("statut", "fermee")
+    .not("rappel_complements_heure", "is", null);
+  if (error || !clientes?.length) return bilan; // rien à faire (ou mise à jour 0035 pas encore faite)
+  const ids = clientes.map((c) => c.id as string);
+  const [{ data: complements }, { data: pris }, { data: appareils }] = await Promise.all([
+    admin.from("complements").select("id, cliente_id, nom, ordre").eq("actif", true).in("cliente_id", ids).order("ordre"),
+    admin.from("complements_pris").select("complement_id").eq("jour", aujourdhui).in("cliente_id", ids),
+    admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids),
+  ]);
+  const dejaPris = new Set((pris ?? []).map((p) => p.complement_id as string));
+  for (const c of clientes) {
+    const siens = (appareils ?? []).filter((a) => a.cliente_id === c.id) as AbonnementPush[];
+    const reste = (complements ?? []).filter((x) => x.cliente_id === c.id && !dejaPris.has(x.id as string)).map((x) => x.nom as string);
+    if (!siens.length) continue;
+    const du = rappelComplementsDu({
+      heure: c.rappel_complements_heure as string | null,
+      maintenant: heure,
+      envoyeLe: c.rappel_complements_envoye as string | null,
+      aujourdhui,
+      resteAPrendre: reste.length,
+    });
+    if (!du) continue;
+    // Réservation avant l'envoi : jamais deux rappels le même jour.
+    const { data: reserve } = await admin
+      .from("clientes")
+      .update({ rappel_complements_envoye: aujourdhui })
+      .eq("id", c.id)
+      .or(`rappel_complements_envoye.is.null,rappel_complements_envoye.lt.${aujourdhui}`)
+      .select("id")
+      .maybeSingle();
+    if (!reserve) continue;
+    let parti = false;
+    for (const a of siens) {
+      const r = await envoyerPush(a, { titre: "Tes compléments 🌿", texte: texteRappelComplements(reste), url: "/complements" });
       if (r === "ok") parti = true;
       else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
       else bilan.erreurs++;

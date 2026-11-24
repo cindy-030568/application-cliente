@@ -69,3 +69,21 @@ test("cycle et périménopause : choisis dans le profil, suivis dans le journal"
   await carte.getByRole("button", { name: "Enregistrer" }).click();
   await expect(carte.getByText(/rien n’est suivi/)).toBeVisible();
 });
+
+test("compléments : la cliente voit sa liste, coche, et règle son rappel", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.getByRole("link", { name: /Mes compléments/ }).click();
+  await expect(page.getByRole("heading", { name: "Le matin" })).toBeVisible();
+  const omega = page.getByRole("checkbox", { name: /Oméga 3/ });
+  await omega.check();
+  await expect(page.getByText(/Tout est pris aujourd’hui|Aujourd’hui : 1 sur/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("checkbox", { name: /Oméga 3/ })).toBeChecked();
+  await page.getByText("Me le rappeler chaque jour").click();
+  await expect(page.getByText(/un petit rappel chaque jour à 08 h 00/)).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-complements-cliente.png", fullPage: true });
+  await page.getByRole("checkbox", { name: /Oméga 3/ }).uncheck();
+  await page.reload();
+  await expect(page.getByRole("checkbox", { name: /Oméga 3/ })).not.toBeChecked();
+});

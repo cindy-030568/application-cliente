@@ -1149,6 +1149,7 @@ Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supab
 
 1. [`0033_recap_semaine.sql`](../supabase/migrations/0033_recap_semaine.sql) (récap de la semaine)
 2. [`0034_cycle.sql`](../supabase/migrations/0034_cycle.sql) (cycle et périménopause)
+3. [`0035_complements.sql`](../supabase/migrations/0035_complements.sql) (compléments)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1200,3 +1201,22 @@ Ce que tu vois : sur sa fiche → **Suivi**, un bloc « Son cycle » (jour et ph
 **Données sensibles** : visibles seulement par elle et toi. Une cliente dont l'accès est fermé ne voit plus son journal. L'app ne donne **jamais d'avis médical**. Pense à mentionner ces données (cycle, symptômes) dans ta politique de confidentialité.
 
 **Tester** : avec une cliente de test → **Profil** → **Mon cycle** → « Mon cycle » → **Enregistrer**. Dans son journal, coche « J'ai mes règles » sur un jour récent : le jour du cycle s'affiche. Puis choisis « Ma périménopause » : les symptômes apparaissent dans le journal. Coche-en un, enregistre, et regarde sa fiche → Suivi.
+
+## 5. Compléments
+
+**Pour toi** : sur la fiche de ta cliente → rubrique **Compléments** → « Ajouter un complément » :
+- le **nom** (ex. Magnésium bisglycinate) ;
+- **combien** (ex. 2 gélules) ;
+- **quand** : le matin, le midi, le soir, au coucher, avant ou après le sport, ou à un autre moment ;
+- une **précision** facultative (ex. pendant le repas, cure de 3 mois).
+
+Tu peux **modifier** un complément, le **mettre en pause** sans l'effacer (case « À prendre en ce moment »), ou le **retirer**. Tu vois aussi combien de prises elle a cochées ces 7 derniers jours.
+
+**Pour elle** :
+- sur son accueil, une carte « Mes compléments · 2 à prendre aujourd'hui » ;
+- sa liste du jour, rangée par moment, où elle **coche** ce qu'elle a pris ;
+- un **rappel discret** si elle l'active (« Me le rappeler chaque jour », coupé par défaut) : une notification par jour, à l'heure qu'elle choisit, seulement s'il lui reste quelque chose à prendre. Il part avec les rappels du journal : rien d'autre à mettre en route.
+
+Seule toi ajoutes des compléments ; une cliente ne voit et ne coche que les siens.
+
+**Tester** : sur la fiche d'une cliente de test, ajoute un complément. Connecte-toi avec elle : la carte « Mes compléments » est sur son accueil. Coche-le, puis active le rappel à une heure proche, avec les notifications activées sur le téléphone.

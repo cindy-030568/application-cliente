@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28,
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null,
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -297,6 +297,10 @@ if (process.env.ANALYSE_DEMO) {
 for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
   journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
+
+// ---- Compléments (0035)
+const complementsListe = [{ id: "c0e00000-0000-4000-8000-000000000000", cliente_id: ALICE, nom: "Oméga 3", moment: "matin", quantite: "2 capsules", note: "pendant le petit-déjeuner", ordre: 0, actif: true, created_at: "2026-11-01T08:00:00Z" }];
+const complementsPris = [];
 
 // ---- Plan alimentaire (0015)
 const besoinsClientes = [];
@@ -610,6 +614,7 @@ http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(nouveau));
   });
   if (u.pathname === "/rest/v1/rpc/definir_suivi_cycle") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) Object.assign(c, { suivi_cycle: b?.p_mode, cycle_duree: b?.p_duree }); res.writeHead(204); res.end(); });
+  if (u.pathname === "/rest/v1/rpc/definir_rappel_complements") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.rappel_complements_heure = b?.p_heure ?? null; res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/definir_recap_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.recap_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/mon_contrat_infos") {
     const t = String(reglages.contrat_texte ?? "");
@@ -660,6 +665,14 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/annonces") return tableCommu(req, res, u, annonces, {
     visibles: coach ? annonces : annonces.filter((a) => a.expire_le > new Date().toISOString()),
     creer: (b) => ({ id: "a0000000-0000-4000-8000-" + String(annonces.length + 1).padStart(12, "0"), lien: null, cree_le: new Date().toISOString(), expire_le: new Date(Date.now() + 86400000).toISOString(), ...b }),
+  });
+  if (u.pathname === "/rest/v1/complements") return tableCommu(req, res, u, complementsListe, {
+    visibles: coach ? complementsListe : complementsListe.filter((x) => x.cliente_id === uid),
+    creer: (b) => (coach ? { id: "c0e00000-0000-4000-8000-" + String(complementsListe.length + 10).padStart(12, "0"), note: null, ordre: 0, actif: true, created_at: new Date().toISOString(), ...b } : { erreur: "interdit" }),
+  });
+  if (u.pathname === "/rest/v1/complements_pris") return tableCommu(req, res, u, complementsPris, {
+    visibles: coach ? complementsPris : complementsPris.filter((x) => x.cliente_id === uid),
+    creer: (b) => (complementsPris.some((x) => x.complement_id === b.complement_id && x.jour === b.jour) ? { remplace: true } : { pris_le: new Date().toISOString(), ...b, cliente_id: uid }),
   });
   if (u.pathname === "/rest/v1/journal_quotidien") return tableCommu(req, res, u, journal, {
     visibles: coach ? journal : journal.filter((j) => j.cliente_id === uid),

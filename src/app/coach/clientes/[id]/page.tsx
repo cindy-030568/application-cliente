@@ -16,6 +16,8 @@ import { BlocConnexion, BlocNotes, BlocStatut, BlocSuppression } from "./blocs";
 import { BlocPlan, type PlanAffiche } from "./bloc-plans";
 import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
 import { BlocPaiement } from "./bloc-paiement";
+import { BlocComplements } from "./bloc-complements";
+import type { Complement } from "@/lib/complements";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
 import { chargerCategoriesAliment } from "@/lib/aliments";
 import { echeanceRenouvellement, jourParisDe, semaineProgramme } from "@/lib/programme-sportif";
@@ -92,6 +94,11 @@ export default async function PageFicheCliente({
     lirePaiement(supabase, id),
     formulesUtilisees(supabase),
     supabase.from("clientes").select("suivi_sport").eq("id", id).maybeSingle<{ suivi_sport: boolean }>(),
+  ]);
+  // Compléments (0035) : lus à part, rien avant la mise à jour.
+  const [{ data: complements, error: sansComplements }, { count: prisSemaine }] = await Promise.all([
+    supabase.from("complements").select("id, nom, moment, quantite, note, ordre, actif").eq("cliente_id", id).order("ordre").returns<Complement[]>(),
+    supabase.from("complements_pris").select("complement_id", { count: "exact", head: true }).eq("cliente_id", id).gte("jour", ajouterJours(aujourdhuiParis(), -6)),
   ]);
   // Contrat accepté (0027) et questionnaire d'arrivée (0031) : lus à part.
   const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }, { data: questionnaire, error: sansQuestionnaire }] = await Promise.all([
@@ -415,6 +422,19 @@ export default async function PageFicheCliente({
             })}
           />
         </Repliable>
+        {!sansComplements && (
+          <Repliable
+            titre="Compléments"
+            resume={
+              complements?.length
+                ? `${complements.filter((x) => x.actif).length} à prendre : ${complements.filter((x) => x.actif).map((x) => x.nom).join(", ") || "aucun en ce moment"}`
+                : "Aucun complément"
+            }
+          >
+            <p className="text-[13.5px] text-texte-2">Quoi prendre, quand et combien. Elle voit sa liste sur son accueil (« Mes compléments ») et coche ce qu’elle a pris.</p>
+            <BlocComplements clienteId={c.id} complements={complements ?? []} prisCetteSemaine={prisSemaine ?? 0} />
+          </Repliable>
+        )}
         <Repliable titre="Plans en PDF ou en lien" resume={resumePlans}>
           <p className="text-[13.5px] text-texte-2">PDF dans l’app, lien Drive ou Nutrium. Les anciennes versions restent consultables.</p>
           <BlocPlan clienteId={c.id} type="nutrition" plans={plansAffiches("nutrition")} />

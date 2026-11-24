@@ -79,6 +79,13 @@ export default async function PageAccueil() {
     supabase.from("journal_quotidien").select("jour").eq("cliente_id", profil.id).eq("jour", auj).maybeSingle(),
   ]);
   const rappelJournal = avecJournal && !sansJournal && !journeeDuJour;
+  // Compléments du jour (0035) : rien avant la mise à jour ou sans compléments.
+  const [{ data: complements }, { data: complementsPris }] = await Promise.all([
+    supabase.from("complements").select("id").eq("actif", true),
+    supabase.from("complements_pris").select("complement_id").eq("jour", auj),
+  ]);
+  const nbComplements = complements?.length ?? 0;
+  const resteComplements = nbComplements - (complementsPris ?? []).filter((p) => (complements ?? []).some((c) => c.id === p.complement_id)).length;
   // Récap de la semaine : carte du dimanche 18 h au mardi soir (pour les clientes en cours de suivi).
   const recapPret = fiche.statut === "active" && recapRecent(auj, heureParis(new Date())) !== null;
   const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
@@ -171,6 +178,21 @@ export default async function PageAccueil() {
             <span className="flex flex-1 flex-col">
               <span className="font-medium">Mon journal du jour</span>
               <span className="text-[14px] text-texte-2">Sommeil, eau, pas, ressenti : 1 minute 💛</span>
+            </span>
+            <IconeFleche className="size-5 shrink-0 text-texte-2" />
+          </Link>
+        )}
+
+        {nbComplements > 0 && (
+          <Link href="/complements" className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce apparition">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sable text-xl" aria-hidden>
+              🌿
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">Mes compléments</span>
+              <span className="text-[14px] text-texte-2">
+                {resteComplements > 0 ? `${resteComplements} à prendre aujourd’hui` : "Tout est pris aujourd’hui ✓"}
+              </span>
             </span>
             <IconeFleche className="size-5 shrink-0 text-texte-2" />
           </Link>

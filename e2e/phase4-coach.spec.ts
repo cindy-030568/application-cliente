@@ -19,3 +19,22 @@ test("périménopause : la coach voit les symptômes notés par sa cliente", asy
   await expect(bloc).toContainText("Bouffées de chaleur · 2 jours");
   await expect(bloc).toContainText("Sueurs nocturnes · 1 jour");
 });
+
+test("compléments : la coach ajoute un complément sur la fiche de sa cliente", async ({ page }) => {
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/clientes/00000000-0000-0000-0000-00000000000a");
+  await page.getByText("Compléments", { exact: true }).click();
+  await page.getByLabel("Complément", { exact: true }).fill("Magnésium bisglycinate");
+  await page.getByLabel("Combien").fill("2 gélules");
+  await page.getByLabel("Quand").selectOption("coucher");
+  await page.getByLabel("Précision (facultatif)").fill("avec un grand verre d’eau");
+  await page.getByRole("button", { name: "Ajouter à sa liste" }).click();
+  await expect(page.getByText("Ajouté à la liste de Sophie ✓")).toBeVisible();
+  await expect(page.getByText("Magnésium bisglycinate").first()).toBeVisible();
+  await page.getByLabel("Complément", { exact: true }).fill("Vitamine D3");
+  await page.getByLabel("Combien").fill("1 goutte");
+  await page.getByRole("button", { name: "Ajouter à sa liste" }).click();
+  await expect(page.getByText("Vitamine D3").first()).toBeVisible();
+  await page.getByText("Vitamine D3").first().scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/phase4-complements-coach.png" });
+});

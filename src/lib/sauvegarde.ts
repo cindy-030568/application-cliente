@@ -24,6 +24,8 @@ export const TABLES_SAUVEGARDEES = [
   "tags", "recettes", "recettes_repas", "recettes_tags", "recette_ingredients", "favoris",
   // Plan alimentaire et programme sportif construits dans l'app
   "besoins_clientes", "plans_alimentaires", "programmes_sportifs", "seances_faites", "charges_series",
+  // Compléments
+  "complements", "complements_pris",
   // Formules, paiements, revenus
   "paiements_clientes", "echeances_paiement", "revenus_divers",
   // Messages, annonces, rappels
