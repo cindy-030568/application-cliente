@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true,
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null,
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -604,6 +604,7 @@ http.createServer((req, res) => {
     }
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(nouveau));
   });
+  if (u.pathname === "/rest/v1/rpc/definir_recap_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.recap_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/mon_contrat_infos") {
     const t = String(reglages.contrat_texte ?? "");
     res.writeHead(200, { "content-type": "application/json" });

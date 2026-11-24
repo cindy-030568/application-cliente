@@ -73,3 +73,18 @@ export async function testerNotification(): Promise<EtatRappels> {
   }
   return ok ? { succes: "Notification envoyée : elle arrive dans quelques secondes." } : { erreur: "La notification n’a pas pu partir. Réessaie plus tard." };
 }
+
+/** Notifications facultatives choisies par la cliente (récap du dimanche…). */
+const PREFERENCES = { recap: "definir_recap_notif" } as const;
+export type Preference = keyof typeof PREFERENCES;
+
+export async function definirPreference(cle: Preference, actif: boolean): Promise<EtatRappels> {
+  const session = await sessionCliente();
+  if (!session) return { erreur: SESSION_EXPIREE };
+  const rpc = PREFERENCES[cle];
+  if (!rpc) return { erreur: "Réglage inconnu." };
+  const { error } = await session.supabase.rpc(rpc, { p_actif: actif === true });
+  if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
+  revalidatePath("/profil");
+  return {};
+}

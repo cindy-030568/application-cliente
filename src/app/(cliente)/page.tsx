@@ -26,6 +26,8 @@ import { encouragementDuJour } from "@/lib/encouragements";
 import { detecterVictoires } from "@/lib/victoires";
 import { chargerDonneesVictoires } from "@/lib/victoires-serveur";
 import { CarteVictoires } from "@/components/victoires";
+import { recapRecent } from "@/lib/recap-semaine";
+import { heureParis } from "@/lib/journal";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -77,6 +79,8 @@ export default async function PageAccueil() {
     supabase.from("journal_quotidien").select("jour").eq("cliente_id", profil.id).eq("jour", auj).maybeSingle(),
   ]);
   const rappelJournal = avecJournal && !sansJournal && !journeeDuJour;
+  // Récap de la semaine : carte du dimanche 18 h au mardi soir (pour les clientes en cours de suivi).
+  const recapPret = fiche.statut === "active" && recapRecent(auj, heureParis(new Date())) !== null;
   const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
   // Petits mots envoyés par Cindy à elle seule ces 14 derniers jours (rien avant la mise à jour 0023).
   const { data: mots } = await supabase
@@ -143,6 +147,19 @@ export default async function PageAccueil() {
               </span>
             </span>
             <IconeFleche className="size-5 shrink-0" />
+          </Link>
+        )}
+
+        {recapPret && (
+          <Link href="/suivi/recap" className="flex items-center gap-4 rounded-carte bg-sable p-4 apparition">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-blanc-casse text-xl" aria-hidden>
+              🌿
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">Ton récap de la semaine est prêt</span>
+              <span className="text-[14px] text-texte-2">Séances, sommeil, pas, eau, et un petit mot 💛</span>
+            </span>
+            <IconeFleche className="size-5 shrink-0 text-texte-2" />
           </Link>
         )}
 

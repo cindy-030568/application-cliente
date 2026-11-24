@@ -9,6 +9,7 @@ import { lireMonPaiement } from "@/lib/paiements-serveur";
 import { CarteMonPaiement } from "@/components/mon-paiement";
 import { LIBELLES_STATUT } from "@/lib/types";
 import { ReglagesRappels } from "./rappels";
+import { InterrupteurPreference } from "./interrupteur";
 import { CarteInstallation } from "@/components/pwa";
 
 export const metadata: Metadata = { title: "Mon profil" };
@@ -22,6 +23,12 @@ export default async function PageProfil() {
     .select("rappels_email")
     .eq("id", profil.id)
     .maybeSingle<{ rappels_email: boolean }>();
+  // Notifications facultatives (lues à part : rien avant la mise à jour 0033).
+  const { data: prefs, error: sansPrefs } = await supabase
+    .from("clientes")
+    .select("recap_notif")
+    .eq("id", profil.id)
+    .maybeSingle<{ recap_notif: boolean }>();
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
       <Link href="/" className="inline-flex items-center gap-1 text-[15px] text-texte-2">
@@ -48,6 +55,21 @@ export default async function PageProfil() {
             <p className="text-[13.5px] text-texte-2">Un petit signe quand c’est le moment de faire le point.</p>
           </div>
           <ReglagesRappels email={pref?.rappels_email ?? true} clePublique={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null} />
+        </Carte>
+      )}
+
+      {!sansPrefs && prefs && fiche.statut === "active" && (
+        <Carte className="flex flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Mes autres notifications</h2>
+            <p className="text-[13.5px] text-texte-2">Si les notifications sont activées sur ton téléphone.</p>
+          </div>
+          <InterrupteurPreference
+            cle="recap"
+            actif={prefs.recap_notif}
+            titre="Mon récap du dimanche"
+            detail="Le dimanche à 18 h : tes séances, ton sommeil, tes pas et ton eau de la semaine."
+          />
         </Carte>
       )}
 

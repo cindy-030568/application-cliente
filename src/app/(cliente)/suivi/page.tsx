@@ -114,6 +114,17 @@ export default async function PageSuivi() {
           </Link>
         )}
 
+        <Link href="/suivi/recap" className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-sable text-xl" aria-hidden>
+            🌿
+          </span>
+          <span className="flex flex-1 flex-col">
+            <span className="font-medium">Mon récap de la semaine</span>
+            <span className="text-[14px] text-texte-2">Séances, sommeil, pas, eau : ta semaine en un coup d’œil</span>
+          </span>
+          <IconeFleche className="size-5 shrink-0 text-texte-2" />
+        </Link>
+
         {!fiche.mode_sans_chiffres && (!ouverte || dejaEnvoye) && (
           <LienBouton href="/suivi/bilan" variante="contour" pleineLargeur>
             Noter une mesure

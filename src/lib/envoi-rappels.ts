@@ -6,6 +6,8 @@ import { messagePaiement } from "@/lib/paiements";
 import { heureParis, rappelJournalDu } from "@/lib/journal";
 import { SITE_URL } from "@/lib/env";
 import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappel } from "@/lib/rappels";
+import { recapADonner, texteNotificationRecap } from "@/lib/recap-semaine";
+import { chargerRecaps } from "@/lib/recap-semaine-serveur";
 
 /** Ce qui est configuré dans Vercel (sans jamais exposer les valeurs). */
 export function configurationRappels() {
@@ -400,6 +402,54 @@ export async function executerRappelsJournal(admin: SupabaseClient, maintenant =
       else bilan.erreurs++;
     }
     if (parti) bilan.rappels++;
+  }
+  return bilan;
+}
+
+// ---------------------------------------------------------------- Récap de la semaine (dimanche 18 h)
+
+/**
+ * Notification du récap de la semaine, le dimanche à partir de 18 h (appelée toutes les 15 minutes
+ * avec les rappels du journal). Une seule fois par semaine et par cliente active, si elle a des
+ * notifications activées et n'a pas décoché le récap.
+ */
+export async function executerRecapsSemaine(admin: SupabaseClient, maintenant = new Date()) {
+  const bilan = { recaps: 0, erreurs: 0 };
+  const aujourdhui = aujourdhuiParis();
+  if (!configurationRappels().push || !recapADonner({ aujourdhui, heure: heureParis(maintenant), dejaEnvoye: null })) return bilan;
+  const { data: clientes, error } = await admin
+    .from("clientes")
+    .select("id, recap_envoye, profils!inner(prenom)")
+    .eq("statut", "active")
+    .eq("recap_notif", true)
+    .or(`recap_envoye.is.null,recap_envoye.lt.${aujourdhui}`);
+  if (error || !clientes?.length) return bilan; // rien à faire (ou mise à jour 0033 pas encore faite)
+  const ids = clientes.map((c) => c.id as string);
+  const { data: appareils } = await admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids);
+  const avecAppareil = clientes.filter((c) => (appareils ?? []).some((a) => a.cliente_id === c.id));
+  if (!avecAppareil.length) return bilan;
+  const prenom = (c: (typeof clientes)[number]) => (c.profils as unknown as { prenom: string }).prenom ?? "";
+  const recaps = await chargerRecaps(admin, avecAppareil.map((c) => ({ id: c.id as string, prenom: prenom(c) })), aujourdhui);
+  for (const c of avecAppareil) {
+    // Réservation avant l'envoi : jamais deux récaps la même semaine.
+    const { data: reserve } = await admin
+      .from("clientes")
+      .update({ recap_envoye: aujourdhui })
+      .eq("id", c.id)
+      .or(`recap_envoye.is.null,recap_envoye.lt.${aujourdhui}`)
+      .select("id")
+      .maybeSingle();
+    if (!reserve) continue;
+    const r = recaps.get(c.id as string);
+    if (!r) continue;
+    let parti = false;
+    for (const a of (appareils ?? []).filter((x) => x.cliente_id === c.id) as AbonnementPush[]) {
+      const res = await envoyerPush(a, { titre: "Ton récap de la semaine 🌿", texte: texteNotificationRecap(r), url: "/suivi/recap" });
+      if (res === "ok") parti = true;
+      else if (res === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+      else bilan.erreurs++;
+    }
+    if (parti) bilan.recaps++;
   }
   return bilan;
 }

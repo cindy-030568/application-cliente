@@ -1138,3 +1138,47 @@ Comment certaines questions sont reprises :
 - La case en haut de la page active ou coupe le questionnaire pour les nouvelles clientes.
 
 **Tester** : crée une cliente de test, connecte-toi avec elle. Après les écrans des données et du contrat, le questionnaire s'affiche. Remplis-le, puis regarde sa fiche : rubriques **Questionnaire d'arrivée** et **Aliments exclus**.
+
+---
+
+# Phase 4 : pour tes clientes, ensuite
+
+## 1. Mettre à jour la base de données (une seule fois)
+
+Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
+
+1. [`0033_recap_semaine.sql`](../supabase/migrations/0033_recap_semaine.sql) (récap de la semaine)
+
+Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
+
+## 2. Victoires hors balance
+
+L'app repère toute seule ce qui progresse chez ta cliente, à partir de ce qu'elle remplit déjà, **sans jamais regarder le poids** :
+- un **nouveau record de charge** sur un exercice (plus lourd que tout ce qu'elle a fait avant) ;
+- sa **régularité** : 3, 4, 6, 8… semaines d'affilée avec au moins 2 séances ;
+- un **cap de séances** : 10e, 25e, 50e, 100e séance… ;
+- son **tour de taille** qui baisse depuis le début (fêté tous les 2 cm) ;
+- son **mieux-être** : stress plus bas ou digestion meilleure que les 3 semaines d'avant.
+
+Ce que ça donne :
+- **Pour elle** : une carte « Ta victoire hors balance 🏆 » sur son accueil pendant 7 jours. Elle la range avec « Merci 💛 ».
+- **Pour toi** : dans ton tableau de bord, rubrique **Garder le contact**, une ligne « Victoire 🏆 » avec les chiffres et un petit mot de félicitations prêt à envoyer (tu peux le modifier, le copier ou l'ignorer).
+- En **mode sans chiffres**, ni la carte ni le mot proposé ne contiennent de nombre (« Ton tour de taille a diminué depuis le début »).
+
+**Tester** : avec une cliente de test qui a un programme sportif, note un poids sur un exercice lors d'une séance, puis, plus de 7 jours après, un poids plus lourd sur le même exercice : la carte apparaît sur son accueil, et la ligne dans ton tableau de bord.
+
+## 3. Récap de la semaine
+
+Chaque **dimanche à 18 h**, ta cliente reçoit le récap de sa semaine (du lundi au dimanche) :
+- les **séances** faites ;
+- ses moyennes de **sommeil**, de **pas** et d'**hydratation** (tirées de son journal) ;
+- une **phrase encourageante** qui colle à sa semaine (jamais culpabilisante).
+
+Où elle le voit :
+- en **notification**, si elle a activé les notifications sur son téléphone. Elle peut la couper dans **Profil → Mes autres notifications → Mon récap du dimanche** ;
+- sur son **accueil**, une carte « Ton récap de la semaine est prêt » du dimanche 18 h au mardi soir ;
+- à tout moment dans **Suivi → Mon récap de la semaine**, avec les semaines d'avant.
+
+La notification part avec les rappels du journal (l'horloge Supabase qui tourne toutes les 15 minutes) : rien d'autre à mettre en route. Elle n'est envoyée qu'une fois par semaine, et seulement aux clientes en cours de suivi.
+
+**Tester** : connecte-toi avec une cliente de test → **Suivi** → **Mon récap de la semaine**. Les chiffres de la semaine dernière s'affichent, et « ← Semaine d'avant » montre les précédentes. Un dimanche après 18 h, la notification arrive sur un téléphone où les notifications sont activées.
