@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lireQuestionnaire, parSection, type QuestionArrivee } from "./questionnaire";
+import { lireQuestionnaire, parSection, questionsPourCliente, type QuestionArrivee } from "./questionnaire";
 
 const q = (id: string, ordre: number, type: QuestionArrivee["type"], extra: Partial<QuestionArrivee> = {}): QuestionArrivee => ({
   id, ordre, section: "S", libelle: `Question ${id}`, aide: null, type, options: [], obligatoire: false, actif: true, ...extra,
@@ -21,6 +21,31 @@ function formulaire(valeurs: Record<string, string | string[]>) {
 }
 
 describe("questionnaire d'arrivée", () => {
+  it("taille, poids, date de naissance (pour ses besoins) et liste d'aliments déjà cochés", () => {
+    const qs = [
+      q("t", 1, "nombre", { cible: "taille_cm", obligatoire: true }),
+      q("p", 2, "nombre", { cible: "poids_kg" }),
+      q("d", 3, "date", { cible: "date_naissance" }),
+      q("a", 4, "aliments", { options: ["Riz", "Pâtes", "Quinoa"] }),
+    ];
+    const r = lireQuestionnaire(qs, formulaire({ q_t: "165 cm", q_p: "68,5", q_d: "1990-04-12", q_a: ["Riz", "Quinoa"], q_a_ajouts: "Polenta" }), CATS);
+    expect(r.besoins).toEqual({ taille_cm: "165", poids_kg: "68.5", date_naissance: "1990-04-12" });
+    expect(r.invalides).toEqual([]);
+    expect(r.reponses).toEqual([
+      { question: "Question t", reponse: "165" },
+      { question: "Question p", reponse: "68,5" },
+      { question: "Question d", reponse: "12/04/1990" },
+      { question: "Question a", reponse: ["Garde : Riz, Quinoa", "Retire : Pâtes", "Ajoute : Polenta"] },
+    ]);
+    const faux = lireQuestionnaire(qs, formulaire({ q_t: "16,5", q_p: "abc" }), CATS);
+    expect(faux.invalides).toEqual(["Question t", "Question p"]);
+    expect(faux.manquantes).toEqual(["Question t"]);
+  });
+  it("les questions du suivi sportif ne sont posées qu'aux clientes qui l'ont", () => {
+    const qs = [q("x", 1, "texte"), q("s", 2, "texte", { condition: "sport" })];
+    expect(questionsPourCliente(qs, false).map((x) => x.id)).toEqual(["x"]);
+    expect(questionsPourCliente(qs, true).map((x) => x.id)).toEqual(["x", "s"]);
+  });
   it("lit les réponses, les exclusions et l'objectif", () => {
     const r = lireQuestionnaire(QUESTIONS, formulaire({
       q_obj: "Tonifier", q_txt: "  Retrouver de l'énergie  ", q_exc: ["c1", "inconnue"], q_exc_autres: "champignons", q_rep: "3", q_hab: ["Je cuisine", "pirate"],

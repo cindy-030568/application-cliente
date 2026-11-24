@@ -1077,6 +1077,7 @@ Pour chacun de ces 2 fichiers, dans l'ordre : lien → **Copy raw file** → Sup
 
 1. [`0030_seances_hors_connexion.sql`](../supabase/migrations/0030_seances_hors_connexion.sql) (séance sans réseau)
 2. [`0031_questionnaire_arrivee.sql`](../supabase/migrations/0031_questionnaire_arrivee.sql) (questionnaire d'arrivée)
+3. [`0032_questionnaire_precoaching.sql`](../supabase/migrations/0032_questionnaire_precoaching.sql) (ton questionnaire pré-coaching à la place des questions de départ)
 
 ## 2. Programme sportif et séance guidée sans réseau
 
@@ -1101,7 +1102,24 @@ Dans une salle en sous-sol, sans réseau, ta cliente peut quand même suivre sa 
 
 ## 3. Questionnaire d'arrivée
 
-À sa première connexion, après le contrat, une nouvelle cliente remplit un questionnaire de 5 minutes : objectif, alimentation (allergies et aliments évités, habitudes), rythme de vie, sport, cycle (facultatif).
+À sa première connexion, après le contrat, une nouvelle cliente remplit **ton questionnaire pré-coaching**, avec ton texte d'accueil (« Félicitations ma Queen ! 👑… ») :
+- ton profil ;
+- 1. mode de vie et quotidien ;
+- 2. objectifs et motivations ;
+- 3. santé ;
+- 4. alimentation actuelle ;
+- 5. relation à la nourriture ;
+- 6. activité physique ;
+- 7. plan alimentaire ;
+- et « As-tu des questions ou observations ? ».
+
+Comment certaines questions sont reprises :
+- Nom, prénom et email ne sont pas redemandés : ils sont déjà dans sa fiche.
+- Sa **taille**, son **poids** et sa **date de naissance** pré-remplissent ses besoins s'ils sont vides.
+- En plus de ta question libre sur l'objectif et le délai, elle choisit **son objectif en un mot** (perte de gras, maintien, prise de muscle, tonification) : il pré-remplit sa fiche.
+- **Photo des compléments** et **bilan sanguin** : la question lui demande de te les envoyer par message. Aucun document de santé n'est gardé dans l'app.
+- **Ton plan alimentaire** (partie 7) : chaque famille s'affiche avec **tous ses aliments déjà cochés**. Elle décoche ceux qu'elle ne veut pas et écrit ceux à ajouter. Tu vois « Garde… / Retire… / Ajoute… » dans ses réponses.
+- « T'entraînes-tu en salle ou chez toi ? » et le matériel à domicile ne sont posés qu'aux clientes **avec suivi sportif**.
 
 - Les **catégories d'aliments cochées** sont ajoutées à ses exclusions de recettes, et son **objectif** est pré-rempli dans ses besoins s'il n'y en avait pas encore. Tu corriges tout depuis sa fiche.
 - Les « autres aliments » écrits à la main restent dans ses réponses : ajoute-les toi-même dans « Aliments exclus ».
@@ -1113,6 +1131,10 @@ Dans une salle en sous-sol, sans réseau, ta cliente peut quand même suivre sa 
 **Modifier les questions** : **Réglages** → **Questionnaire d'arrivée** → **Modifier les questions**.
 - Tu peux changer le texte, l'aide, l'ordre, rendre une question obligatoire ou non, ne plus la poser, la supprimer, ou en ajouter une.
 - Une question « Objectif » a toujours 4 réponses, dans l'ordre : perte de gras, maintien, prise de muscle, tonification. Tu peux changer leur texte, pas leur ordre.
+- Une question « Liste d'aliments » : un aliment par ligne, tous affichés déjà cochés.
+- Une question « Nombre » ou « Date » peut pré-remplir sa taille, son poids ou sa date de naissance.
+- La case « Seulement si suivi sportif » réserve une question aux clientes qui ont le suivi sportif.
+- Le **texte d'accueil** se modifie en haut de la page.
 - La case en haut de la page active ou coupe le questionnaire pour les nouvelles clientes.
 
 **Tester** : crée une cliente de test, connecte-toi avec elle. Après les écrans des données et du contrat, le questionnaire s'affiche. Remplis-le, puis regarde sa fiche : rubriques **Questionnaire d'arrivée** et **Aliments exclus**.

@@ -15,6 +15,12 @@ test("première connexion : la cliente remplit son questionnaire d'arrivée", as
     await page.getByPlaceholder(/Autres aliments/).fill("champignons");
     await page.getByText("3", { exact: true }).click();
     await page.getByLabel(/Dans 3 mois/).fill("Avoir de l’énergie toute la journée");
+    await page.getByLabel("Ta taille (en cm)").fill("165");
+    // Aliments du plan : tout est déjà coché, elle décoche ce qu'elle ne veut pas et ajoute.
+    await page.getByText("Pâtes", { exact: true }).click();
+    await page.getByPlaceholder("Aliments à ajouter (facultatif)").fill("Polenta");
+    // Sophie a le suivi sportif : la question salle / maison lui est posée.
+    await expect(page.getByText("T'entraînes-tu en salle ou chez toi ?")).toBeVisible();
     await page.screenshot({ path: "test-results/questionnaire-cliente.png", fullPage: true });
     await page.getByRole("button", { name: /Envoyer mes réponses/ }).click();
     await page.waitForURL((u) => u.pathname === "/");
@@ -24,6 +30,8 @@ test("première connexion : la cliente remplit son questionnaire d'arrivée", as
     const etat = await (await request.get(`${SIMULE}/__test/questionnaire`)).json();
     const envoi = etat.reponses[0];
     expect(envoi.objectif).toBe("recompo");
+    expect(envoi.besoins).toEqual({ taille_cm: "165" });
+    expect(envoi.reponses).toContainEqual({ question: "Féculents", reponse: ["Garde : Riz, Quinoa", "Retire : Pâtes", "Ajoute : Polenta"] });
     expect(envoi.reponses).toContainEqual({ question: "Allergies, intolérances ou aliments que tu ne manges pas", reponse: ["Gluten", "Autres : champignons"] });
     // Gluten ajouté à ses exclusions de recettes.
     expect(etat.exclusions.filter((e: { cliente_id: string }) => e.cliente_id === "00000000-0000-0000-0000-00000000000a").length).toBeGreaterThan(2);

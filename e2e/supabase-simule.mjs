@@ -415,14 +415,17 @@ async function routeClaude(req, res) {
 
 // ---- Phase 3 : questionnaire d'arrivée (désactivé tant qu'un test ne l'active pas)
 let questionnaireActif = false;
-const Q = (ordre, section, libelle, type, options = [], obligatoire = false, aide = null) => ({ id: crypto.randomUUID(), ordre, section, libelle, aide, type, options, obligatoire, actif: true });
+const Q = (ordre, section, libelle, type, options = [], obligatoire = false, aide = null, extra = {}) => ({ id: crypto.randomUUID(), ordre, section, libelle, aide, type, options, obligatoire, actif: true, cible: null, condition: null, ...extra });
 const questionsArrivee = [
   Q(10, "Ton objectif", "Quel est ton objectif principal ?", "objectif", ["Perdre du gras", "Me sentir mieux sans viser un poids (maintien)", "Prendre du muscle ou du poids", "Me tonifier : perdre du gras et gagner du muscle"], true),
   Q(20, "Ton objectif", "Dans 3 mois, qu'est-ce qui te ferait dire que l'accompagnement a réussi ?", "texte_long", [], true),
   Q(30, "Ton alimentation", "Allergies, intolérances ou aliments que tu ne manges pas", "exclusions", [], false, "Coche ce qui te concerne."),
   Q(40, "Ton alimentation", "Combien de repas prends-tu par jour, en général ?", "choix", ["2", "3", "4", "5 ou plus"], true),
   Q(130, "Ton cycle (facultatif)", "Ton cycle", "choix", ["Règles régulières", "Cycle irrégulier", "Je préfère ne pas répondre"], false, "Facultatif."),
-];
+  Q(5, "Ton profil", "Ta taille (en cm)", "nombre", [], true, null, { cible: "taille_cm" }),
+  Q(140, "6. Ton activité physique", "T'entraînes-tu en salle ou chez toi ?", "choix", ["En salle", "Chez moi", "Les deux"], false, null, { condition: "sport" }),
+  Q(150, "7. Ton plan alimentaire", "Féculents", "aliments", ["Riz", "Pâtes", "Quinoa"], false, "Décoche les aliments que tu ne veux pas."),
+].sort((a, b) => a.ordre - b.ordre);
 const reponsesArrivee = [];
 
 // ---- Tâche du matin : passage du jour, à 7 h (horloge Supabase)
@@ -592,7 +595,7 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/rpc/envoyer_questionnaire") return corpsJson(req).then((b) => {
     const nouveau = !reponsesArrivee.some((r) => r.cliente_id === uid);
     if (nouveau) {
-      reponsesArrivee.push({ cliente_id: uid, reponses: b?.p_reponses ?? [], envoye_le: new Date().toISOString(), objectif: b?.p_objectif ?? null });
+      reponsesArrivee.push({ cliente_id: uid, reponses: b?.p_reponses ?? [], envoye_le: new Date().toISOString(), objectif: b?.p_objectif ?? null, besoins: b?.p_besoins ?? null });
       for (const id of b?.p_categories ?? []) if (!exclusionsListe.some((e) => e.cliente_id === uid && e.categorie_id === id)) exclusionsListe.push({ cliente_id: uid, categorie_id: id, aliment_id: null, aliments: null });
     }
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(nouveau));

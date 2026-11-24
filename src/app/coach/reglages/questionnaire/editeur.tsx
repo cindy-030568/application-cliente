@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { Bouton, CaseACocher, Champ, Message, ZoneTexte } from "@/components/ui";
-import { TYPES_QUESTION, type QuestionArrivee, type TypeQuestion } from "@/lib/questionnaire";
-import { changerQuestionnaireActif, enregistrerQuestion, supprimerQuestion, type EtatQuestion } from "./actions";
+import { CIBLES, TYPES_QUESTION, type QuestionArrivee, type TypeQuestion } from "@/lib/questionnaire";
+import { changerQuestionnaireActif, enregistrerQuestion, enregistrerTexteAccueil, supprimerQuestion, type EtatQuestion } from "./actions";
 
-const AVEC_OPTIONS: TypeQuestion[] = ["choix", "choix_multiple", "objectif"];
+const AVEC_OPTIONS: TypeQuestion[] = ["choix", "choix_multiple", "objectif", "aliments"];
 
 export function EditeurQuestion({ question, ordreSuivant }: { question?: QuestionArrivee; ordreSuivant?: number }) {
   const [type, setType] = useState<TypeQuestion>(question?.type ?? "texte");
@@ -62,12 +62,33 @@ export function EditeurQuestion({ question, ordreSuivant }: { question?: Questio
           className="[&_textarea]:min-h-28"
         />
       )}
+      {(type === "nombre" || type === "date") && (
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-chocolat" htmlFor={`cible-${k}`}>
+            Pré-remplir dans ses besoins (facultatif)
+          </label>
+          <select id={`cible-${k}`} name="cible" defaultValue={question?.cible ?? ""} className="min-h-12 max-w-sm rounded-xl border border-ligne bg-white px-3 text-[15px]">
+            <option value="">Non</option>
+            {Object.entries(CIBLES)
+              .filter(([c]) => (type === "date") === (c === "date_naissance"))
+              .map(([c, l]) => (
+                <option key={c} value={c}>
+                  {l}
+                </option>
+              ))}
+          </select>
+        </div>
+      )}
+      {type === "aliments" && (
+        <p className="text-[13.5px] text-texte-2">Tous les aliments s’affichent déjà cochés : elle décoche ceux qu’elle ne veut pas et écrit ceux à ajouter.</p>
+      )}
       {type === "exclusions" && (
         <p className="text-[13.5px] text-texte-2">La cliente coche des catégories d’aliments (gluten, porc…) : elles sont ajoutées à ses exclusions de recettes.</p>
       )}
       <div className="flex flex-wrap gap-5">
         {type !== "exclusions" && <CaseACocher name="obligatoire" label="Obligatoire" defaultChecked={question?.obligatoire ?? false} />}
         <CaseACocher name="actif" label="Posée aux nouvelles clientes" defaultChecked={question?.actif ?? true} />
+        <CaseACocher name="condition" value="sport" label="Seulement si suivi sportif" defaultChecked={question?.condition === "sport"} />
       </div>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
@@ -110,5 +131,29 @@ export function InterrupteurQuestionnaire({ actif }: { actif: boolean }) {
         });
       }}
     />
+  );
+}
+
+export function TexteAccueil({ texte }: { texte: string }) {
+  const [etat, setEtat] = useState<EtatQuestion>({});
+  const [enCours, demarrer] = useTransition();
+  return (
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const valeur = String(new FormData(e.currentTarget).get("intro") ?? "");
+        demarrer(async () => setEtat(await enregistrerTexteAccueil(valeur)));
+      }}
+    >
+      <ZoneTexte id="intro-questionnaire" label="Texte d’accueil, en haut du questionnaire" name="intro" maxLength={5000} defaultValue={texte} className="[&_textarea]:min-h-40" />
+      {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
+      {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+      <div>
+        <Bouton type="submit" variante="contour" disabled={enCours} className="min-h-11">
+          Enregistrer le texte d’accueil
+        </Bouton>
+      </div>
+    </form>
   );
 }

@@ -3,7 +3,8 @@
  * catégories d'aliments à exclure et objectif à pré-remplir dans sa fiche.
  */
 
-export type TypeQuestion = "texte" | "texte_long" | "choix" | "choix_multiple" | "objectif" | "exclusions";
+export type TypeQuestion = "texte" | "texte_long" | "choix" | "choix_multiple" | "objectif" | "exclusions" | "nombre" | "date" | "aliments";
+export type CibleQuestion = "taille_cm" | "poids_kg" | "date_naissance";
 export type QuestionArrivee = {
   id: string;
   ordre: number;
@@ -14,6 +15,10 @@ export type QuestionArrivee = {
   options: string[];
   obligatoire: boolean;
   actif: boolean;
+  /** Champ de ses besoins pré-rempli par la réponse (taille, poids, date de naissance). */
+  cible?: CibleQuestion | null;
+  /** « sport » : posée seulement aux clientes avec suivi sportif. */
+  condition?: "sport" | null;
 };
 export type ReponseArrivee = { question: string; reponse: string | string[] };
 
@@ -26,7 +31,21 @@ export const TYPES_QUESTION: Record<TypeQuestion, string> = {
   choix_multiple: "Plusieurs choix",
   objectif: "Objectif (rempli dans sa fiche)",
   exclusions: "Aliments à exclure (remplis dans sa fiche)",
+  nombre: "Nombre",
+  date: "Date",
+  aliments: "Liste d’aliments déjà cochés (elle décoche, elle ajoute)",
 };
+export const CIBLES: Record<CibleQuestion, string> = {
+  taille_cm: "Sa taille (cm)",
+  poids_kg: "Son poids (kg)",
+  date_naissance: "Sa date de naissance",
+};
+const BORNES: Record<"taille_cm" | "poids_kg", [number, number]> = { taille_cm: [100, 230], poids_kg: [25, 350] };
+
+/** Questions à poser à cette cliente (celles du suivi sportif seulement si elle l'a). */
+export function questionsPourCliente(questions: QuestionArrivee[], suiviSport: boolean): QuestionArrivee[] {
+  return questions.filter((q) => q.actif && (q.condition !== "sport" || suiviSport));
+}
 
 /** Sections dans l'ordre des questions. */
 export function parSection(questions: QuestionArrivee[]): { section: string; questions: QuestionArrivee[] }[] {
@@ -47,6 +66,8 @@ export function lireQuestionnaire(questions: QuestionArrivee[], f: Lecteur, cate
   const manquantes: string[] = [];
   let categoriesExclues: string[] = [];
   let objectif: (typeof CODES_OBJECTIF)[number] | null = null;
+  const besoins: Partial<Record<CibleQuestion, string>> = {};
+  const invalides: string[] = [];
   for (const q of questions.filter((x) => x.actif).sort((a, b) => a.ordre - b.ordre)) {
     const cle = `q_${q.id}`;
     let reponse: string | string[] = "";
@@ -64,6 +85,32 @@ export function lireQuestionnaire(questions: QuestionArrivee[], f: Lecteur, cate
       }
     } else if (q.type === "choix_multiple") {
       reponse = f.getAll(cle).filter((v) => q.options.includes(v));
+    } else if (q.type === "nombre") {
+      const brut = (f.get(cle) ?? "").trim().replace(",", ".").replace(/\s|cm|kg/gi, "");
+      if (brut) {
+        const n = Number(brut);
+        const [min, max] = q.cible && q.cible !== "date_naissance" ? BORNES[q.cible] : [0, 100000];
+        if (!Number.isFinite(n) || n < min || n > max) invalides.push(q.libelle);
+        else {
+          reponse = String(n).replace(".", ",");
+          if (q.cible && q.cible !== "date_naissance") besoins[q.cible] = String(n);
+        }
+      }
+    } else if (q.type === "date") {
+      const v = f.get(cle) ?? "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+        reponse = v.split("-").reverse().join("/");
+        if (q.cible === "date_naissance") besoins.date_naissance = v;
+      }
+    } else if (q.type === "aliments") {
+      const gardes = f.getAll(cle).filter((v) => q.options.includes(v));
+      const retires = q.options.filter((o) => !gardes.includes(o));
+      const ajouts = (f.get(`${cle}_ajouts`) ?? "").trim().slice(0, 500);
+      reponse = [
+        ...(gardes.length ? [`Garde : ${gardes.join(", ")}`] : []),
+        ...(retires.length ? [`Retire : ${retires.join(", ")}`] : []),
+        ...(ajouts ? [`Ajoute : ${ajouts}`] : []),
+      ];
     } else if (q.type === "exclusions") {
       const ids = f.getAll(cle).filter((id) => categories.some((c) => c.id === id));
       categoriesExclues = [...new Set([...categoriesExclues, ...ids])];
@@ -74,5 +121,5 @@ export function lireQuestionnaire(questions: QuestionArrivee[], f: Lecteur, cate
     if (vide && q.obligatoire) manquantes.push(q.libelle);
     if (!vide) reponses.push({ question: q.libelle, reponse });
   }
-  return { reponses, manquantes, categoriesExclues, objectif };
+  return { reponses, manquantes, invalides, categoriesExclues, objectif, besoins };
 }

@@ -3,16 +3,19 @@ import Link from "next/link";
 import { IconeRetour } from "@/components/icones";
 import { Carte, Message } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
-import { parSection, type QuestionArrivee } from "@/lib/questionnaire";
-import { EditeurQuestion, InterrupteurQuestionnaire } from "./editeur";
+import { parSection } from "@/lib/questionnaire";
+import { chargerQuestions } from "@/lib/questionnaire-serveur";
+import { EditeurQuestion, InterrupteurQuestionnaire, TexteAccueil } from "./editeur";
 
 export const metadata: Metadata = { title: "Questionnaire d’arrivée" };
 
 export default async function PageQuestionnaireCoach() {
   const { supabase } = await exigerCoach();
-  const [{ data: questions, error }, { data: reglage }] = await Promise.all([
-    supabase.from("questions_arrivee").select("id, ordre, section, libelle, aide, type, options, obligatoire, actif").order("ordre").returns<QuestionArrivee[]>(),
+  const [questions, { error }, { data: reglage }, { data: intro }] = await Promise.all([
+    chargerQuestions(supabase, true),
+    supabase.from("questions_arrivee").select("id").limit(1),
     supabase.from("reglages").select("questionnaire_actif").maybeSingle<{ questionnaire_actif: boolean }>(),
+    supabase.from("reglages").select("questionnaire_intro").maybeSingle<{ questionnaire_intro: string | null }>(),
   ]);
   const ordreSuivant = ((questions ?? []).at(-1)?.ordre ?? 0) + 10;
   return (
@@ -31,8 +34,9 @@ export default async function PageQuestionnaireCoach() {
         <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0031_questionnaire_arrivee.sql (voir le guide).</Message>
       ) : (
         <>
-          <Carte>
+          <Carte className="flex flex-col gap-4">
             <InterrupteurQuestionnaire actif={reglage?.questionnaire_actif ?? true} />
+            {intro && <TexteAccueil texte={intro.questionnaire_intro ?? ""} />}
           </Carte>
           {parSection(questions ?? []).map(({ section, questions: liste }) => (
             <section key={section} className="flex flex-col gap-3">

@@ -70,6 +70,35 @@ function Question({ q, categories, manquante }: { q: QuestionArrivee; categories
       </label>
     );
   }
+  if (q.type === "nombre" || q.type === "date") {
+    return (
+      <label className={cadre}>
+        {titre}
+        {aide}
+        {q.type === "nombre" ? (
+          <input name={nom} required={q.obligatoire} inputMode="decimal" maxLength={10} className={cx(champ, "max-w-40")} />
+        ) : (
+          <input name={nom} type="date" required={q.obligatoire} className={cx(champ, "max-w-56")} />
+        )}
+      </label>
+    );
+  }
+  if (q.type === "aliments") {
+    return (
+      <fieldset className={cadre}>
+        <legend className="mb-2 flex flex-col gap-1">
+          {titre}
+          {aide}
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {q.options.map((o) => (
+            <Puce key={o} type="checkbox" nom={nom} valeur={o} libelle={o} coche />
+          ))}
+        </div>
+        <input name={`${nom}_ajouts`} maxLength={500} placeholder="Aliments à ajouter (facultatif)" className={champ} />
+      </fieldset>
+    );
+  }
   if (q.type === "exclusions") {
     return (
       <fieldset className={cadre}>
@@ -102,10 +131,26 @@ function Question({ q, categories, manquante }: { q: QuestionArrivee; categories
   );
 }
 
-function Puce({ type, nom, valeur, libelle, requis = false, large = false }: { type: "radio" | "checkbox"; nom: string; valeur: string; libelle: string; requis?: boolean; large?: boolean }) {
+function Puce({
+  type,
+  nom,
+  valeur,
+  libelle,
+  requis = false,
+  large = false,
+  coche = false,
+}: {
+  type: "radio" | "checkbox";
+  nom: string;
+  valeur: string;
+  libelle: string;
+  requis?: boolean;
+  large?: boolean;
+  coche?: boolean;
+}) {
   return (
     <label className={cx("cursor-pointer", large && "w-full")}>
-      <input type={type} name={nom} value={valeur} required={requis} className="peer sr-only" />
+      <input type={type} name={nom} value={valeur} required={requis} defaultChecked={coche} className="peer sr-only" />
       <span
         className={cx(
           "flex min-h-11 items-center rounded-xl border border-ligne bg-white px-4 py-2 text-[15px] transition-colors peer-checked:border-accent peer-checked:bg-accent-pale peer-focus-visible:ring-2 peer-focus-visible:ring-accent",
