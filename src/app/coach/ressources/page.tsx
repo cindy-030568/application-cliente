@@ -20,8 +20,16 @@ export default async function PageRessourcesCoach() {
         .returns<{ id: string; statut: string; profils: { prenom: string; nom: string } }[]>(),
     ]);
 
+  // Fiches écrites dans l'appli et brouillons (0037) : lus à part, rien avant la mise à jour.
+  const { data: fiches, error: sansFiches } = await supabase
+    .from("ressources")
+    .select("id, contenu, publiee")
+    .returns<{ id: string; contenu: string | null; publiee: boolean }[]>();
+  const fiche = new Map((fiches ?? []).map((f) => [f.id, f]));
   const avecClientes = (ressources ?? []).map((r) => ({
     ...r,
+    contenu: fiche.get(r.id)?.contenu ?? null,
+    publiee: fiche.get(r.id)?.publiee ?? true,
     clientes: (liens ?? []).filter((l) => l.ressource_id === r.id).map((l) => l.cliente_id as string),
   }));
   const choix = (clientes ?? [])
@@ -34,12 +42,12 @@ export default async function PageRessourcesCoach() {
         <Surtitre>Ressources</Surtitre>
         <h1 className="font-titre text-[34px] font-bold leading-tight">Mes ressources</h1>
         <p className="mt-1 max-w-2xl text-[15px] text-texte-2">
-          Guides, listes de courses, fiches… hébergés sur ton Google Drive. Tes clientes les
-          retrouvent dans leur espace, rangés par catégorie.
+          Guides, listes de courses, fiches… hébergés sur ton Google Drive, ou écrits directement ici. Tes clientes les
+          retrouvent dans leur espace, rangés par catégorie. Un brouillon reste invisible pour elles tant que tu ne l’as pas publié.
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} />
+        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} avecFiches={!sansFiches} />
         <Carte className="flex h-fit flex-col gap-4">
           <h2 className="font-titre text-lg font-bold">Catégories</h2>
           <GestionCategories categories={categories ?? []} />

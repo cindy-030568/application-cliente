@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
 import { IconeExterne, IconePlus } from "@/components/icones";
@@ -21,10 +22,13 @@ export function GestionRessources({
   categories,
   ressources,
   clientes,
+  avecFiches = false,
 }: {
   categories: CategorieRessource[];
   ressources: RessourceAvecClientes[];
   clientes: ClienteChoix[];
+  /** Fiches écrites dans l'appli et brouillons (après la mise à jour 0037). */
+  avecFiches?: boolean;
 }) {
   const [edition, setEdition] = useState<string | "nouvelle" | null>(ressources.length ? null : "nouvelle");
   const [etat, setEtat] = useState<EtatRessource>({});
@@ -44,6 +48,7 @@ export function GestionRessources({
         <FormulaireRessource
           categories={categories}
           clientes={clientes}
+          avecFiches={avecFiches}
           onFin={(r) => {
             setEtat(r);
             setEdition(null);
@@ -71,6 +76,7 @@ export function GestionRessources({
                   <FormulaireRessource
                     categories={categories}
                     clientes={clientes}
+                    avecFiches={avecFiches}
                     initiale={r}
                     onFin={(res) => {
                       setEtat(res);
@@ -82,16 +88,23 @@ export function GestionRessources({
               ) : (
                 <li key={r.id} className="flex flex-wrap items-start gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce">
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <a
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-medium hover:text-accent"
-                    >
-                      {r.titre} <IconeExterne className="size-4 shrink-0" />
-                    </a>
+                    {r.url ? (
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium hover:text-accent"
+                      >
+                        {r.titre} <IconeExterne className="size-4 shrink-0" />
+                      </a>
+                    ) : (
+                      <Link href={`/coach/ressources/${r.id}`} className="font-medium hover:text-accent">
+                        {r.titre} <span className="text-[13px] font-normal text-texte-2">· fiche dans l’appli (aperçu)</span>
+                      </Link>
+                    )}
                     {r.description && <p className="text-[14px] text-texte-2">{r.description}</p>}
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {r.publiee === false && <Etiquette ton="rose">Brouillon : invisible pour tes clientes</Etiquette>}
                       {r.visibilite === "toutes" ? (
                         <Etiquette ton="vert">Toutes les clientes</Etiquette>
                       ) : (
@@ -134,17 +147,20 @@ export function GestionRessources({
 function FormulaireRessource({
   categories,
   clientes,
+  avecFiches,
   initiale,
   onFin,
   onAnnuler,
 }: {
   categories: CategorieRessource[];
   clientes: ClienteChoix[];
+  avecFiches: boolean;
   initiale?: RessourceAvecClientes;
   onFin: (etat: EtatRessource) => void;
   onAnnuler?: () => void;
 }) {
   const [visibilite, setVisibilite] = useState(initiale?.visibilite ?? "toutes");
+  const [type, setType] = useState<"lien" | "fiche">(initiale && !initiale.url ? "fiche" : "lien");
   const [etat, envoyer] = useActionState(async (precedent: EtatRessource, fd: FormData) => {
     const r = await enregistrerRessource(precedent, fd);
     if (!r.erreur) onFin(r);
@@ -154,16 +170,50 @@ function FormulaireRessource({
   return (
     <form action={envoyer} className="flex flex-col gap-4 rounded-carte border border-ligne bg-blanc-casse p-5 shadow-douce">
       {initiale && <input type="hidden" name="id" value={initiale.id} />}
+      {avecFiches && <input type="hidden" name="avec_fiches" value="1" />}
       <Champ label="Titre" name="titre" required maxLength={120} defaultValue={initiale?.titre} />
-      <Champ
-        label="Lien (Google Drive ou autre)"
-        name="url"
-        type="url"
-        required
-        placeholder="https://drive.google.com/…"
-        defaultValue={initiale?.url}
-        aide="Dans Drive : Partager → « Tous les utilisateurs disposant du lien » → Copier le lien. Un dossier entier fonctionne aussi."
-      />
+      {avecFiches && (
+        <fieldset className="flex flex-wrap gap-2">
+          <legend className="mb-2 text-sm font-medium">Type de ressource</legend>
+          {(["lien", "fiche"] as const).map((v) => (
+            <label
+              key={v}
+              className={cx(
+                "cursor-pointer rounded-full px-4 py-2 text-[14px] transition-colors",
+                type === v ? "bg-chocolat text-creme" : "bg-creme text-chocolat hover:bg-sable",
+              )}
+            >
+              <input type="radio" name="type" value={v} checked={type === v} onChange={() => setType(v)} className="sr-only" />
+              {v === "lien" ? "Un lien (Drive, PDF…)" : "Une fiche écrite ici"}
+            </label>
+          ))}
+        </fieldset>
+      )}
+      {type === "fiche" ? (
+        <div className="flex flex-col gap-1.5">
+          <ZoneTexte
+            label="Contenu de la fiche"
+            name="contenu"
+            required
+            maxLength={20000}
+            defaultValue={initiale?.contenu ?? ""}
+            className="[&_textarea]:min-h-96 [&_textarea]:text-[15px]"
+          />
+          <p className="text-[13px] text-texte-2">
+            « ## » en début de ligne pour un intertitre, « - » pour une liste, **texte** pour le gras, une ligne vide entre deux paragraphes.
+          </p>
+        </div>
+      ) : (
+        <Champ
+          label="Lien (Google Drive ou autre)"
+          name="url"
+          type="url"
+          required
+          placeholder="https://drive.google.com/…"
+          defaultValue={initiale?.url ?? ""}
+          aide="Dans Drive : Partager → « Tous les utilisateurs disposant du lien » → Copier le lien. Un dossier entier fonctionne aussi."
+        />
+      )}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="categorie_id" className="text-sm font-medium">
           Catégorie
@@ -227,6 +277,13 @@ function FormulaireRessource({
           </div>
         )}
       </fieldset>
+      {avecFiches && (
+        <CaseACocher
+          name="publiee"
+          label="Publiée : visible par tes clientes (décoche pour la garder en brouillon)"
+          defaultChecked={initiale?.publiee ?? true}
+        />
+      )}
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       <div className="flex gap-3">
         <BoutonEnvoi enCours="Enregistrement…">{initiale ? "Enregistrer" : "Ajouter la ressource"}</BoutonEnvoi>

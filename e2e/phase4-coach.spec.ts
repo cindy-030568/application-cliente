@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { seConnecter } from "./outils";
+import { devices, expect, test } from "@playwright/test";
+import { fermerMotDuJour, seConnecter } from "./outils";
 
 test("victoire hors balance : ligne dans le tableau de bord, avec un mot prêt à envoyer", async ({ page }) => {
   await seConnecter(page, "coach@exemple.fr");
@@ -37,4 +37,32 @@ test("compléments : la coach ajoute un complément sur la fiche de sa cliente",
   await expect(page.getByText("Vitamine D3").first()).toBeVisible();
   await page.getByText("Vitamine D3").first().scrollIntoViewIfNeeded();
   await page.screenshot({ path: "test-results/phase4-complements-coach.png" });
+});
+
+test("fiche « Je mange dehors » : brouillon relu puis publié par la coach", async ({ page, browser }) => {
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/ressources");
+  const ligne = page.locator("li", { hasText: "Je mange dehors" });
+  await expect(ligne).toContainText("Brouillon : invisible pour tes clientes");
+  await ligne.getByRole("link", { name: /Je mange dehors/ }).click();
+  await expect(page.getByRole("heading", { name: "Au restaurant" })).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-fiche-apercu.png", fullPage: true });
+  await page.goto("/coach/ressources");
+  await page.locator("li", { hasText: "Je mange dehors" }).getByRole("button", { name: "Modifier" }).click();
+  await expect(page.getByLabel("Contenu de la fiche")).toHaveValue(/## Au restaurant/);
+  await page.getByLabel(/Publiée : visible par tes clientes/).check();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText("Ressource modifiée.")).toBeVisible();
+  await expect(page.locator("li", { hasText: "Je mange dehors" })).not.toContainText("Brouillon");
+
+  // Une fois publiée, la cliente la lit dans ses ressources (sur son téléphone).
+  const tel = await browser.newContext({ ...devices["iPhone 13"], baseURL: "http://localhost:3100", locale: "fr-FR", timezoneId: "Europe/Paris" });
+  const cliente = await tel.newPage();
+  await seConnecter(cliente, "sophie@exemple.fr");
+  await fermerMotDuJour(cliente);
+  await cliente.goto("/ressources");
+  await cliente.getByRole("link", { name: /Je mange dehors/ }).click();
+  await expect(cliente.getByRole("heading", { name: "Chez des amis ou en famille" })).toBeVisible();
+  await cliente.screenshot({ path: "test-results/phase4-fiche-cliente.png" });
+  await tel.close();
 });

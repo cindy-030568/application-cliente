@@ -112,3 +112,13 @@ test("planning des repas : choisir ses recettes de la semaine, puis remplir la l
   await expect(page.getByText(/Planning de la semaine du/).first()).toBeVisible();
   await page.screenshot({ path: "test-results/phase4-planning-courses.png", fullPage: true });
 });
+
+test("fiche « Je mange dehors » : invisible en brouillon, lisible une fois publiée", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.goto("/ressources");
+  await expect(page.getByText("Guide : bien démarrer")).toBeVisible();
+  await expect(page.getByText("Je mange dehors")).toHaveCount(0);
+  await page.goto("/ressources/eeeeeeee-0000-0000-0000-000000000004");
+  await expect(page.getByRole("heading", { name: "Au restaurant" })).toHaveCount(0);
+});

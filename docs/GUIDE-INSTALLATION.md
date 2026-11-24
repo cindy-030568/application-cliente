@@ -1151,6 +1151,7 @@ Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supab
 2. [`0034_cycle.sql`](../supabase/migrations/0034_cycle.sql) (cycle et périménopause)
 3. [`0035_complements.sql`](../supabase/migrations/0035_complements.sql) (compléments)
 4. [`0036_planning_repas.sql`](../supabase/migrations/0036_planning_repas.sql) (planning des repas)
+5. [`0037_ressources_fiches.sql`](../supabase/migrations/0037_ressources_fiches.sql) (fiches écrites dans l'appli et brouillon « Je mange dehors »)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1238,3 +1239,26 @@ Puis **🛒 Ajouter ma semaine à ma liste de courses** : toutes les recettes de
 Toi, tu peux consulter son planning (lecture seule) ; une autre cliente ne le voit jamais.
 
 **Tester** : connecte-toi avec une cliente de test qui a des repas et des cibles → **Recettes** → **Mon planning de la semaine** → choisis 2 ou 3 recettes → **Ajouter ma semaine à ma liste de courses** → **Voir ma liste de courses**.
+
+## 7. Fiche « Je mange dehors »
+
+Tes ressources peuvent maintenant être **un lien** (Drive, PDF…) comme avant, **ou une fiche écrite directement dans l'appli**, que tu modifies quand tu veux. Et toute ressource peut rester en **brouillon** : tes clientes ne la voient pas tant que tu ne l'as pas publiée.
+
+La mise à jour 0037 ajoute **une proposition de fiche « Je mange dehors »**, en brouillon, dans la catégorie « Fiches pratiques » :
+- avant de partir ;
+- au restaurant ;
+- à la boulangerie ou sur le pouce ;
+- chez des amis ou en famille ;
+- à l'apéro ;
+- et le lendemain (« rien à compenser »).
+
+Elle est écrite dans l'esprit **sans restriction**, à la première personne de ton accompagnement. **C'est une proposition : relis-la, change ce que tu veux, puis publie-la.**
+
+**Pour la relire et la publier** : **Ressources** → « Je mange dehors » (étiquette « Brouillon ») :
+- clique sur le titre pour l'**aperçu**, tel que tes clientes la liront ;
+- **Modifier** pour changer le texte. En début de ligne, « ## » fait un intertitre et « - » une ligne de liste. **texte** entre deux paires d'étoiles passe en gras. Une ligne vide sépare deux paragraphes.
+- coche **Publiée**, puis **Enregistrer**.
+
+Tes clientes la trouvent alors dans **Ressources**, et la lisent directement dans l'appli.
+
+**Tester** : avant de publier, connecte-toi avec une cliente de test : la fiche n'apparaît pas dans ses ressources. Publie-la, recharge : elle apparaît.

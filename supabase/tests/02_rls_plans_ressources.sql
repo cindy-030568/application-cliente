@@ -122,7 +122,8 @@ select test.verifier((select titre from public.plans where cliente_id = '0000000
 select test.verifier((select count(*) from storage.objects) = 3, 'la coach voit tous les fichiers');
 insert into storage.objects (bucket_id, name) values ('plans', '00000000-0000-0000-0000-0000000000a2/sport/v1.pdf');
 select test.verifier(true, 'la coach peut déposer un fichier');
-select test.verifier((select count(*) from public.ressources) = 2, 'la coach voit toutes les ressources');
+-- (sans la fiche « Je mange dehors » proposée en brouillon par la mise à jour 0037)
+select test.verifier((select count(*) from public.ressources where titre <> 'Je mange dehors') = 2, 'la coach voit toutes les ressources');
 insert into public.categories_ressource (nom, ordre) values ('Recettes', 5);
 select test.verifier(true, 'la coach peut ajouter une catégorie');
 reset role;

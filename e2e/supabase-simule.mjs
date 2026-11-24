@@ -134,6 +134,12 @@ const ressources = [
   { id: "eeeeeeee-0000-0000-0000-000000000002", titre: "Liste de courses de base", categorie_id: categories[1].id, description: null, url: "https://drive.google.com/b", visibilite: "toutes", created_at: "2026-11-02T09:00:00Z" },
   { id: "eeeeeeee-0000-0000-0000-000000000003", titre: "Ebook compléments", categorie_id: categories[2].id, description: "Magnésium, vitamine D, oméga-3 : ce qui est utile.", url: "https://drive.google.com/c", visibilite: "certaines", created_at: "2026-11-03T09:00:00Z" },
 ];
+// Brouillon « Je mange dehors » : le même texte que la mise à jour 0037.
+{
+  const sql = fs.readFileSync(new URL("../supabase/migrations/0037_ressources_fiches.sql", import.meta.url), "utf8");
+  const contenu = sql.split("$fiche$")[1];
+  ressources.push({ id: "eeeeeeee-0000-0000-0000-000000000004", titre: "Je mange dehors", categorie_id: categories[3].id, description: "Restaurant, boulangerie, chez des amis : profiter, sans culpabiliser et sans tout remettre en question.", url: null, contenu, publiee: false, visibilite: "toutes", created_at: "2026-11-24T09:00:00Z" });
+}
 const ressourcesClientes = [{ ressource_id: ressources[2].id, cliente_id: ALICE }];
 function filtrer(lignes, params) {
   let r = lignes;
@@ -669,6 +675,14 @@ http.createServer((req, res) => {
     visibles: coach ? annonces : annonces.filter((a) => a.expire_le > new Date().toISOString()),
     creer: (b) => ({ id: "a0000000-0000-4000-8000-" + String(annonces.length + 1).padStart(12, "0"), lien: null, cree_le: new Date().toISOString(), expire_le: new Date(Date.now() + 86400000).toISOString(), ...b }),
   });
+  if (u.pathname === "/rest/v1/ressources_clientes") return tableCommu(req, res, u, ressourcesClientes, { visibles: coach ? ressourcesClientes : ressourcesClientes.filter((r) => r.cliente_id === uid), creer: (b) => (coach ? b : { erreur: "interdit" }) });
+  if (u.pathname === "/rest/v1/ressources") {
+    if (!coach && req.method !== "GET") { res.writeHead(403); return res.end(); }
+    return tableCommu(req, res, u, ressources, {
+      visibles: coach ? ressources : ressources.filter((r) => r.publiee !== false && (r.visibilite === "toutes" || ressourcesClientes.some((l) => l.ressource_id === r.id && l.cliente_id === uid))),
+      creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
+    });
+  }
   if (u.pathname === "/rest/v1/planning_repas") return tableCommu(req, res, u, planningRepas, {
     visibles: coach ? planningRepas : planningRepas.filter((x) => x.cliente_id === uid),
     enrichir: (x) => ({ ...x, recettes: { titre: recettes.find((r) => r.id === x.recette_id)?.titre ?? "?" } }),
@@ -715,8 +729,6 @@ http.createServer((req, res) => {
     case "/rest/v1/videos": { const l = filtrer(coach ? videos : videos.filter((v) => v.publiee), u.searchParams); res.setHeader("content-range", `0-${Math.max(l.length - 1, 0)}/${l.length}`); return send(l); }
     case "/rest/v1/champs_mesure": return send(filtrer(champs, u.searchParams));
     case "/rest/v1/retours_bilan": return send(filtrer(coach ? retours : retours.filter((r) => bilans.find((b) => b.id === r.bilan_id)?.cliente_id === uid), u.searchParams));
-    case "/rest/v1/ressources_clientes": return send(coach ? ressourcesClientes : ressourcesClientes.filter((r) => r.cliente_id === uid));
-    case "/rest/v1/ressources": return send(coach ? ressources : ressources.filter((r) => r.visibilite === "toutes" || ressourcesClientes.some((l) => l.ressource_id === r.id && l.cliente_id === uid)));
     case "/rest/v1/clientes": {
       const visibles = coach ? clientes : clientes.filter((c) => c.id === uid);
       return send(filtrer(eqId ? visibles.filter((c) => c.id === eqId) : visibles, [...u.searchParams].filter(([k]) => k !== "id")));

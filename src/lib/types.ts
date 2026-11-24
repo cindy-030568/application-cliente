@@ -86,9 +86,13 @@ export type Ressource = {
   titre: string;
   categorie_id: string | null;
   description: string | null;
-  url: string;
+  /** Lien externe ; null pour une fiche écrite dans l'appli (0037). */
+  url: string | null;
   visibilite: "toutes" | "certaines";
   created_at: string;
+  /** Fiche écrite dans l'appli et état de publication (lus à part, après la mise à jour 0037). */
+  contenu?: string | null;
+  publiee?: boolean;
 };
 
 export const COLONNES_RESSOURCE = "id, titre, categorie_id, description, url, visibilite, created_at";

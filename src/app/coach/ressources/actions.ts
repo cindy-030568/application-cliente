@@ -26,13 +26,23 @@ export async function enregistrerRessource(
   const clientes = formData.getAll("clientes").map(String).filter((c) => UUID.test(c));
 
   if (!titre) return { erreur: "Le titre est obligatoire." };
-  let url: string;
-  try {
-    const u = new URL(String(formData.get("url") ?? "").trim());
-    if (u.protocol !== "https:") throw new Error();
-    url = u.toString();
-  } catch {
-    return { erreur: "Le lien doit commencer par https://" };
+  // Fiches écrites dans l'appli et brouillons : seulement après la mise à jour 0037.
+  const avecFiches = formData.get("avec_fiches") === "1";
+  const fiche = avecFiches && formData.get("type") === "fiche";
+  let url: string | null = null;
+  let contenu: string | null = null;
+  if (fiche) {
+    contenu = String(formData.get("contenu") ?? "").replace(/\r\n?/g, "\n").trim();
+    if (!contenu) return { erreur: "Écris le contenu de la fiche." };
+    if (contenu.length > 20000) return { erreur: "La fiche est trop longue (20 000 caractères au plus)." };
+  } else {
+    try {
+      const u = new URL(String(formData.get("url") ?? "").trim());
+      if (u.protocol !== "https:") throw new Error();
+      url = u.toString();
+    } catch {
+      return { erreur: "Le lien doit commencer par https://" };
+    }
   }
   if (visibilite === "certaines" && clientes.length === 0) {
     return { erreur: "Choisis au moins une cliente, ou rends la ressource visible par toutes." };
@@ -44,6 +54,7 @@ export async function enregistrerRessource(
     url,
     visibilite,
     categorie_id: UUID.test(categorie) ? categorie : null,
+    ...(avecFiches ? { contenu, publiee: formData.get("publiee") === "on" } : {}),
   };
 
   let ressourceId = id;
