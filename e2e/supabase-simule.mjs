@@ -326,7 +326,11 @@ programmesSportifs.push({ id: "9b000000-0000-4000-8000-0000000000f1", cliente_id
       { nom: "Squat goblet", series: "2", repetitions: "10", charge: null, repos: "30 s", tempo: null, consignes: "Dos droit" }] }] }] } });
 const seancesFaites = [];
 // Une séance précédente (il y a 3 jours) pour le rappel « la dernière fois ».
-const chargesSeries = [1, 2, 3, 4].map((serie) => ({ cliente_id: "00000000-0000-0000-0000-00000000000a", seance_ref: "21000000-0000-4000-8000-000000000001", exercice_cle: "squat goblet", exercice_nom: "Squat goblet", serie, charge_kg: serie < 3 ? "12.0" : "14.0", faite_le: new Date(Date.now() - 3 * 864e5 + serie * 60000).toISOString() }));
+const chargesSeries = [
+  // Il y a 12 jours : 10 kg ; il y a 3 jours : 14 kg → « Nouveau record » (victoire hors balance).
+  ...[1, 2, 3].map((serie) => ({ cliente_id: "00000000-0000-0000-0000-00000000000a", seance_ref: "21000000-0000-4000-8000-000000000000", exercice_cle: "squat goblet", exercice_nom: "Squat goblet", serie, charge_kg: "10.0", faite_le: new Date(Date.now() - 12 * 864e5 + serie * 60000).toISOString() })),
+  ...[1, 2, 3, 4].map((serie) => ({ cliente_id: "00000000-0000-0000-0000-00000000000a", seance_ref: "21000000-0000-4000-8000-000000000001", exercice_cle: "squat goblet", exercice_nom: "Squat goblet", serie, charge_kg: serie < 3 ? "12.0" : "14.0", faite_le: new Date(Date.now() - 3 * 864e5 + serie * 60000).toISOString() })),
+];
 const annonces = [];
 const paiementsClientes = [];
 const echeancesPaiement = [];

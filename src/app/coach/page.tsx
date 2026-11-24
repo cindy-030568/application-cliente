@@ -12,7 +12,9 @@ import { lireMouvements } from "@/lib/revenus-serveur";
 import { lireSeancesFaites } from "@/lib/seances-faites-serveur";
 import { LIBELLE_MOTIF, detecterAlerte } from "@/lib/alertes-notes";
 import { CATEGORIE, classerTaches, enRetard, quand, resume, type Tache, type TypeTache } from "@/lib/tableau-de-bord";
-import { proposerMessages, type Proposition } from "@/lib/propositions-messages";
+import { proposerMessages, semaineIso, type Proposition } from "@/lib/propositions-messages";
+import { detecterVictoires } from "@/lib/victoires";
+import { chargerDonneesVictoires } from "@/lib/victoires-serveur";
 import { CarteAnnonce } from "./annonce";
 import { PropositionsMessages } from "./propositions";
 import { chargerFile } from "./bilans/donnees";
@@ -40,6 +42,7 @@ export default async function TableauDeBord() {
     objectifs,
     dejaTraitees,
     notesRecentes,
+    donneesVictoires,
   ] = await Promise.all([
       chargerFile(),
       supabase.from("echeances_paiement").select("id, cliente_id, date_echeance, montant").is("payee_le", null).lte("date_echeance", dans14),
@@ -62,6 +65,8 @@ export default async function TableauDeBord() {
       supabase.from("messages_cliente").select("cliente_id, proposition").gte("cree_le", ajouterJours(auj, -8)),
       // Notes à lire vite : notes du journal des 3 derniers jours.
       supabase.from("journal_quotidien").select("cliente_id, jour, observations").gte("jour", ajouterJours(auj, -2)).not("observations", "is", null),
+      // Victoires hors balance (charges, séances, tour de taille, stress, digestion : jamais le poids).
+      chargerDonneesVictoires(supabase, auj),
     ]);
 
   const suivies = clientes.filter((c) => c.statut !== "fermee");
@@ -218,8 +223,20 @@ export default async function TableauDeBord() {
       auj,
     ).filter((p) => !traitees.has(`${c.id}|${p.cle}`)),
   );
-  // Les relances d'abord.
-  propositions.sort((a, b) => Number(a.ton === "bravo") - Number(b.ton === "bravo"));
+  // Victoires hors balance de la semaine : une ligne par victoire, avec un mot de félicitations prêt à envoyer.
+  const semaine = semaineIso(auj);
+  for (const c of actives) {
+    const d = donneesVictoires.get(c.id);
+    if (!d) continue;
+    for (const v of detecterVictoires({ ...d, prenom: c.profils.prenom, sansChiffres: c.mode_sans_chiffres }, auj)) {
+      const cle = `victoire_${v.type}:${semaine}`;
+      if (traitees.has(`${c.id}|${cle}`)) continue;
+      propositions.push({ cle, clienteId: c.id, prenom: c.profils.prenom, ton: "victoire", titre: `${v.emoji} ${v.titre}`, constat: v.constat, message: v.message });
+    }
+  }
+  // Les relances d'abord, puis les victoires, puis les bravos.
+  const ORDRE_TON = { relance: 0, victoire: 1, bravo: 2 } as const;
+  propositions.sort((a, b) => ORDRE_TON[a.ton] - ORDRE_TON[b.ton]);
 
   // ------------------------------------------------------------ Chiffres du moment
   const an = Number(auj.slice(0, 4));
@@ -283,7 +300,7 @@ export default async function TableauDeBord() {
             <div className="flex items-baseline justify-between gap-3">
               <div>
                 <h2 className="font-titre text-[22px] font-bold leading-tight">Garder le contact 💬</h2>
-                <p className="text-[13.5px] text-texte-2">Ce qui a changé cette semaine chez tes clientes, avec un petit mot prêt à envoyer.</p>
+                <p className="text-[13.5px] text-texte-2">Ce qui a changé cette semaine chez tes clientes (et leurs victoires hors balance), avec un petit mot prêt à envoyer.</p>
               </div>
               {propositions.length > 0 && <span className="font-titre text-[22px] font-bold tabular-nums text-texte-2">{propositions.length}</span>}
             </div>

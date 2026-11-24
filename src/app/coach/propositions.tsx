@@ -51,7 +51,7 @@ function LigneProposition({ p, fait }: { p: Proposition; fait: (message: string)
         <Link href={`/coach/clientes/${p.clienteId}`} className="text-[15.5px] font-semibold hover:text-accent">
           {p.prenom}
         </Link>
-        <Etiquette ton={p.ton === "bravo" ? "vert" : "rose"}>{p.ton === "bravo" ? "Bravo" : "Garder le lien"}</Etiquette>
+        <Etiquette ton={p.ton === "relance" ? "rose" : "vert"}>{p.ton === "victoire" ? "Victoire 🏆" : p.ton === "bravo" ? "Bravo" : "Garder le lien"}</Etiquette>
       </div>
       <div>
         <p className="text-[14.5px] font-medium">{p.titre}</p>

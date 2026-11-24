@@ -23,6 +23,9 @@ import { journalActif } from "@/lib/journal-serveur";
 import { AnnoncesAccueil } from "@/components/annonces";
 import { MarquerMessagesLus } from "@/components/messages-lus";
 import { encouragementDuJour } from "@/lib/encouragements";
+import { detecterVictoires } from "@/lib/victoires";
+import { chargerDonneesVictoires } from "@/lib/victoires-serveur";
+import { CarteVictoires } from "@/components/victoires";
 import { EnTete } from "./composants";
 
 export default async function PageAccueil() {
@@ -56,11 +59,17 @@ export default async function PageAccueil() {
     timeZone: "Europe/Paris",
   });
   const formationOuverte = fiche.acces_formation && Boolean(reglages.lien_formation);
-  const [communaute, sport, monPaiement] = await Promise.all([
+  const [communaute, sport, monPaiement, donneesVictoires] = await Promise.all([
     carteCommunaute(supabase, profil.id),
     lireSuiviSport(supabase, profil.id),
     lireMonPaiement(supabase),
+    chargerDonneesVictoires(supabase, auj, profil.id),
   ]);
+  // Victoires hors balance des 7 derniers jours (jamais le poids ; sans nombre en mode sans chiffres).
+  const mesDonnees = donneesVictoires.get(profil.id);
+  const victoires = mesDonnees
+    ? detecterVictoires({ ...mesDonnees, prenom: profil.prenom, sansChiffres: fiche.mode_sans_chiffres }, auj).map(({ cle, emoji, titre }) => ({ cle, emoji, titre }))
+    : [];
   const mensualite = mensualiteASignaler(monPaiement, auj);
   // Journal du jour (rien avant la mise à jour 0013 ou s'il est désactivé pour elle).
   const [avecJournal, { data: journeeDuJour, error: sansJournal }] = await Promise.all([
@@ -99,6 +108,7 @@ export default async function PageAccueil() {
           annonces={[...(mots ?? []).map((m) => ({ id: `m-${m.id}`, texte: m.texte as string, lien: null })), ...(annonces ?? [])]}
         />
         <MarquerMessagesLus ids={nonLus} />
+        <CarteVictoires victoires={victoires} />
 
         {retourNonLu && (
           <Link

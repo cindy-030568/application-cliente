@@ -24,7 +24,7 @@ export type Proposition = {
   cle: string;
   clienteId: string;
   prenom: string;
-  ton: "relance" | "bravo";
+  ton: "relance" | "bravo" | "victoire";
   titre: string;
   /** Ce qui a changé (pour la coach). */
   constat: string;
