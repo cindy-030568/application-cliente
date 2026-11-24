@@ -1152,6 +1152,7 @@ Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supab
 3. [`0035_complements.sql`](../supabase/migrations/0035_complements.sql) (compléments)
 4. [`0036_planning_repas.sql`](../supabase/migrations/0036_planning_repas.sql) (planning des repas)
 5. [`0037_ressources_fiches.sql`](../supabase/migrations/0037_ressources_fiches.sql) (fiches écrites dans l'appli et brouillon « Je mange dehors »)
+6. [`0038_bilan_fin.sql`](../supabase/migrations/0038_bilan_fin.sql) (bilan de fin de suivi)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1262,3 +1263,31 @@ Elle est écrite dans l'esprit **sans restriction**, à la première personne de
 Tes clientes la trouvent alors dans **Ressources**, et la lisent directement dans l'appli.
 
 **Tester** : avant de publier, connecte-toi avec une cliente de test : la fiche n'apparaît pas dans ses ressources. Publie-la, recharge : elle apparaît.
+
+## 8. Bilan de fin de suivi
+
+**Quand ta cliente le voit** : automatiquement **7 jours avant sa date de fin** (fiche → Infos et accès → date de fin), ou dès que tu passes son suivi en **« Terminé »**. Une carte « Ton bilan de fin de suivi est prêt 🎓 » apparaît sur son accueil. Quand tu fermes son accès, elle ne le voit plus : elle doit donc le **télécharger avant**.
+
+**Ce qu'il contient** :
+- ses chiffres : séances faites, bilans envoyés, jours de journal ;
+- **avant / après** : sa première et sa dernière photo (de face si possible) ;
+- **ses mesures** : départ → aujourd'hui, avec une petite courbe pour chacune ;
+- **ses progrès en force** : les exercices où sa charge a le plus augmenté ;
+- un mot de fin, puis le bloc **« Continuer avec moi »**.
+
+Il respecte ses réglages :
+- en **mode sans chiffres**, ni mesures ni photos ni kilos ;
+- si le **poids est masqué**, jamais de poids.
+
+Elle peut le **télécharger en PDF** (« Télécharger mon bilan (PDF) »).
+
+**« Continuer avec moi »** : **Réglages → Bilan de fin de suivi**.
+- Tu écris ton texte et tes offres (6 au plus), avec un titre et une description. Aucun prix n'est imposé : indique-le dans la description si tu le souhaites.
+- Sous chaque offre, ta cliente a un bouton **« Ça m'intéresse »**.
+- Quand elle clique, tu es prévenue : notification, et email si tu l'as coché, case « Inscription ou envie de continuer » dans Réglages → Mes notifications.
+- Une ligne « Envie de continuer avec toi » apparaît aussi dans ton tableau de bord.
+- Sur sa fiche, rubrique **Bilan de fin de suivi**, tu vois ses demandes. Tu cliques sur **Marquer comme traitée** une fois que tu l'as recontactée.
+
+Sur sa fiche, **« Voir son bilan de fin tel qu'elle le voit »** ouvre un aperçu à tout moment, même avant qu'elle y ait accès.
+
+**Tester** : sur la fiche d'une cliente de test qui a quelques bilans, mets une date de fin dans moins de 7 jours. Connecte-toi avec elle : la carte apparaît sur son accueil. Ouvre son bilan, télécharge le PDF, puis clique sur « Ça m'intéresse » : tu reçois la notification, et la ligne apparaît dans ton tableau de bord.

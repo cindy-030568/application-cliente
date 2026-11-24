@@ -43,6 +43,7 @@ export default async function TableauDeBord() {
     dejaTraitees,
     notesRecentes,
     donneesVictoires,
+    demandesSuite,
   ] = await Promise.all([
       chargerFile(),
       supabase.from("echeances_paiement").select("id, cliente_id, date_echeance, montant").is("payee_le", null).lte("date_echeance", dans14),
@@ -67,6 +68,8 @@ export default async function TableauDeBord() {
       supabase.from("journal_quotidien").select("cliente_id, jour, observations").gte("jour", ajouterJours(auj, -2)).not("observations", "is", null),
       // Victoires hors balance (charges, séances, tour de taille, stress, digestion : jamais le poids).
       chargerDonneesVictoires(supabase, auj),
+      // Envies de continuer (bilan de fin de suivi, 0038).
+      supabase.from("demandes_suite").select("id, cliente_id, offre, cree_le").eq("traitee", false),
     ]);
 
   const suivies = clientes.filter((c) => c.statut !== "fermee");
@@ -97,6 +100,16 @@ export default async function TableauDeBord() {
       titre: nom.get(n.clienteId) ?? "Cliente",
       detail: `${n.source === "journal" ? "Dans son journal" : "Après sa séance"} : quelque chose qui concerne ${LIBELLE_MOTIF[motif]}`,
       lien: n.source === "journal" ? `/coach/clientes/${n.clienteId}/suivi` : `/coach/clientes/${n.clienteId}/programme-sportif`,
+    });
+  }
+  for (const d of demandesSuite.error ? [] : (demandesSuite.data ?? [])) {
+    taches.push({
+      id: `su-${d.id}`,
+      type: "suite",
+      date: jourParisDe(d.cree_le as string),
+      titre: nom.get(d.cliente_id as string) ?? "Cliente",
+      detail: `Envie de continuer avec toi : « ${d.offre} »`,
+      lien: `/coach/clientes/${d.cliente_id}`,
     });
   }
   for (const b of aTraiter) {
@@ -363,6 +376,7 @@ const TON: Record<TypeTache, "rose" | "sable" | "sombre" | "vert"> = {
   programme: "rose",
   programme_auto: "rose",
   fin_suivi: "sombre",
+  suite: "vert",
   decrochage: "sombre",
   signalement: "rose",
   rgpd: "sombre",
@@ -425,7 +439,7 @@ function Bloc({
 
 function LigneTache({ t, auj }: { t: Tache; auj: string }) {
   const retard = enRetard(t, auj);
-  const aujourdhui = !retard && t.date === auj && t.type !== "signalement" && t.type !== "decrochage" && t.type !== "rgpd";
+  const aujourdhui = !retard && t.date === auj && t.type !== "signalement" && t.type !== "decrochage" && t.type !== "rgpd" && t.type !== "suite";
   return (
     <li>
       {/* Téléphone : étiquette et date en haut, puis la cliente et l'action sur toute la largeur. */}

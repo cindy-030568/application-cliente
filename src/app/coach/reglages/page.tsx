@@ -11,6 +11,8 @@ import { configurationRappels, lireReglagesRappels } from "@/lib/envoi-rappels";
 import { lirePrefsNotifCoach } from "@/lib/notifications-coach";
 import { NotificationsCoach } from "./notifications";
 import { FormulaireContrat, InterrupteurBrouillon, type ReglagesContrat } from "./contrat";
+import { FormulaireFinSuivi } from "./fin";
+import { lireOffres } from "@/lib/bilan-fin";
 
 export const metadata: Metadata = { title: "Réglages" };
 
@@ -26,6 +28,7 @@ export default async function PageReglages() {
     { data: contrat, error: sans0027 },
     { count: acceptations },
     { data: brouillon, error: sans0028 },
+    { data: fin, error: sans0038 },
   ] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
@@ -43,6 +46,8 @@ export default async function PageReglages() {
     supabase.from("reglages").select("contrat_texte, contrat_version, contrat_case_renonciation, contrat_depuis").maybeSingle<ReglagesContrat>(),
     supabase.from("acceptations_contrat").select("id", { count: "exact", head: true }),
     supabase.from("reglages").select("brouillon_claude").maybeSingle<{ brouillon_claude: boolean }>(),
+    // Bilan de fin de suivi (0038) : lu à part.
+    supabase.from("reglages").select("fin_texte, fin_offres").maybeSingle<{ fin_texte: string; fin_offres: unknown }>(),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -89,6 +94,19 @@ export default async function PageReglages() {
         <Link href="/coach/reglages/questionnaire" className={classesBouton("contour")}>
           Modifier les questions
         </Link>
+      </Carte>
+      <Carte id="fin-de-suivi" className="flex scroll-mt-6 flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Bilan de fin de suivi : « Continuer avec moi »</h2>
+          <p className="text-[14px] text-texte-2">
+            Ce que ta cliente lit en bas de son bilan de fin de suivi, avec un bouton « Ça m’intéresse » sous chaque offre. Tu es prévenue quand elle clique.
+          </p>
+        </div>
+        {sans0038 || !fin ? (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0038_bilan_fin.sql (voir le guide).</Message>
+        ) : (
+          <FormulaireFinSuivi texte={fin.fin_texte} offres={lireOffres(fin.fin_offres)} />
+        )}
       </Carte>
       <Carte className="flex flex-col gap-4">
         <div>

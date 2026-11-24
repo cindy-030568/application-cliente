@@ -17,6 +17,8 @@ import { BlocPlan, type PlanAffiche } from "./bloc-plans";
 import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
 import { BlocPaiement } from "./bloc-paiement";
 import { BlocComplements } from "./bloc-complements";
+import { BoutonTraiterSuite } from "../../reglages/fin";
+import { bilanFinVisible } from "@/lib/bilan-fin";
 import type { Complement } from "@/lib/complements";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
 import { chargerCategoriesAliment } from "@/lib/aliments";
@@ -100,6 +102,13 @@ export default async function PageFicheCliente({
     supabase.from("complements").select("id, nom, moment, quantite, note, ordre, actif").eq("cliente_id", id).order("ordre").returns<Complement[]>(),
     supabase.from("complements_pris").select("complement_id", { count: "exact", head: true }).eq("cliente_id", id).gte("jour", ajouterJours(aujourdhuiParis(), -6)),
   ]);
+  // Demandes « continuer avec moi » du bilan de fin de suivi (0038) : lues à part.
+  const { data: demandesSuite, error: sansFin } = await supabase
+    .from("demandes_suite")
+    .select("id, offre, cree_le, traitee")
+    .eq("cliente_id", id)
+    .order("cree_le", { ascending: false })
+    .returns<{ id: string; offre: string; cree_le: string; traitee: boolean }[]>();
   // Contrat accepté (0027) et questionnaire d'arrivée (0031) : lus à part.
   const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }, { data: questionnaire, error: sansQuestionnaire }] = await Promise.all([
     supabase
@@ -465,6 +474,35 @@ export default async function PageFicheCliente({
               </ul>
             ) : (
               <p className="text-[13.5px] text-texte-2">Aucun rappel envoyé pour l’instant.</p>
+            )}
+          </Repliable>
+        )}
+        {!sansFin && (
+          <Repliable
+            titre="Bilan de fin de suivi"
+            resume={
+              bilanFinVisible(c, aujourdhuiParis()) ? "Visible par elle en ce moment" : "Visible 7 jours avant sa date de fin, ou dès que son suivi est terminé"
+            }
+            alerte={
+              (demandesSuite ?? []).some((d) => !d.traitee)
+                ? `Envie de continuer : ${(demandesSuite ?? []).filter((d) => !d.traitee).map((d) => d.offre).join(", ")} · `
+                : undefined
+            }
+          >
+            <Link href={`/coach/clientes/${c.id}/bilan-de-fin`} className="w-fit text-[14.5px] font-medium underline underline-offset-4">
+              Voir son bilan de fin tel qu’elle le voit
+            </Link>
+            {(demandesSuite ?? []).length > 0 && (
+              <ul className="flex flex-col divide-y divide-ligne">
+                {(demandesSuite ?? []).map((d) => (
+                  <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                    <span className="text-[14.5px]">
+                      A cliqué sur <strong>« {d.offre} »</strong> le {formaterDate(d.cree_le.slice(0, 10))}
+                    </span>
+                    {d.traitee ? <span className="text-[13.5px] text-texte-2">Traitée</span> : <BoutonTraiterSuite id={d.id} />}
+                  </li>
+                ))}
+              </ul>
             )}
           </Repliable>
         )}

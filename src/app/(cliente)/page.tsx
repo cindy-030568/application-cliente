@@ -27,6 +27,7 @@ import { detecterVictoires } from "@/lib/victoires";
 import { chargerDonneesVictoires } from "@/lib/victoires-serveur";
 import { CarteVictoires } from "@/components/victoires";
 import { recapRecent } from "@/lib/recap-semaine";
+import { bilanFinVisible } from "@/lib/bilan-fin";
 import { heureParis } from "@/lib/journal";
 import { EnTete } from "./composants";
 
@@ -152,6 +153,19 @@ export default async function PageAccueil() {
                   ? `Pour le ${formaterDate(bilanAFaire.echeance, { year: undefined })} · quelques minutes suffisent.`
                   : "Il est encore temps de l’envoyer."}
               </span>
+            </span>
+            <IconeFleche className="size-5 shrink-0" />
+          </Link>
+        )}
+
+        {bilanFinVisible(fiche, auj) && (
+          <Link href="/bilan-de-fin" className="flex items-center gap-4 rounded-carte bg-chocolat p-4 text-creme apparition">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-carte-sombre text-xl" aria-hidden>
+              🎓
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="font-medium">Ton bilan de fin de suivi est prêt</span>
+              <span className="text-[14px] text-texte-clair">Ta transformation, à garder et à télécharger 💛</span>
             </span>
             <IconeFleche className="size-5 shrink-0" />
           </Link>

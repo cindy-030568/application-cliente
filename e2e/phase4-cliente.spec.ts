@@ -122,3 +122,29 @@ test("fiche « Je mange dehors » : invisible en brouillon, lisible une fois pub
   await page.goto("/ressources/eeeeeeee-0000-0000-0000-000000000004");
   await expect(page.getByRole("heading", { name: "Au restaurant" })).toHaveCount(0);
 });
+
+test("bilan de fin de suivi : sa transformation, le PDF et « Continuer avec moi »", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.getByRole("link", { name: /Ton bilan de fin de suivi est prêt/ }).click();
+  await expect(page.getByRole("heading", { name: /Sophie, regarde ton chemin/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Avant / après" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Tes mesures" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Courbe : Tour de taille" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Tu es devenue plus forte/ })).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-bilan-fin.png", fullPage: true });
+  // PDF à garder.
+  const [pdf] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Télécharger mon bilan (PDF)" }).click()]);
+  expect(pdf.suggestedFilename()).toBe("mon-bilan-de-fin-de-suivi.pdf");
+  const chemin = await pdf.path();
+  const { readFileSync } = await import("node:fs");
+  expect(readFileSync(chemin).subarray(0, 5).toString()).toBe("%PDF-");
+  await pdf.saveAs("test-results/phase4-bilan-fin.pdf");
+  // Continuer avec moi.
+  const offre = page.locator("li", { hasText: "Continuer mon accompagnement" });
+  await offre.getByRole("button", { name: "Ça m’intéresse" }).click();
+  await expect(page.getByText("C’est noté ! Cindy revient vers toi très vite 💛")).toBeVisible();
+  await expect(offre).toContainText("Demande envoyée à Cindy ✓");
+  await page.reload();
+  await expect(page.locator("li", { hasText: "Continuer mon accompagnement" })).toContainText("Demande envoyée à Cindy ✓");
+});

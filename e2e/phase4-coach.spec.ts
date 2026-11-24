@@ -66,3 +66,21 @@ test("fiche « Je mange dehors » : brouillon relu puis publié par la coach", a
   await cliente.screenshot({ path: "test-results/phase4-fiche-cliente.png" });
   await tel.close();
 });
+
+test("bilan de fin de suivi : la coach règle ses offres, voit l'aperçu et les envies de continuer", async ({ page }) => {
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/reglages#fin-de-suivi");
+  const carte = page.locator("#fin-de-suivi");
+  await carte.getByRole("button", { name: "Ajouter une offre" }).click();
+  await carte.getByLabel("Offre 2").fill("Programme 3 mois");
+  await carte.getByLabel("Description (et le prix si tu veux l’indiquer)").nth(1).fill("3 mois de suivi complet, nutrition et sport.");
+  await carte.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(carte.getByText("Enregistré ✓")).toBeVisible();
+  await page.goto("/coach/clientes/00000000-0000-0000-0000-00000000000a/bilan-de-fin");
+  await expect(page.getByText("c’est ce que ta cliente voit en ce moment")).toBeVisible();
+  await expect(page.getByText("Programme 3 mois")).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-bilan-fin-coach.png", fullPage: true });
+  // L'envie de continuer (envoyée par la cliente dans le test téléphone) apparaît dans le tableau de bord.
+  await page.goto("/coach");
+  await expect(page.getByText("Envie de continuer avec toi : « Continuer mon accompagnement »")).toBeVisible();
+});

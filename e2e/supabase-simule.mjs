@@ -23,7 +23,9 @@ const clientes = [
   fiche("00000000-0000-0000-0000-0000000000b3", "active", "Claire", "Petit", "claire@exemple.fr", "2026-09-21", true),
   fiche("00000000-0000-0000-0000-0000000000b4", "terminee", "Isabelle", "Moreau", "isabelle@exemple.fr", "2026-03-02", true),
 ];
-const reglages = { notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
+// Sophie termine son suivi dans 5 jours : son bilan de fin de suivi est visible.
+clientes[0].date_fin = iso(new Date(Date.now() + 5 * 86400000));
+const reglages = { fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
   message_formation: "Envie d'aller plus loin ? Découvre la Fitw_cindy Academy ✨", lien_contact: "https://wa.me/33600000000",
   tolerance_pct: 10, tolerance_g: 3, hors_tolerance: "masquer", rappels_actifs: true, relance_jours: 2, texte_rappel: "Coucou {prenom} ! Ton bilan est prêt : prends 5 minutes pour faire le point 💛", texte_relance: "{prenom}, ton bilan t'attend toujours. Quelques minutes suffisent, même imparfait 💛", fenetre_bilan_jours: 3, intro_bilan: "Voici les points pour faire le point sur ces {jours} derniers jours. Réponds en toute simplicité, avec tes mots à toi. Pas besoin d’être parfaite : ce bilan, c’est ton espace pour faire le point et avancer 💛" };
 const jour = (n) => iso(new Date(Date.now() + n * 86400000));
@@ -304,6 +306,9 @@ for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
   journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
 
+// ---- Fin de suivi (0038)
+const demandesSuite = [];
+
 // ---- Planning des repas (0036)
 const planningRepas = [];
 
@@ -518,6 +523,11 @@ http.createServer((req, res) => {
       res.end(JSON.stringify((paths ?? []).map((p) => ({ path: p, signedURL: "/object/sign/photos/" + p + "?token=faux", error: null }))));
     }); return;
   }
+  // Téléchargement d'une photo de bilan (PDF du bilan de fin) : une petite image PNG.
+  if (u.pathname.startsWith("/storage/v1/object/photos/") && req.method === "GET") {
+    res.writeHead(200, { "content-type": "image/png" });
+    return res.end(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP42rQTAAUpAk8zGDhpAAAAAElFTkSuQmCC", "base64"));
+  }
   if (u.pathname.startsWith("/storage/v1/object/sign/photos/")) {
     const angle = u.pathname.includes("face") ? "face" : u.pathname.includes("profil") ? "profil" : "dos";
     const ton = u.pathname.includes("000000000003") ? "#d9b48f" : "#e6c9a8";
@@ -683,6 +693,10 @@ http.createServer((req, res) => {
       creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
     });
   }
+  if (u.pathname === "/rest/v1/demandes_suite") return tableCommu(req, res, u, demandesSuite, {
+    visibles: coach ? demandesSuite : demandesSuite.filter((x) => x.cliente_id === uid),
+    creer: (b) => (coach ? { erreur: "interdit" } : { id: "d5000000-0000-4000-8000-" + String(demandesSuite.length + 1).padStart(12, "0"), cree_le: new Date().toISOString(), traitee: false, ...b, cliente_id: uid }),
+  });
   if (u.pathname === "/rest/v1/planning_repas") return tableCommu(req, res, u, planningRepas, {
     visibles: coach ? planningRepas : planningRepas.filter((x) => x.cliente_id === uid),
     enrichir: (x) => ({ ...x, recettes: { titre: recettes.find((r) => r.id === x.recette_id)?.titre ?? "?" } }),
