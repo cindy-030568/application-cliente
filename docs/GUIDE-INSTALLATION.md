@@ -1148,6 +1148,7 @@ Comment certaines questions sont reprises :
 Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success ».
 
 1. [`0033_recap_semaine.sql`](../supabase/migrations/0033_recap_semaine.sql) (récap de la semaine)
+2. [`0034_cycle.sql`](../supabase/migrations/0034_cycle.sql) (cycle et périménopause)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1182,3 +1183,20 @@ Où elle le voit :
 La notification part avec les rappels du journal (l'horloge Supabase qui tourne toutes les 15 minutes) : rien d'autre à mettre en route. Elle n'est envoyée qu'une fois par semaine, et seulement aux clientes en cours de suivi.
 
 **Tester** : connecte-toi avec une cliente de test → **Suivi** → **Mon récap de la semaine**. Les chiffres de la semaine dernière s'affichent, et « ← Semaine d'avant » montre les précédentes. Un dimanche après 18 h, la notification arrive sur un téléphone où les notifications sont activées.
+
+## 4. Cycle et périménopause dans le journal
+
+C'est **ta cliente qui choisit**, dans **Profil → Mon cycle (facultatif)** :
+- **Rien** (par défaut) ;
+- **Mon cycle** : elle indique la durée habituelle de son cycle (28 jours par défaut). L'app déduit le **jour et la phase** de son cycle à partir des jours où elle coche « J'ai mes règles » dans son journal. Si elle a oublié de cocher, elle corrige simplement les jours concernés dans son journal.
+- **Ma périménopause** : dans son journal, elle coche ses **symptômes du jour** (bouffées de chaleur, sueurs nocturnes, sommeil perturbé, sautes d'humeur, fatigue, règles irrégulières, douleurs articulaires, ballonnements, maux de tête).
+
+Ce qu'elle voit dans son journal :
+- « Jour 24 de ton cycle · phase lutéale », avec la mention « Repères indicatifs, qui ne remplacent pas l'avis d'un professionnel de santé » ;
+- si son poids monte pendant une période où le corps retient souvent de l'eau (les 7 jours avant les règles et les 3 premiers jours des règles), un **message doux** : « C'est normal en ce moment… Regarde la tendance sur plusieurs semaines plutôt que le chiffre du jour 💛 ». Jamais en mode sans chiffres.
+
+Ce que tu vois : sur sa fiche → **Suivi**, un bloc « Son cycle » (jour et phase du moment) ou « Sa périménopause » (symptômes notés ces 14 derniers jours).
+
+**Données sensibles** : visibles seulement par elle et toi. Une cliente dont l'accès est fermé ne voit plus son journal. L'app ne donne **jamais d'avis médical**. Pense à mentionner ces données (cycle, symptômes) dans ta politique de confidentialité.
+
+**Tester** : avec une cliente de test → **Profil** → **Mon cycle** → « Mon cycle » → **Enregistrer**. Dans son journal, coche « J'ai mes règles » sur un jour récent : le jour du cycle s'affiche. Puis choisis « Ma périménopause » : les symptômes apparaissent dans le journal. Coche-en un, enregistre, et regarde sa fiche → Suivi.

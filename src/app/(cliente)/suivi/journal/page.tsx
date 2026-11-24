@@ -10,6 +10,8 @@ import { exigerCliente } from "@/lib/auth";
 import { ajouterJours, aujourdhuiParis } from "@/lib/bilan";
 import { numeroSemaine } from "@/lib/journal";
 import { journalActif, lireJournal } from "@/lib/journal-serveur";
+import { LIBELLE_PHASE, PAS_UN_AVIS_MEDICAL, messageRetention, situationCycle } from "@/lib/cycle";
+import { lireCycle, lireSymptomesJournal } from "@/lib/cycle-serveur";
 
 export const metadata: Metadata = { title: "Mon journal" };
 
@@ -25,6 +27,7 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
     supabase.from("abonnements_push").select("id", { count: "exact", head: true }).eq("cliente_id", profil.id),
   ]);
   if (!entrees || !actif) redirect("/suivi");
+  const cycle = await lireCycle(supabase, profil.id);
 
   const auj = aujourdhuiParis();
   const debut = fiche.date_debut && fiche.date_debut <= auj ? fiche.date_debut : (entrees.at(-1)?.jour ?? auj);
@@ -41,6 +44,15 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
     if (j < debut) break;
     if (!remplis.has(j)) oublies.push(j);
   }
+
+  // Cycle (facultatif, choisi par la cliente) : jour et phase déduits des jours « règles » cochés.
+  const joursRegles = entrees.filter((e) => e.regles).map((e) => e.jour);
+  const situation = cycle?.mode === "cycle" ? situationCycle(joursRegles, jour, cycle.duree) : null;
+  const doux =
+    cycle && entree
+      ? messageRetention({ mode: cycle.mode, sansChiffres: fiche.mode_sans_chiffres, jour, poidsDuJour: entree.poids, pesees: entrees, joursRegles, duree: cycle.duree })
+      : null;
+  const symptomes = cycle?.mode === "perimenopause" ? ((await lireSymptomesJournal(supabase, profil.id, jour)).get(jour) ?? []) : null;
 
   return (
     <div className="pt-encoche flex flex-col gap-5 px-5 pb-6">
@@ -89,6 +101,25 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
             Aller
           </button>
         </form>
+        {cycle?.mode === "cycle" && (
+          <div className="flex flex-col gap-1 rounded-xl bg-accent-pale/60 p-3 text-[14px]">
+            {situation ? (
+              <p>
+                <span className="font-medium">Jour {situation.jour} de ton cycle</span> · {LIBELLE_PHASE[situation.phase]}
+                {situation.retention && " · le corps retient souvent un peu d’eau en ce moment"}
+              </p>
+            ) : (
+              <p>Coche « J’ai mes règles » les jours concernés : l’appli repère toute seule le jour et la phase de ton cycle.</p>
+            )}
+            {doux && <p>{doux}</p>}
+            <p className="text-[12px] text-texte-2">
+              {PAS_UN_AVIS_MEDICAL}{" "}
+              <Link href="/profil#cycle" className="underline underline-offset-2">
+                Régler
+              </Link>
+            </p>
+          </div>
+        )}
         {oublies.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-[13px] text-texte-2">
@@ -117,6 +148,7 @@ export default async function PageJournal({ searchParams }: { searchParams: Prom
           jour={jour}
           entree={entree}
           sansChiffres={fiche.mode_sans_chiffres}
+          symptomes={symptomes}
           suivant={(() => {
             const j = oublies.find((x) => x !== jour);
             return j ? { jour: j, libelle: jourPuce.format(new Date(`${j}T00:00:00Z`)) } : null;

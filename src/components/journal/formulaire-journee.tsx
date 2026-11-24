@@ -6,6 +6,7 @@ import { BoutonEnvoi } from "@/components/bouton-envoi";
 import { Message, cx } from "@/components/ui";
 import { enregistrerJournee, type EtatJournal } from "@/app/journal-actions";
 import type { EntreeJournal } from "@/lib/journal";
+import { SYMPTOMES } from "@/lib/cycle";
 
 const champ =
   "min-h-12 w-full rounded-xl border border-ligne bg-white px-4 text-[16px] text-chocolat focus:border-chocolat focus:outline-none focus:ring-2 focus:ring-accent-pale";
@@ -55,10 +56,13 @@ export function FormulaireJournee({
   entree,
   sansChiffres,
   suivant,
+  symptomes,
 }: {
   jour: string;
   entree: EntreeJournal | null;
   sansChiffres: boolean;
+  /** Suivi de la périménopause choisi : symptômes du jour déjà notés (sinon, pas de case proposée). */
+  symptomes?: string[] | null;
   /** Prochain jour oublié à remplir, proposé après l'enregistrement. */
   suivant?: { jour: string; libelle: string } | null;
 }) {
@@ -86,6 +90,23 @@ export function FormulaireJournee({
         <input type="checkbox" name="regles" defaultChecked={entree?.regles ?? false} className="size-5 accent-[var(--accent)]" />
         <span className="text-[15px]">J’ai mes règles aujourd’hui</span>
       </label>
+      {symptomes && (
+        <fieldset className="flex flex-col gap-2">
+          <input type="hidden" name="symptomes_proposes" value="1" />
+          <legend className="text-sm font-medium">Mes symptômes du jour</legend>
+          <div className="flex flex-wrap gap-2">
+            {SYMPTOMES.map((x) => (
+              <label key={x.code}>
+                <input type="checkbox" name="symptomes" value={x.code} defaultChecked={symptomes.includes(x.code)} className="peer sr-only" />
+                <span className="inline-flex min-h-10 cursor-pointer items-center rounded-full border border-ligne bg-white px-3.5 text-[14px] transition-colors peer-checked:border-chocolat peer-checked:bg-chocolat peer-checked:text-creme peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
+                  {x.libelle}
+                </span>
+              </label>
+            ))}
+          </div>
+          <span className="text-[12.5px] text-texte-2">Coche ce que tu ressens, rien si tout va bien. Visible seulement par toi et Cindy.</span>
+        </fieldset>
+      )}
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Observations</span>
         <textarea
@@ -99,6 +120,7 @@ export function FormulaireJournee({
       </label>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
+      {etat.doux && <Message ton="info">{etat.doux}</Message>}
       {etat.succes && suivant && (
         <Link href={`/suivi/journal?jour=${suivant.jour}`} className="self-center text-[14.5px] font-medium underline underline-offset-4">
           Remplir le jour oublié suivant : {suivant.libelle} →

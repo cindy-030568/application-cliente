@@ -35,3 +35,37 @@ test("récap de la semaine : séances, sommeil, pas, eau et un petit mot", async
   await page.reload();
   await expect(page.getByRole("switch", { name: /Mon récap du dimanche/ })).not.toBeChecked();
 });
+
+test("cycle et périménopause : choisis dans le profil, suivis dans le journal", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.goto("/profil#cycle");
+  const carte = page.locator("#cycle");
+  await carte.getByText("Mon cycle", { exact: true }).click();
+  await carte.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(carte.getByText("C’est noté ✓")).toBeVisible();
+  await page.goto("/suivi/journal");
+  await expect(page.getByText(/Jour \d+ de ton cycle/)).toBeVisible();
+  await expect(page.getByText(/jamais|ne remplacent pas l’avis/).first()).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-cycle-journal.png" });
+
+  // Périménopause : les symptômes du jour.
+  await page.goto("/profil#cycle");
+  await carte.getByText("Ma périménopause", { exact: true }).click();
+  await carte.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(carte.getByText("C’est noté ✓")).toBeVisible();
+  await page.goto("/suivi/journal");
+  await expect(page.getByText(/Jour \d+ de ton cycle/)).toHaveCount(0);
+  await page.getByText("Bouffées de chaleur").click();
+  await page.getByRole("button", { name: /ma journée/ }).click();
+  await expect(page.getByText("Journée enregistrée ✓")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("checkbox", { name: "Bouffées de chaleur" })).toBeChecked();
+  await page.getByText("Mes symptômes du jour").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/phase4-perimenopause-journal.png" });
+  // Remise à zéro pour les autres tests.
+  await page.goto("/profil#cycle");
+  await carte.getByText("Rien", { exact: true }).click();
+  await carte.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(carte.getByText(/rien n’est suivi/)).toBeVisible();
+});

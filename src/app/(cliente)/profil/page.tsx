@@ -10,6 +10,9 @@ import { CarteMonPaiement } from "@/components/mon-paiement";
 import { LIBELLES_STATUT } from "@/lib/types";
 import { ReglagesRappels } from "./rappels";
 import { InterrupteurPreference } from "./interrupteur";
+import { ReglageCycle } from "./cycle";
+import { lireCycle } from "@/lib/cycle-serveur";
+import { journalActif } from "@/lib/journal-serveur";
 import { CarteInstallation } from "@/components/pwa";
 
 export const metadata: Metadata = { title: "Mon profil" };
@@ -29,6 +32,7 @@ export default async function PageProfil() {
     .select("recap_notif")
     .eq("id", profil.id)
     .maybeSingle<{ recap_notif: boolean }>();
+  const [cycle, avecJournal] = await Promise.all([lireCycle(supabase, profil.id), journalActif(supabase, profil.id)]);
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
       <Link href="/" className="inline-flex items-center gap-1 text-[15px] text-texte-2">
@@ -70,6 +74,16 @@ export default async function PageProfil() {
             titre="Mon récap du dimanche"
             detail="Le dimanche à 18 h : tes séances, ton sommeil, tes pas et ton eau de la semaine."
           />
+        </Carte>
+      )}
+
+      {cycle && avecJournal && fiche.statut !== "fermee" && (
+        <Carte id="cycle" className="flex scroll-mt-6 flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Mon cycle (facultatif)</h2>
+            <p className="text-[13.5px] text-texte-2">Pour mieux comprendre ton corps au fil du mois, dans ton journal.</p>
+          </div>
+          <ReglageCycle mode={cycle.mode} duree={cycle.duree} />
         </Carte>
       )}
 

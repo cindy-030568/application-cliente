@@ -12,6 +12,9 @@ import type { ClienteListe } from "../../../donnees";
 import { ReglagesSuivi } from "./reglages-suivi";
 import { VueJournal } from "@/components/journal/vue-journal";
 import { lireJournal } from "@/lib/journal-serveur";
+import { ajouterJours } from "@/lib/bilan";
+import { LIBELLE_PHASE, libelleSymptome, situationCycle } from "@/lib/cycle";
+import { lireCycle, lireSymptomesJournal } from "@/lib/cycle-serveur";
 
 export const metadata: Metadata = { title: "Suivi" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -33,6 +36,12 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
   const journal = await lireJournal(supabase, id);
   const aujJ = aujourdhuiParis();
   const debutJournal = c.date_debut && c.date_debut <= aujJ ? c.date_debut : (journal?.at(-1)?.jour ?? aujJ);
+  // Cycle / périménopause (choisi par la cliente) : données sensibles, visibles seulement par elle et toi.
+  const cycle = await lireCycle(supabase, id);
+  const situation = cycle?.mode === "cycle" && journal ? situationCycle(journal.filter((e) => e.regles).map((e) => e.jour), aujJ, cycle.duree) : null;
+  const symptomes14 = cycle?.mode === "perimenopause" ? await lireSymptomesJournal(supabase, id, ajouterJours(aujJ, -13)) : null;
+  const compteSymptomes = new Map<string, number>();
+  for (const liste of symptomes14?.values() ?? []) for (const x of liste) compteSymptomes.set(x, (compteSymptomes.get(x) ?? 0) + 1);
   const photos = bilans.flatMap((b) =>
     b.photos.flatMap((p) => (urls.get(p.fichier_path) ? [{ angle: p.angle, date: b.date_mesure, url: urls.get(p.fichier_path)! }] : [])),
   );
@@ -111,6 +120,32 @@ export default async function PageSuiviCoach({ params }: { params: Promise<{ id:
             )}
           </div>
           <VueJournal entrees={journal} debut={debutJournal} aujourdhui={aujJ} />
+        </Carte>
+      )}
+
+      {cycle && cycle.mode !== "aucun" && (
+        <Carte className="flex flex-col gap-2">
+          <h2 className="font-titre text-xl font-bold">{cycle.mode === "cycle" ? "Son cycle" : "Sa périménopause"}</h2>
+          {cycle.mode === "cycle" ? (
+            <p className="text-[14.5px]">
+              {situation
+                ? `Aujourd’hui : jour ${situation.jour} de son cycle (${LIBELLE_PHASE[situation.phase]})${situation.retention ? ", période où le corps retient souvent de l’eau" : ""}. Cycle habituel : ${cycle.duree} jours.`
+                : `Pas de règles notées récemment dans son journal. Cycle habituel : ${cycle.duree} jours.`}
+            </p>
+          ) : compteSymptomes.size ? (
+            <ul className="flex flex-wrap gap-2 text-[14px]">
+              {[...compteSymptomes].sort((a, b) => b[1] - a[1]).map(([code, n]) => (
+                <li key={code} className="rounded-full bg-sable px-3 py-1">
+                  {libelleSymptome(code)} · {n} jour{n > 1 ? "s" : ""}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[14.5px] text-texte-2">Aucun symptôme noté ces 14 derniers jours.</p>
+          )}
+          <p className="text-[12.5px] text-texte-2">
+            {cycle.mode === "perimenopause" ? "Symptômes notés ces 14 derniers jours. " : ""}Suivi choisi par ta cliente, visible seulement par elle et toi. Repères indicatifs, jamais un avis médical.
+          </p>
         </Carte>
       )}
     </div>

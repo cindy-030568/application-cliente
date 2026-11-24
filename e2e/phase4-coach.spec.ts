@@ -11,3 +11,11 @@ test("victoire hors balance : ligne dans le tableau de bord, avec un mot prêt �
   await ligne.scrollIntoViewIfNeeded();
   await page.screenshot({ path: "test-results/phase4-victoire-coach.png", fullPage: false });
 });
+
+test("périménopause : la coach voit les symptômes notés par sa cliente", async ({ page }) => {
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/clientes/00000000-0000-0000-0000-0000000000b2/suivi");
+  const bloc = page.locator("section, div").filter({ has: page.getByRole("heading", { name: "Sa périménopause" }) }).last();
+  await expect(bloc).toContainText("Bouffées de chaleur · 2 jours");
+  await expect(bloc).toContainText("Sueurs nocturnes · 1 jour");
+});

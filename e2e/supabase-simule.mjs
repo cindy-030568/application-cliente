@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null,
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28,
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -291,6 +291,11 @@ if (process.env.ANALYSE_DEMO) {
       sommeil: 6 + (i % 4) * 0.5, hydratation: 1.3 + (i % 3) * 0.3, pas: 6000 + (i % 5) * 1200, trainings: i % 2, stress: 1 + (i % 4), digestion: 3 + (i % 3),
       regles: i >= 8 && i <= 12, observations: i === 2 ? "Fatiguée, peu dormi" : null, updated_at: new Date().toISOString() });
   }
+}
+
+// Nathalie suit sa périménopause : 2 jours de symptômes notés.
+for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
+  journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
 
 // ---- Plan alimentaire (0015)
@@ -604,6 +609,7 @@ http.createServer((req, res) => {
     }
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(nouveau));
   });
+  if (u.pathname === "/rest/v1/rpc/definir_suivi_cycle") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) Object.assign(c, { suivi_cycle: b?.p_mode, cycle_duree: b?.p_duree }); res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/definir_recap_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.recap_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/mon_contrat_infos") {
     const t = String(reglages.contrat_texte ?? "");
