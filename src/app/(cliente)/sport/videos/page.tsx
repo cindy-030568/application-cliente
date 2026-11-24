@@ -66,7 +66,7 @@ export default async function PageVideos({ searchParams }: { searchParams: Promi
         <BientotDisponible
           icone={<IconeVideo className="size-6" />}
           titre="Bientôt ici"
-          texte="Cindy prépare ses vidéos d’exercices, avec les points techniques à retenir."
+          texte="Je prépare mes vidéos d’exercices, avec les points techniques à retenir."
         />
       ) : (
         <>

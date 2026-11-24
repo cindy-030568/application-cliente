@@ -52,7 +52,7 @@ export default async function PageRecettes({
         <BientotDisponible
           icone={<IconeRecettes className="size-6" />}
           titre="Bientôt prêtes pour toi"
-          texte="Cindy prépare tes repères pour chaque repas. Dès que c’est fait, tes recettes apparaîtront ici avec tes quantités."
+          texte="Je prépare tes repères pour chaque repas. Dès que c’est fait, tes recettes apparaîtront ici avec tes quantités."
         />
       </>
     );
@@ -173,7 +173,7 @@ export default async function PageRecettes({
                 ? "Touche le cœur sur une recette pour la retrouver ici."
                 : q || tagActif
                   ? "Essaie un autre mot ou enlève le filtre."
-                  : "Cindy ajoute régulièrement des recettes : reviens bientôt !"}
+                  : "J’ajoute régulièrement des recettes : reviens bientôt !"}
             </p>
           </div>
         ) : (

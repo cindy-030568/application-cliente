@@ -11,7 +11,7 @@ export type EtatMessage = { erreur?: string; succes?: string };
 const MIGRATION = "Fais d’abord la mise à jour de la base : fichier 0023_messages_cliente.sql (voir le guide).";
 
 /**
- * Proposition de message de l'accueil : envoyée dans l'appli (notification + « Un mot de Cindy » sur son accueil),
+ * Proposition de message de l'accueil : envoyée dans l'appli (notification + « Un petit mot de ma part » sur son accueil),
  * copiée (envoyée par toi ailleurs) ou ignorée. Dans tous les cas, elle ne revient pas cette semaine.
  */
 export async function traiterProposition(clienteId: string, proposition: string, statut: "envoye" | "copie" | "ignore", texte: string): Promise<EtatMessage> {
@@ -25,7 +25,7 @@ export async function traiterProposition(clienteId: string, proposition: string,
   if (statut === "envoye") {
     after(async () => {
       try {
-        await envoyerPushCliente(createAdminClient(), clienteId, { titre: "Un mot de Cindy 💛", texte: t.length > 140 ? `${t.slice(0, 137)}…` : t, url: "/" });
+        await envoyerPushCliente(createAdminClient(), clienteId, { titre: "Un petit mot pour toi 💛", texte: t.length > 140 ? `${t.slice(0, 137)}…` : t, url: "/" });
       } catch {
         // le message reste visible sur son accueil même si la notification échoue
       }

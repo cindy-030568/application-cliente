@@ -193,7 +193,7 @@ export default async function PageRecette({
 
         {recette.astuce && (
           <aside className="rounded-carte bg-accent-pale/60 p-4">
-            <p className="text-[13px] font-semibold uppercase tracking-wide text-accent-fonce">L’astuce de Cindy</p>
+            <p className="text-[13px] font-semibold uppercase tracking-wide text-accent-fonce">Mon astuce</p>
             <p className="mt-1 text-[15px]">{recette.astuce}</p>
           </aside>
         )}

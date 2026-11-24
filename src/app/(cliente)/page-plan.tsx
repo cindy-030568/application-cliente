@@ -10,12 +10,12 @@ import { LecteurPdf } from "./lecteur-pdf";
 const TEXTES: Record<TypePlan, { titre: string; attente: string; chemin: string }> = {
   nutrition: {
     titre: "Mon plan alimentaire",
-    attente: "Cindy prépare ton plan alimentaire. Il apparaîtra ici dès qu’il sera prêt 💛",
+    attente: "Je prépare ton plan alimentaire. Il apparaîtra ici dès qu’il sera prêt 💛",
     chemin: "/nutrition",
   },
   sport: {
     titre: "Mon programme sportif",
-    attente: "Cindy prépare ton programme. Il apparaîtra ici dès qu’il sera prêt 💪",
+    attente: "Je prépare ton programme. Il apparaîtra ici dès qu’il sera prêt 💪",
     chemin: "/sport",
   },
 };
@@ -104,7 +104,7 @@ export async function PagePlan({ type, version }: { type: TypePlan; version?: st
             </>
           ) : (
             <p className="rounded-xl bg-accent-pale px-4 py-3 text-[14px] text-erreur">
-              Ton plan n’est pas disponible pour le moment. Réessaie dans un instant ou écris à Cindy.
+              Ton plan n’est pas disponible pour le moment. Réessaie dans un instant ou écris-moi.
             </p>
           )
         ) : (

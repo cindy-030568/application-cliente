@@ -17,7 +17,7 @@ export function Adhesion({ charte, lienPolitique }: { charte: string; lienPoliti
       <div className="flex flex-col gap-2">
         <h2 className="font-titre text-xl font-bold">Rejoindre la communauté</h2>
         <p className="text-[15px] text-texte-2">
-          Un espace pour échanger entre clientes de Cindy : partager tes victoires, tes questions, tes recettes, et
+          Un espace pour échanger entre mes clientes : partager tes victoires, tes questions, tes recettes, et
           t’encourager mutuellement. C’est facultatif, et tu peux partir quand tu veux.
         </p>
       </div>

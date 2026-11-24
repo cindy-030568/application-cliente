@@ -12,7 +12,7 @@ export default function PageAccesFerme() {
         <h1 className="font-titre text-[30px] font-bold leading-tight">Ton espace est fermé</h1>
         <p className="text-texte-2">
           Ton accès à l’app n’est plus actif. Si tu penses que c’est une erreur, ou si tu veux
-          reprendre un accompagnement, écris directement à Cindy : elle sera ravie d’avoir de tes
+          reprendre un accompagnement, écris-moi directement : je serai ravie d’avoir de tes
           nouvelles.
         </p>
         <BoutonDeconnexion className="underline underline-offset-4">Me déconnecter</BoutonDeconnexion>

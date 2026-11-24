@@ -56,7 +56,7 @@ export function ReglageCycle({ mode, duree }: { mode: ModeCycle; duree: number }
           </select>
         </label>
       )}
-      <p className="text-[12.5px] text-texte-2">Visible seulement par toi et Cindy. Ce ne sont que des repères, jamais un avis médical.</p>
+      <p className="text-[12.5px] text-texte-2">Visible seulement par toi et moi. Ce ne sont que des repères, jamais un avis médical.</p>
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
       <Bouton type="submit" variante="contour" disabled={enCours}>

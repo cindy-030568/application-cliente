@@ -44,7 +44,7 @@ export function CarteParrainage({ code, lien }: { code: string; lien: string | n
         </Bouton>
       </div>
       {copie && <p className="text-[13.5px] text-succes">{copie === "message" ? "Message copié" : copie === "lien" ? "Lien copié" : "Code copié"} ✓ Colle-le où tu veux.</p>}
-      <p className="text-[13px] text-texte-2">Quand une amie s’inscrit avec ton lien ou ton code, Cindy le voit. La petite attention pour toi, c’est elle qui s’en occupe 🎁</p>
+      <p className="text-[13px] text-texte-2">Quand une amie s’inscrit avec ton lien ou ton code, je le vois. Et la petite attention pour toi, c’est moi qui m’en occupe 🎁</p>
     </div>
   );
 }

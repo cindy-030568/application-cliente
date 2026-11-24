@@ -118,7 +118,7 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
 
   const signaler = async (m: MessageCommunaute) => {
     const motif = window.prompt(
-      `Signaler ce message à Cindy ?\nTu peux préciser pourquoi (facultatif) :`,
+      `Me signaler ce message ?\nTu peux me dire pourquoi (facultatif) :`,
       "",
     );
     if (motif === null) return;
@@ -216,7 +216,7 @@ function CarteMessage({
         m.epingle && "ring-2 ring-caramel-clair",
       )}
     >
-      {m.epingle && <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-caramel-texte">📌 Épinglé par Cindy</p>}
+      {m.epingle && <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-caramel-texte">📌 Message épinglé</p>}
       <header className="flex items-center gap-3">
         <span
           aria-hidden

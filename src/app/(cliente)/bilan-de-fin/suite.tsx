@@ -25,7 +25,7 @@ export function BlocSuite({ texte, offres, demandees }: { texte: string; offres:
               <span className="font-medium">{o.titre}</span>
               {o.description && <span className="whitespace-pre-line text-[14.5px] text-texte-2">{o.description}</span>}
               {fait ? (
-                <span className="text-[14px] font-medium text-succes">Demande envoyée à Cindy ✓</span>
+                <span className="text-[14px] font-medium text-succes">Demande bien reçue ✓ Je reviens vers toi très vite.</span>
               ) : (
                 <Bouton
                   className="w-fit"

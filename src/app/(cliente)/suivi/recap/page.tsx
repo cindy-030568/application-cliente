@@ -50,7 +50,7 @@ export default async function PageRecap({ searchParams }: { searchParams: Promis
       </div>
       <Carte className="text-[14.5px] text-texte-2">
         {r.joursRemplis === 0
-          ? "Ton journal n’a pas été rempli cette semaine. Même 1 minute par jour aide Cindy à mieux t’accompagner 💛"
+          ? "Ton journal n’a pas été rempli cette semaine. Même 1 minute par jour m’aide à mieux t’accompagner 💛"
           : `Journal rempli ${r.joursRemplis} jour${r.joursRemplis > 1 ? "s" : ""} sur 7.`}{" "}
         <Link href="/suivi/journal" className="font-medium text-chocolat underline underline-offset-4">
           Mon journal

@@ -32,7 +32,7 @@ export function AnnoncesAccueil({ annonces }: { annonces: { id: string; texte: s
             C
           </span>
           <span className="flex flex-col gap-1">
-            <span className="text-[12px] uppercase tracking-[0.12em] text-caramel-clair">Un mot de Cindy</span>
+            <span className="text-[12px] uppercase tracking-[0.12em] text-caramel-clair">Un petit mot de ma part</span>
             <span className="whitespace-pre-wrap text-[15px]">{a.texte}</span>
             {a.lien && (
               <Link href={a.lien} onClick={() => fermer(a.id)} className="mt-1 self-start text-[14px] font-medium text-white underline underline-offset-4">

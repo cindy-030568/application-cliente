@@ -25,5 +25,5 @@ export async function demanderSuite(offre: string): Promise<EtatSuite> {
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
   after(() => notifierCoach({ type: "suite", clienteId: profil.id, offre: choisie.titre }));
   revalidatePath("/bilan-de-fin");
-  return { succes: "C’est noté ! Cindy revient vers toi très vite 💛" };
+  return { succes: "C’est noté ! Je reviens vers toi très vite 💛" };
 }

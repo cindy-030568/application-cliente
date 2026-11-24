@@ -146,10 +146,10 @@ test("bilan de fin de suivi : sa transformation, le PDF et « Continuer avec moi
   // Continuer avec moi.
   const offre = page.locator("li", { hasText: "Continuer mon accompagnement" });
   await offre.getByRole("button", { name: "Ça m’intéresse" }).click();
-  await expect(page.getByText("C’est noté ! Cindy revient vers toi très vite 💛")).toBeVisible();
-  await expect(offre).toContainText("Demande envoyée à Cindy ✓");
+  await expect(page.getByText("C’est noté ! Je reviens vers toi très vite 💛")).toBeVisible();
+  await expect(offre).toContainText("Demande bien reçue ✓");
   await page.reload();
-  await expect(page.locator("li", { hasText: "Continuer mon accompagnement" })).toContainText("Demande envoyée à Cindy ✓");
+  await expect(page.locator("li", { hasText: "Continuer mon accompagnement" })).toContainText("Demande bien reçue ✓");
 });
 
 test("avis et parrainage : un témoignage avec sa case de publication, et son code à partager", async ({ page }) => {
@@ -159,14 +159,14 @@ test("avis et parrainage : un témoignage avec sa case de publication, et son co
   await page.getByLabel("Ton témoignage").fill("Grâce à Cindy, j’ai retrouvé de l’énergie et confiance en moi, sans me priver.");
   // La publication est une case à part : sans elle, le nom n'est même pas demandé.
   await expect(page.getByText("Sous quel nom ?")).toHaveCount(0);
-  await page.getByText("J’autorise Cindy à publier mon témoignage").click();
+  await page.getByText("Oui, tu peux publier mon témoignage").click();
   await page.getByText("Mon initiale").click();
   await page.screenshot({ path: "test-results/phase4-avis-cliente.png", fullPage: true });
   await page.getByRole("button", { name: "Envoyer mon témoignage" }).click();
   await expect(page.getByText(/Merci infiniment pour ton témoignage/)).toBeVisible();
   await page.reload();
   const envoye = page.locator("li", { hasText: "Grâce à Cindy" });
-  await expect(envoye.getByRole("checkbox", { name: "Cindy peut le publier" })).toBeChecked();
+  await expect(envoye.getByRole("checkbox", { name: "Tu m’autorises à le publier" })).toBeChecked();
 
   // Parrainage : son code et son lien dans le profil.
   await page.goto("/profil#parrainage");

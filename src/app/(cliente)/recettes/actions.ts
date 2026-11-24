@@ -157,7 +157,7 @@ export async function retirerRecetteDesCourses(lot: string): Promise<EtatAction>
 // ---------------------------------------------------------------- Planning des repas de la semaine
 
 const JOUR = /^\d{4}-\d{2}-\d{2}$/;
-const MIGRATION_PLANNING = "Le planning n’est pas encore prêt : Cindy doit faire une mise à jour de l’appli.";
+const MIGRATION_PLANNING = "Le planning n’est pas encore prêt : une mise à jour de l’appli arrive très vite.";
 
 /** Choisit une recette pour un jour et un repas (remplace celle d'avant). La recette doit être proposée pour ce repas. */
 export async function planifierRecette(jour: string, indexRepas: number, recetteId: string): Promise<EtatAction> {

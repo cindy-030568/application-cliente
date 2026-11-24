@@ -39,7 +39,7 @@ export function FormulaireBilan({
   libelleDate = "Date du bilan",
   redirection,
   libelleEnvoi,
-  libelleCommentaire = "Un mot pour Cindy (facultatif)",
+  libelleCommentaire = "Un petit mot pour moi (facultatif)",
 }: {
   champs: ChampMesure[];
   /** Rythme de bilan de la cliente, pour les libellés contenant {jours}. */
@@ -332,8 +332,8 @@ export function FormulaireBilan({
           </legend>
           <p className="-mt-2 text-[14px] text-texte-2">
             {modePhotos === "demandees"
-              ? "Toutes les 4 semaines : face, profil et dos, dans la même tenue et la même lumière si possible. Visibles uniquement par toi et Cindy."
-              : "Facultatif. Visibles uniquement par toi et Cindy."}
+              ? "Toutes les 4 semaines : face, profil et dos, dans la même tenue et la même lumière si possible. Visibles uniquement par toi et moi."
+              : "Facultatif. Visibles uniquement par toi et moi."}
           </p>
           <div className="grid grid-cols-3 gap-3">
             {ANGLES.map(({ valeur: angle, libelle }) => {

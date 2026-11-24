@@ -65,7 +65,7 @@ export async function enregistrerSeance(
 
 function erreurSeance(code: string): { erreur: string; definitif: boolean } {
   // Avant la mise à jour 0019 : rien ne casse.
-  if (["42P01", "PGRST205"].includes(code)) return { erreur: "L’enregistrement des séances n’est pas encore activé par Cindy. Bravo quand même ! 💪", definitif: true };
+  if (["42P01", "PGRST205"].includes(code)) return { erreur: "L’enregistrement des séances n’est pas encore activé. Bravo quand même ! 💪", definitif: true };
   // Accès fermé (refus de la base) : inutile de réessayer.
   if (code === "42501") return { erreur: "Ton accès est fermé : la séance n’a pas pu être enregistrée.", definitif: true };
   return { erreur: "La séance n’a pas pu être enregistrée. Vérifie ta connexion et réessaie.", definitif: false };

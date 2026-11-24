@@ -342,7 +342,7 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
               const garder = (): Resultat | null => {
                 if (!horsConnexion) return null;
                 ajouterAFile({ id: nouvelId(), type: "seance", ...horsConnexion, infos, ref, faiteLe: new Date().toISOString() });
-                return { succes: "Pas de réseau : ta séance est gardée sur ton téléphone. Elle sera envoyée à Cindy dès que le réseau revient 💪" };
+                return { succes: "Pas de réseau : ta séance est gardée sur ton téléphone. Elle me sera envoyée dès que le réseau revient 💪" };
               };
               if (horsConnexion && typeof navigator !== "undefined" && navigator.onLine === false) {
                 await rattraper();
@@ -656,7 +656,7 @@ function Fin({
             </div>
           </fieldset>
           <label className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-medium">Un mot pour Cindy ? (facultatif)</span>
+            <span className="text-[14px] font-medium">Un petit mot pour moi ? (facultatif)</span>
             <textarea
               value={commentaire}
               maxLength={500}

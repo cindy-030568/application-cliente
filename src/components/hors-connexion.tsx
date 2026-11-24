@@ -107,7 +107,7 @@ export function BoutonDeconnexion({ className, children }: { className?: string;
         if (
           restantes &&
           !window.confirm(
-            `${restantes} séance${restantes > 1 ? "s" : ""} ou poids pas encore envoyé${restantes > 1 ? "s" : ""} à Cindy (pas de réseau). Si tu te déconnectes maintenant, ${restantes > 1 ? "ils seront effacés" : "il sera effacé"}. Te déconnecter quand même ?`,
+            `${restantes} séance${restantes > 1 ? "s" : ""} ou poids que je n’ai pas encore reçu${restantes > 1 ? "s" : ""} (pas de réseau). Si tu te déconnectes maintenant, ${restantes > 1 ? "ils seront effacés" : "il sera effacé"}. Te déconnecter quand même ?`,
           )
         ) {
           setEnCours(false);

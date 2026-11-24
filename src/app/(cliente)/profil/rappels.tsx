@@ -44,7 +44,7 @@ export function ReglagesRappels({ email, clePublique }: { email: boolean; clePub
 
   const activer = () =>
     demarrer(async () => {
-      if (!clePublique) return setEtat({ erreur: "Les notifications ne sont pas encore prêtes. Cindy s’en occupe." });
+      if (!clePublique) return setEtat({ erreur: "Les notifications ne sont pas encore prêtes : je m’en occupe." });
       try {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {

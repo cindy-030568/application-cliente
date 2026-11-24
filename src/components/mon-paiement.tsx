@@ -48,7 +48,7 @@ export function CarteMonPaiement({ p, aujourdhui }: { p: MonPaiement; aujourdhui
             })}
           </ul>
           <p className="text-[13px] text-texte-2">
-            Réglé : {formaterEuros(paye)} sur {formaterEuros(total)}. Une question sur un paiement ? Écris simplement à Cindy.
+            Réglé : {formaterEuros(paye)} sur {formaterEuros(total)}. Une question sur un paiement ? Écris-moi simplement.
           </p>
         </>
       )}
@@ -67,6 +67,6 @@ export function mensualiteASignaler(p: MonPaiement | null, aujourdhui: string) {
     ? { titre: `Mensualité de ${formaterEuros(e.montant)} ${quand}`, texte: "Un petit rappel pour ton accompagnement 💛" }
     : {
         titre: `Mensualité du ${formaterDate(e.date_echeance, { year: undefined })} : ${formaterEuros(e.montant)}`,
-        texte: "Pas encore notée comme reçue. Déjà réglée ? Pas de souci, Cindy la cochera.",
+        texte: "Pas encore notée comme reçue. Déjà réglée ? Pas de souci, je la cocherai.",
       };
 }

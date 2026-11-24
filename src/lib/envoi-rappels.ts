@@ -524,7 +524,7 @@ export async function envoyerAnnonce(admin: SupabaseClient, texte: string, url: 
     .neq("clientes.statut", "fermee");
   const touchees = new Set<string>();
   for (const a of (appareils ?? []) as (AbonnementPush & { cliente_id: string })[]) {
-    const r = await envoyerPush(a, { titre: "Un mot de Cindy 💛", texte, url });
+    const r = await envoyerPush(a, { titre: "Un petit mot pour toi 💛", texte, url });
     if (r === "ok") {
       res.notifications++;
       touchees.add(a.cliente_id);

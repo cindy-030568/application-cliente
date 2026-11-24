@@ -44,7 +44,7 @@ export default async function PageSuivi() {
             className="flex items-center justify-between gap-3 rounded-carte bg-chocolat p-4 text-creme apparition"
           >
             <span className="flex flex-col">
-              <span className="font-medium">Cindy t’a répondu 💛</span>
+              <span className="font-medium">Je t’ai répondu 💛</span>
               <span className="text-[14px] text-texte-clair">
                 Sur ton bilan du {formaterDate(retourNonLu.date_mesure, { year: undefined })}
               </span>
@@ -80,7 +80,7 @@ export default async function PageSuivi() {
                 <>
                   <span className="font-medium">Bilan envoyé ✓</span>
                   <span className="text-[14px] text-texte-2">
-                    {dejaEnvoye.retour ? "Cindy t’a répondu." : "Cindy te répond bientôt."}
+                    {dejaEnvoye.retour ? "Je t’ai répondu." : "Je te réponds très vite."}
                   </span>
                 </>
               ) : (

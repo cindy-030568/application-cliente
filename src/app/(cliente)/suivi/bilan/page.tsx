@@ -61,7 +61,7 @@ export default async function PageNouveauBilan() {
         sansPhotos={fiche.mode_sans_chiffres}
         photos={avecPhotos ? "demandees" : "repliees"}
         redirection="/suivi/{id}?envoye=1"
-        libelleEnvoi={estBilan ? "Envoyer mon bilan à Cindy" : "Enregistrer"}
+        libelleEnvoi={estBilan ? "Envoyer mon bilan" : "Enregistrer"}
       />
     </div>
   );

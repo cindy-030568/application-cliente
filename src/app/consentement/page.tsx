@@ -33,11 +33,11 @@ export default async function PageConsentement({
           alimentaires. Certaines de ces informations sont des données de santé.
         </li>
         <li>
-          <strong className="font-medium">Pourquoi :</strong> uniquement pour ton suivi de coaching avec Cindy.
+          <strong className="font-medium">Pourquoi :</strong> uniquement pour ton suivi de coaching avec moi.
           Rien n’est vendu, ni utilisé pour de la publicité.
         </li>
         <li>
-          <strong className="font-medium">Qui y a accès :</strong> toi et Cindy, personne d’autre. Les autres
+          <strong className="font-medium">Qui y a accès :</strong> toi et moi, personne d’autre. Les autres
           clientes ne voient jamais tes données. Ta liste de courses n’est visible que par toi.
           Si tu rejoins la communauté (facultatif), les membres voient seulement ton prénom et ce que tu choisis
           d’y publier.
@@ -53,7 +53,7 @@ export default async function PageConsentement({
         </li>
         <li>
           <strong className="font-medium">Tes droits :</strong> tu peux à tout moment consulter, corriger,
-          récupérer ou faire supprimer tes données, et retirer ton accord, en écrivant à Cindy. Tu peux aussi
+          récupérer ou faire supprimer tes données, et retirer ton accord, en m’écrivant. Tu peux aussi
           contacter la CNIL.
         </li>
       </ul>

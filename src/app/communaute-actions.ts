@@ -32,7 +32,7 @@ export async function rejoindreCommunaute(_e: EtatCommunauteAction, formData: Fo
   const etat = await lireEtatCommunaute(s.supabase);
   if (!etat?.ouverte) return { erreur: "La communauté n’est pas ouverte pour le moment." };
   const { error } = await s.supabase.from("membres_communaute").insert({ cliente_id: s.profil.id });
-  if (error) return { erreur: "Tu ne peux pas rejoindre la communauté pour le moment. Parles-en à Cindy." };
+  if (error) return { erreur: "Tu ne peux pas rejoindre la communauté pour le moment. Écris-moi pour en parler." };
   rafraichir();
   return {};
 }
@@ -146,5 +146,5 @@ export async function signalerMessage(id: string, motifBrut: string): Promise<Et
   if (!error) after(() => notifierCoach({ type: "signalement" }));
   revalidatePath("/coach/communaute");
   revalidatePath("/coach", "layout");
-  return { succes: "Merci, Cindy a été prévenue. Elle regardera ce message." };
+  return { succes: "Merci de me l’avoir signalé : je regarde ce message très vite." };
 }

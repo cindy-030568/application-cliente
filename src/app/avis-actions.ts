@@ -24,7 +24,7 @@ export async function laisserAvis(_e: EtatAvis, formData: FormData): Promise<Eta
   if (texte.length > 2000) return { erreur: "Ton témoignage est un peu long (2 000 caractères au plus)." };
   const publiable = formData.get("publiable") === "on";
   const nom = String(formData.get("nom_affiche") ?? "");
-  if (publiable && !NOMS.includes(nom)) return { erreur: "Choisis sous quel nom Cindy peut le publier." };
+  if (publiable && !NOMS.includes(nom)) return { erreur: "Choisis sous quel nom je peux le publier." };
   const de = String(formData.get("contexte") ?? "");
   const contexte = de === "victoire" || de === "fin" ? de : "libre";
   const { error } = await session.supabase
@@ -34,7 +34,7 @@ export async function laisserAvis(_e: EtatAvis, formData: FormData): Promise<Eta
   const clienteId = session.profil.id;
   after(() => notifierCoach({ type: "avis", clienteId, publiable }));
   revalidatePath("/avis");
-  return { succes: "Merci infiniment pour ton témoignage 💛 Il compte énormément pour Cindy." };
+  return { succes: "Merci infiniment pour ton témoignage 💛 Il compte énormément pour moi." };
 }
 
 /** Change d'avis sur la publication (ou la retire). */
@@ -49,7 +49,7 @@ export async function changerPublication(id: string, publiable: boolean, nom: st
     .eq("cliente_id", session.profil.id);
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
   revalidatePath("/avis");
-  return { succes: publiable ? "C’est noté ✓" : "C’est noté : Cindy ne le publiera pas." };
+  return { succes: publiable ? "C’est noté ✓" : "C’est noté : je ne le publierai pas." };
 }
 
 export async function supprimerAvis(id: string): Promise<EtatAvis> {

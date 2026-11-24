@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "fitw_cindy",
     short_name: "fitw_cindy",
-    description: "Ton espace de coaching nutrition et sport avec Cindy.",
+    description: "Ton espace de coaching nutrition et sport fitw_cindy.",
     lang: "fr",
     start_url: "/",
     scope: "/",

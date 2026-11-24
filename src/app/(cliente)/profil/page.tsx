@@ -125,7 +125,7 @@ export default async function PageProfil() {
       </Link>
 
       <p className="text-[14px] text-texte-2">
-        Une info à corriger ? Écris simplement à Cindy, elle s’en occupe.
+        Une info à corriger ? Écris-moi simplement, je m’en occupe.
       </p>
 
       {reglages.lien_politique && (

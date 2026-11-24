@@ -44,13 +44,13 @@ export default async function PageBilanCliente({
 
       {envoye && (
         <Message ton="succes">
-          {bilan.echeance ? "Bilan envoyé à Cindy. Bravo d’avoir pris ce temps pour toi 💛" : "C’est noté !"}
+          {bilan.echeance ? "Bilan bien reçu. Bravo d’avoir pris ce temps pour toi 💛" : "C’est noté !"}
         </Message>
       )}
 
       {bilan.retour && (
         <section className="flex flex-col gap-2 rounded-bloc bg-chocolat p-5 text-creme">
-          <p className="font-main text-[24px] leading-none text-caramel-clair">Le mot de Cindy</p>
+          <p className="font-main text-[24px] leading-none text-caramel-clair">Mon retour</p>
           <p className="whitespace-pre-wrap text-[15.5px] leading-relaxed">{bilan.retour.contenu}</p>
         </section>
       )}

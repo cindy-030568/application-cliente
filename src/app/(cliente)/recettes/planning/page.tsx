@@ -60,7 +60,7 @@ export default async function PagePlanning({ searchParams }: { searchParams: Pro
         <p className="rounded-carte bg-blanc-casse p-5 text-[15px] text-texte-2 shadow-douce">Le planning arrive très bientôt dans ton appli 💛</p>
       ) : repas.length === 0 ? (
         <p className="rounded-carte bg-blanc-casse p-5 text-[15px] text-texte-2 shadow-douce">
-          Cindy prépare tes repères pour chaque repas : ton planning sera disponible dès que c’est fait.
+          Je prépare tes repères pour chaque repas : ton planning sera disponible dès que c’est fait.
         </p>
       ) : (
         <>

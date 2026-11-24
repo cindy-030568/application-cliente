@@ -70,7 +70,7 @@ export function emailRappel(
 <tr><td style="font-family:Georgia,serif;font-size:22px;font-weight:bold;padding-bottom:20px;">fitw<span style="color:#c17f3a;">_</span>cindy</td></tr>
 <tr><td style="font-size:17px;line-height:1.55;padding-bottom:28px;">${echapper(message)}</td></tr>
 <tr><td><a href="${echapper(lien)}" style="display:inline-block;background:#d6336c;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;padding:14px 28px;border-radius:999px;">${echapper(bouton)}</a></td></tr>
-<tr><td style="font-size:12.5px;line-height:1.5;color:#6e5440;padding-top:32px;">${pied ? `${echapper(pied)} <a href="${echapper(lienProfil)}" style="color:#6e5440;">Réglages</a>.` : `Tu reçois cet email car tu es accompagnée par Cindy. Pour ne plus recevoir les rappels par email : <a href="${echapper(lienProfil)}" style="color:#6e5440;">ton profil</a>.`}</td></tr>
+<tr><td style="font-size:12.5px;line-height:1.5;color:#6e5440;padding-top:32px;">${pied ? `${echapper(pied)} <a href="${echapper(lienProfil)}" style="color:#6e5440;">Réglages</a>.` : `Tu reçois cet email car je t’accompagne. Pour ne plus recevoir les rappels par email : <a href="${echapper(lienProfil)}" style="color:#6e5440;">ton profil</a>.`}</td></tr>
 </table></td></tr></table></body></html>`;
   const texte = `${message}\n\n${bouton} : ${lien}\n\n${pied ? `${pied} ${lienProfil}` : `Pour ne plus recevoir ces emails : ${lienProfil}`}`;
   return { html, texte };

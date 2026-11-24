@@ -24,7 +24,7 @@ const caveat = Caveat({
 
 export const metadata: Metadata = {
   title: { default: "fitw_cindy", template: "%s · fitw_cindy" },
-  description: "Ton espace de coaching nutrition et sport avec Cindy.",
+  description: "Ton espace de coaching nutrition et sport fitw_cindy.",
   robots: { index: false, follow: false },
   appleWebApp: { capable: true, title: "fitw_cindy", statusBarStyle: "default" },
   // Noms de fichiers versionnés : un changement de logo n'est jamais masqué par un cache.

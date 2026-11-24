@@ -23,7 +23,7 @@ export async function validerSeance(programmeId: string, seance: number, infos: 
   if ("erreur" in r) return { erreur: r.erreur };
   revalidatePath("/sport");
   if (r.nouveau) notifierSeanceFaite(session.profil.id, r.nom, infos.commentaire);
-  return { succes: "Séance enregistrée : Cindy la verra. Bravo ! 💪" };
+  return { succes: "Séance enregistrée : je la verrai. Bravo ! 💪" };
 }
 
 export type { ChargeNotee };

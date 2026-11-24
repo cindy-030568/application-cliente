@@ -131,7 +131,7 @@ export default async function PageAccueil() {
               C
             </span>
             <span className="flex flex-1 flex-col">
-              <span className="font-medium">Cindy a répondu à ton bilan</span>
+              <span className="font-medium">J’ai répondu à ton bilan</span>
               <span className="text-[14px] text-texte-clair">Touche pour lire son message 💛</span>
             </span>
             <IconeFleche className="size-5 shrink-0" />
@@ -352,7 +352,7 @@ export default async function PageAccueil() {
                   rel="noopener noreferrer"
                   className="mt-1 text-[14px] font-medium text-accent underline underline-offset-4"
                 >
-                  En parler avec Cindy
+                  En parler avec moi
                 </a>
               )}
             </span>
@@ -367,7 +367,7 @@ export default async function PageAccueil() {
 async function carteCommunaute(supabase: Parameters<typeof accesCommunaute>[0], moi: string) {
   const acces = await accesCommunaute(supabase, moi);
   if (!acces) return null;
-  if (!acces.membre) return { nonLus: 0, texte: "Échange avec les autres clientes de Cindy" };
+  if (!acces.membre) return { nonLus: 0, texte: "Échange avec mes autres clientes" };
   const n = acces.nonLus;
   return { nonLus: n, texte: n === 0 ? "Pas de nouveau message" : n === 1 ? "1 nouveau message" : `${n > 99 ? "99+" : n} nouveaux messages` };
 }

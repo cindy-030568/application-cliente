@@ -50,8 +50,8 @@ export function FormulaireAvis({ prenom, contexte }: { prenom: string; contexte:
         <label className="flex cursor-pointer items-start gap-3">
           <input type="checkbox" name="publiable" checked={publiable} onChange={(e) => setPubliable(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
           <span className="flex flex-col">
-            <span className="text-[15px] font-medium">J’autorise Cindy à publier mon témoignage</span>
-            <span className="text-[13px] text-texte-2">Sur son site ou ses réseaux. Facultatif : sans cette case, il reste entre vous. Tu peux changer d’avis à tout moment.</span>
+            <span className="text-[15px] font-medium">Oui, tu peux publier mon témoignage</span>
+            <span className="text-[13px] text-texte-2">Sur mon site ou mes réseaux. Facultatif : sans cette case, il reste entre nous. Tu peux changer d’avis à tout moment.</span>
           </span>
         </label>
         {publiable && <ChoixNom prenom={prenom} valeur={nom} onChange={setNom} />}
@@ -83,7 +83,7 @@ export function AvisEnvoye({ a, prenom }: { a: { id: string; texte: string; publ
       <p className="whitespace-pre-line text-[15px]">« {a.texte} »</p>
       <label className="flex cursor-pointer items-center gap-3 text-[14.5px]">
         <input type="checkbox" checked={publiable} disabled={enCours} onChange={(e) => enregistrer(e.target.checked, nom)} className="size-5 accent-[var(--accent)]" />
-        Cindy peut le publier
+        Tu m’autorises à le publier
       </label>
       {publiable && <ChoixNom prenom={prenom} valeur={nom} onChange={(n) => enregistrer(true, n)} nom={`nom-${a.id}`} />}
       {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}

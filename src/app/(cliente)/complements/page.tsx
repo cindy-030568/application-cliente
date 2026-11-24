@@ -25,7 +25,7 @@ export default async function PageComplements() {
       </Link>
       <div>
         <h1 className="font-titre text-[30px] font-bold leading-tight">Mes compléments</h1>
-        <p className="text-[15px] text-texte-2">Ce que Cindy t’a conseillé : coche au fur et à mesure de la journée.</p>
+        <p className="text-[15px] text-texte-2">Ce que je t’ai conseillé : coche au fur et à mesure de la journée.</p>
       </div>
       {liste.length ? (
         <>
@@ -36,7 +36,7 @@ export default async function PageComplements() {
           {!sansRappel && <RappelComplements heure={rappel?.rappel_complements_heure ?? null} appareil={(appareils ?? 0) > 0} />}
         </>
       ) : (
-        <p className="rounded-carte bg-blanc-casse p-5 text-[15px] text-texte-2 shadow-douce">Cindy ne t’a pas encore conseillé de compléments.</p>
+        <p className="rounded-carte bg-blanc-casse p-5 text-[15px] text-texte-2 shadow-douce">Je ne t’ai pas encore conseillé de compléments.</p>
       )}
     </div>
   );

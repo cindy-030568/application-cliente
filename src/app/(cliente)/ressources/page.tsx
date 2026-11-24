@@ -52,7 +52,7 @@ export default async function PageRessources() {
         <BientotDisponible
           icone={<IconeRessources className="size-6" />}
           titre="Bientôt ici"
-          texte="Cindy ajoutera ici ses guides et fiches pratiques."
+          texte="J’ajouterai ici mes guides et fiches pratiques."
         />
       ) : (
         <div className="flex flex-col gap-7 px-5 pt-3">

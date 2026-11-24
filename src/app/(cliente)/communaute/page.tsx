@@ -17,7 +17,7 @@ export default async function PageCommunaute() {
   if (!etat?.ouverte) {
     contenu = (
       <Encadre emoji="🌱" titre="Bientôt ouverte">
-        La communauté n’est pas ouverte pour le moment. Cindy te préviendra dès qu’elle le sera.
+        La communauté n’est pas ouverte pour le moment. Je te préviens dès qu’elle ouvre.
       </Encadre>
     );
   } else if (!membre) {
@@ -25,7 +25,7 @@ export default async function PageCommunaute() {
   } else if (membre.statut === "exclue") {
     contenu = (
       <Encadre emoji="🔒" titre="Tu n’as plus accès à la communauté">
-        Cindy a retiré ton accès. Si tu veux en parler, écris-lui directement : ton accompagnement, lui, continue normalement.
+        J’ai retiré ton accès à la communauté. Si tu veux en parler, écris-moi directement : ton accompagnement, lui, continue normalement.
       </Encadre>
     );
   } else {

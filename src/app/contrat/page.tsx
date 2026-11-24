@@ -69,7 +69,7 @@ export default async function PageContrat({
           J’accepte et je commence ✨
         </BoutonEnvoi>
         <p className="text-center text-[13px] text-texte-2">
-          Ton acceptation est enregistrée avec la date et l’heure. Tu peux demander une copie de ton contrat à Cindy à tout moment.
+          Ton acceptation est enregistrée avec la date et l’heure. Tu peux me demander une copie de ton contrat à tout moment.
         </p>
       </form>
     </main>

@@ -24,7 +24,7 @@ export default async function PageAvis({ searchParams }: { searchParams: Promise
       </Link>
       <div>
         <h1 className="font-titre text-[30px] font-bold leading-tight">Laisser un témoignage</h1>
-        <p className="text-[15px] text-texte-2">Quelques mots sur ton accompagnement : ça touche toujours Cindy, et ça peut aider d’autres femmes à se lancer 💛</p>
+        <p className="text-[15px] text-texte-2">Quelques mots sur ton accompagnement : ça me touche toujours, et ça peut aider d’autres femmes à se lancer 💛</p>
       </div>
       {error ? (
         <p className="rounded-carte bg-blanc-casse p-5 text-[15px] text-texte-2 shadow-douce">Cette page arrive très bientôt dans ton appli 💛</p>

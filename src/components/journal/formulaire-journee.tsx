@@ -104,7 +104,7 @@ export function FormulaireJournee({
               </label>
             ))}
           </div>
-          <span className="text-[12.5px] text-texte-2">Coche ce que tu ressens, rien si tout va bien. Visible seulement par toi et Cindy.</span>
+          <span className="text-[12.5px] text-texte-2">Coche ce que tu ressens, rien si tout va bien. Visible seulement par toi et moi.</span>
         </fieldset>
       )}
       <label className="flex flex-col gap-1.5">
