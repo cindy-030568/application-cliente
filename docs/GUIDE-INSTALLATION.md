@@ -1153,6 +1153,7 @@ Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supab
 4. [`0036_planning_repas.sql`](../supabase/migrations/0036_planning_repas.sql) (planning des repas)
 5. [`0037_ressources_fiches.sql`](../supabase/migrations/0037_ressources_fiches.sql) (fiches écrites dans l'appli et brouillon « Je mange dehors »)
 6. [`0038_bilan_fin.sql`](../supabase/migrations/0038_bilan_fin.sql) (bilan de fin de suivi)
+7. [`0039_avis_parrainage.sql`](../supabase/migrations/0039_avis_parrainage.sql) (avis et parrainage)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1291,3 +1292,35 @@ Elle peut le **télécharger en PDF** (« Télécharger mon bilan (PDF) »).
 Sur sa fiche, **« Voir son bilan de fin tel qu'elle le voit »** ouvre un aperçu à tout moment, même avant qu'elle y ait accès.
 
 **Tester** : sur la fiche d'une cliente de test qui a quelques bilans, mets une date de fin dans moins de 7 jours. Connecte-toi avec elle : la carte apparaît sur son accueil. Ouvre son bilan, télécharge le PDF, puis clique sur « Ça m'intéresse » : tu reçois la notification, et la ligne apparaît dans ton tableau de bord.
+
+## 9. Avis (témoignages)
+
+**Pour ta cliente** : elle laisse un témoignage depuis la carte « victoire hors balance », son bilan de fin de suivi ou son profil (« Laisser un témoignage »).
+- Le texte d'abord, puis une **case séparée** : « J'autorise Cindy à publier mon témoignage ». Elle n'est jamais cochée d'avance.
+- Si elle la coche, elle choisit **sous quel nom** : son prénom (« Sophie »), son initiale (« S. ») ou anonyme (« Une cliente de Cindy »).
+- Elle peut **changer d'avis à tout moment** (décocher, changer de nom) ou retirer son témoignage.
+
+**Pour toi** : menu **Avis**.
+- Tous les témoignages, ou seulement ceux dont la **publication est autorisée**, avec le nom à utiliser.
+- **Exporter (Excel / CSV)**.
+- Tu peux supprimer un témoignage, mais jamais modifier son texte ni l'autorisation : c'est elle qui décide.
+- Tu es prévenue à chaque nouveau témoignage (case « Inscription, témoignage ou envie de continuer » dans Réglages → Mes notifications).
+
+À vérifier de ton côté : l'**article 9 de ton contrat** (témoignages). Il doit dire la même chose que l'app : publication seulement avec son accord, sous le nom qu'elle choisit. Et mentionne les témoignages dans ta politique de confidentialité.
+
+## 10. Parrainage
+
+- Chaque cliente a un **code personnel** de 6 caractères. Elle le trouve dans **Profil → Parrainer une amie**, avec son **lien** à partager : ton formulaire Tally, avec son code au bout.
+- **Ton formulaire Tally a été mis à jour et republié** :
+  - une question facultative « **Code de parrainage** » sur la dernière page ;
+  - un champ caché « parrain » qui la remplit tout seul quand la personne arrive par le lien de sa marraine.
+  - Elle peut aussi taper le code à la main.
+- Quand une inscription arrive avec un code, tu vois « 🎁 **Parrainée par Sophie Martin** » sur sa fiche à valider, et la notification le dit.
+- Sur la fiche de la marraine, rubrique **Parrainage et avis** : son code, ses filleules, et une case **« Récompense donnée »** que tu coches toi-même. La récompense est gérée à la main par toi : aucun paiement automatique.
+- Le lien du formulaire se règle dans **Réglages → Parrainage**. Il est déjà rempli avec ton formulaire actuel.
+
+**Tester** :
+1. Connecte-toi avec une cliente de test → **Profil** → **Parrainer une amie** → **Copier mon lien**.
+2. Ouvre ce lien dans une fenêtre de navigation privée : à la dernière page, la question « Code de parrainage » est déjà remplie.
+3. Envoie le formulaire avec un email de test : la fiche à valider affiche « Parrainée par… ».
+4. Pour l'avis : **Profil** → **Laisser un témoignage**, coche la case de publication, choisis le nom, envoie, puis regarde le menu **Avis**.

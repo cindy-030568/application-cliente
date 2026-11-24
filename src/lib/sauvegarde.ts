@@ -29,7 +29,7 @@ export const TABLES_SAUVEGARDEES = [
   // Planning des repas
   "planning_repas",
   // Fin de suivi
-  "demandes_suite",
+  "demandes_suite", "avis",
   // Formules, paiements, revenus
   "paiements_clientes", "echeances_paiement", "revenus_divers",
   // Messages, annonces, rappels

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   IconeClientes,
+  IconeCoeur,
   IconeCommunaute,
   IconeEuro,
   IconeNutrition,
@@ -22,6 +23,7 @@ const LIENS = [
   { href: "/coach/bilans", label: "Bilans", Icone: IconeSuivi },
   { href: "/coach/clientes", label: "Clientes", Icone: IconeClientes },
   { href: "/coach/communaute", label: "Communauté", Icone: IconeCommunaute },
+  { href: "/coach/avis", label: "Avis", Icone: IconeCoeur },
   { href: "/coach/revenus", label: "Revenus", Icone: IconeEuro },
   { href: "/coach/recettes", label: "Recettes", Icone: IconeRecettes },
   { href: "/coach/aliments", label: "Aliments", Icone: IconeNutrition },

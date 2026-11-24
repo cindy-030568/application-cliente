@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 
 const CLE = "fitw_victoires_vues";
@@ -63,13 +64,18 @@ export function CarteVictoires({ victoires }: { victoires: VictoireAffichee[] })
           ))}
         </ul>
         <p className="text-[14px] text-texte-2">Ce sont ces progrès-là qui durent. Sois fière de toi 💛</p>
-        <button
-          type="button"
-          onClick={merci}
-          className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme"
-        >
-          Merci 💛
-        </button>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <button
+            type="button"
+            onClick={merci}
+            className="inline-flex min-h-11 w-fit items-center justify-center rounded-full bg-chocolat px-5 text-[15px] font-medium text-creme"
+          >
+            Merci 💛
+          </button>
+          <Link href="/avis?de=victoire" className="text-[14.5px] font-medium underline underline-offset-4">
+            Laisser un témoignage
+          </Link>
+        </div>
       </div>
     </section>
   );

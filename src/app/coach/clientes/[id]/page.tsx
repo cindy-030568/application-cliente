@@ -18,6 +18,7 @@ import { BlocExclusions, BlocRepas } from "./bloc-nutrition";
 import { BlocPaiement } from "./bloc-paiement";
 import { BlocComplements } from "./bloc-complements";
 import { BoutonTraiterSuite } from "../../reglages/fin";
+import { CaseRecompense } from "../../avis/boutons";
 import { bilanFinVisible } from "@/lib/bilan-fin";
 import type { Complement } from "@/lib/complements";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
@@ -109,6 +110,17 @@ export default async function PageFicheCliente({
     .eq("cliente_id", id)
     .order("cree_le", { ascending: false })
     .returns<{ id: string; offre: string; cree_le: string; traitee: boolean }[]>();
+  // Parrainage (0039) : son code et ses filleules, lus à part.
+  const [{ data: monCode, error: sansParrainage }, { data: filleules }, { count: nbAvis }] = await Promise.all([
+    supabase.from("clientes").select("code_parrainage").eq("id", id).maybeSingle<{ code_parrainage: string | null }>(),
+    supabase
+      .from("demandes_inscription")
+      .select("id, prenom, nom, recue_le, statut, recompense_donnee")
+      .eq("marraine_id", id)
+      .order("recue_le", { ascending: false })
+      .returns<{ id: string; prenom: string; nom: string; recue_le: string; statut: string; recompense_donnee: boolean }[]>(),
+    supabase.from("avis").select("id", { count: "exact", head: true }).eq("cliente_id", id),
+  ]);
   // Contrat accepté (0027) et questionnaire d'arrivée (0031) : lus à part.
   const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }, { data: questionnaire, error: sansQuestionnaire }] = await Promise.all([
     supabase
@@ -504,6 +516,45 @@ export default async function PageFicheCliente({
                 ))}
               </ul>
             )}
+          </Repliable>
+        )}
+        {!sansParrainage && monCode?.code_parrainage && (
+          <Repliable
+            titre="Parrainage et avis"
+            resume={[
+              `Code ${monCode.code_parrainage}`,
+              (filleules ?? []).length ? `${(filleules ?? []).length} filleule${(filleules ?? []).length > 1 ? "s" : ""}` : "aucune filleule",
+              nbAvis ? `${nbAvis} témoignage${nbAvis > 1 ? "s" : ""}` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          >
+            <p className="text-[14px] text-texte-2">
+              Son code de parrainage : <strong className="tracking-[0.12em] text-chocolat">{monCode.code_parrainage}</strong>. Elle le trouve, avec son lien à partager, dans son profil.
+            </p>
+            {(filleules ?? []).length > 0 ? (
+              <ul className="flex flex-col divide-y divide-ligne">
+                {(filleules ?? []).map((f) => (
+                  <li key={f.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+                    <span className="text-[14.5px]">
+                      <strong>
+                        {f.prenom} {f.nom}
+                      </strong>{" "}
+                      · inscrite le {formaterDate(f.recue_le.slice(0, 10))}
+                      {f.statut === "a_valider" ? " (fiche à valider)" : ""}
+                    </span>
+                    <CaseRecompense id={f.id} donnee={f.recompense_donnee} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[14px] text-texte-2">Aucune inscription avec son code pour l’instant.</p>
+            )}
+            {nbAvis ? (
+              <Link href="/coach/avis" className="w-fit text-[14px] underline underline-offset-4">
+                Voir ses témoignages
+              </Link>
+            ) : null}
           </Repliable>
         )}
         <Repliable titre="Connexion" resume="Renvoyer l’email ou créer un lien à partager">

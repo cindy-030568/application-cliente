@@ -36,6 +36,18 @@ export default async function PageClientes({
       .returns<Demande[]>(),
     supabase.from("categories_aliment").select("id, nom"),
   ]);
+  // Parrainage (0039) : lu à part, rien avant la mise à jour.
+  const { data: parrainages } = await supabase
+    .from("demandes_inscription")
+    .select("id, code_parrainage, marraine_id")
+    .eq("statut", "a_valider")
+    .not("code_parrainage", "is", null)
+    .returns<{ id: string; code_parrainage: string; marraine_id: string | null }[]>();
+  const nomDe = new Map(toutes.map((c) => [c.id, `${c.profils.prenom} ${c.profils.nom}`.trim()]));
+  const avecParrainage = (demandes ?? []).map((d) => {
+    const p = (parrainages ?? []).find((x) => x.id === d.id);
+    return p ? { ...d, parrainage: { code: p.code_parrainage, marraine: p.marraine_id ? { id: p.marraine_id, nom: nomDe.get(p.marraine_id) ?? "une cliente" } : null } } : d;
+  });
   const clientes = statut === "toutes" ? toutes : toutes.filter((c) => c.statut === statut);
 
   return (
@@ -52,7 +64,7 @@ export default async function PageClientes({
 
       {supprimee && <Message ton="succes">La cliente et toutes ses données ont été supprimées.</Message>}
 
-      <FichesAValider demandes={demandes ?? []} categories={new Map((categories ?? []).map((c) => [c.id as string, c.nom as string]))} />
+      <FichesAValider demandes={avecParrainage} categories={new Map((categories ?? []).map((c) => [c.id as string, c.nom as string]))} />
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par statut">
         {FILTRES.map((f) => {

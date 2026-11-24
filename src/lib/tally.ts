@@ -5,6 +5,7 @@
  * ou aliments évités. Toutes les autres réponses sont gardées telles quelles pour la coach.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { lireCode } from "./parrainage";
 
 export type ChampTally = {
   key?: string;
@@ -24,6 +25,8 @@ export type DemandeLue = {
   exclusionsTexte: string | null;
   categoriesExclues: string[];
   reponses: { question: string; reponse: string }[];
+  /** Code de parrainage (question « Code de parrainage » ou champ caché « parrain »). */
+  codeParrainage: string | null;
 };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,11 +75,12 @@ export function texteReponse(champ: ChampTally): string {
   return "";
 }
 
-type Role = "prenom" | "nom" | "email" | "objectif" | "exclusions";
+type Role = "prenom" | "nom" | "email" | "objectif" | "exclusions" | "parrainage";
 
 /** À quoi sert une question, d'après son intitulé. */
 export function roleQuestion(champ: ChampTally): Role | null {
   const l = normaliser(champ.label ?? "");
+  if (/parrain|marraine/.test(l)) return "parrainage";
   if (/\bpr[e]?nom\b|\bprenom\b|first name/.test(l)) return "prenom";
   if (champ.type === "INPUT_EMAIL" || /\be-?mail\b|\bcourriel\b|adresse mail/.test(l)) return "email";
   if (/\bnom\b|last name/.test(l)) return "nom";
@@ -140,7 +144,7 @@ export function lireReponseTally(payload: unknown, categories: { id: string; nom
     const role = roleQuestion(champ);
     if (role && reponse && !valeurs[role]) valeurs[role] = reponse;
     else if (role === "exclusions" && reponse) valeurs.exclusions = `${valeurs.exclusions}, ${reponse}`;
-    if (question && reponse && role !== "prenom" && role !== "nom" && role !== "email") reponses.push({ question, reponse });
+    if (question && reponse && role !== "prenom" && role !== "nom" && role !== "email" && role !== "parrainage") reponses.push({ question, reponse });
   }
   const email = (valeurs.email ?? "").trim().toLowerCase();
   const prenom = (valeurs.prenom ?? "").trim().slice(0, 60);
@@ -158,5 +162,6 @@ export function lireReponseTally(payload: unknown, categories: { id: string; nom
     exclusionsTexte,
     categoriesExclues: exclusionsTexte ? categoriesDepuis(exclusionsTexte, categories) : [],
     reponses,
+    codeParrainage: lireCode(valeurs.parrainage),
   };
 }

@@ -13,6 +13,8 @@ export type Demande = {
   categories_exclues: string[];
   reponses: { question: string; reponse: string }[];
   doublon_de: string | null;
+  /** Parrainage (0039) : code saisi et nom de la marraine reconnue. */
+  parrainage?: { code: string; marraine: { id: string; nom: string } | null } | null;
 };
 
 const quand = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -48,6 +50,21 @@ export function FichesAValider({ demandes, categories }: { demandes: Demande[]; 
                 <Link href={`/coach/clientes/${d.doublon_de}`} className="font-medium underline underline-offset-4">
                   Voir sa fiche
                 </Link>
+              </p>
+            )}
+            {d.parrainage && (
+              <p className="rounded-xl bg-succes-pale px-3 py-2 text-[14px]">
+                🎁 {d.parrainage.marraine ? (
+                  <>
+                    Parrainée par{" "}
+                    <Link href={`/coach/clientes/${d.parrainage.marraine.id}`} className="font-medium underline underline-offset-4">
+                      {d.parrainage.marraine.nom}
+                    </Link>{" "}
+                    (code {d.parrainage.code})
+                  </>
+                ) : (
+                  <>Code de parrainage {d.parrainage.code} : aucune cliente n’a ce code.</>
+                )}
               </p>
             )}
             <dl className="flex flex-col gap-1.5 text-[14px]">

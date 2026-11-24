@@ -11,6 +11,8 @@ import { LIBELLES_STATUT } from "@/lib/types";
 import { ReglagesRappels } from "./rappels";
 import { InterrupteurPreference } from "./interrupteur";
 import { ReglageCycle } from "./cycle";
+import { CarteParrainage } from "./parrainage";
+import { lienParrainage } from "@/lib/parrainage";
 import { lireCycle } from "@/lib/cycle-serveur";
 import { journalActif } from "@/lib/journal-serveur";
 import { CarteInstallation } from "@/components/pwa";
@@ -32,7 +34,13 @@ export default async function PageProfil() {
     .select("recap_notif")
     .eq("id", profil.id)
     .maybeSingle<{ recap_notif: boolean }>();
-  const [cycle, avecJournal] = await Promise.all([lireCycle(supabase, profil.id), journalActif(supabase, profil.id)]);
+  const [cycle, avecJournal, { data: parrain }, { data: lien }] = await Promise.all([
+    lireCycle(supabase, profil.id),
+    journalActif(supabase, profil.id),
+    // Parrainage (0039) : lu à part, rien avant la mise à jour.
+    supabase.from("clientes").select("code_parrainage").eq("id", profil.id).maybeSingle<{ code_parrainage: string | null }>(),
+    supabase.from("reglages").select("lien_inscription").maybeSingle<{ lien_inscription: string | null }>(),
+  ]);
   return (
     <div className="pt-encoche flex flex-col gap-6 px-5">
       <Link href="/" className="inline-flex items-center gap-1 text-[15px] text-texte-2">
@@ -76,6 +84,24 @@ export default async function PageProfil() {
           />
         </Carte>
       )}
+
+      {parrain?.code_parrainage && fiche.statut !== "fermee" && (
+        <Carte id="parrainage" className="flex scroll-mt-6 flex-col gap-4">
+          <div>
+            <h2 className="font-titre text-xl font-bold">Parrainer une amie</h2>
+            <p className="text-[13.5px] text-texte-2">Partage ton lien personnel, ou donne ton code à une amie qui veut se lancer.</p>
+          </div>
+          <CarteParrainage code={parrain.code_parrainage} lien={lienParrainage(lien?.lien_inscription, parrain.code_parrainage)} />
+        </Carte>
+      )}
+
+      <Link href="/avis" className="flex items-center justify-between rounded-carte bg-blanc-casse p-4 shadow-douce">
+        <span className="flex flex-col">
+          <span className="font-medium">Laisser un témoignage</span>
+          <span className="text-[13.5px] text-texte-2">Publié seulement si tu le souhaites</span>
+        </span>
+        <IconeFleche className="size-5 text-texte-2" />
+      </Link>
 
       {cycle && avecJournal && fiche.statut !== "fermee" && (
         <Carte id="cycle" className="flex scroll-mt-6 flex-col gap-4">

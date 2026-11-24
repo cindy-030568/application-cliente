@@ -51,6 +51,20 @@ export async function POST(request: Request) {
       doublon_de: (compte?.id as string | undefined) ?? null,
       recue_le: new Date().toISOString(),
     };
+    // Parrainage (0039) : la marraine est retrouvée grâce à son code (rien avant la mise à jour).
+    let parrainage: { code_parrainage: string; marraine_id: string | null } | null = null;
+    let marraine = "";
+    if (lue.codeParrainage) {
+      const { data: m, error: sans0039 } = await admin
+        .from("clientes")
+        .select("id, profils!inner(prenom)")
+        .eq("code_parrainage", lue.codeParrainage)
+        .maybeSingle<{ id: string; profils: { prenom: string } }>();
+      if (!sans0039) {
+        parrainage = { code_parrainage: lue.codeParrainage, marraine_id: m?.id ?? null };
+        marraine = m?.profils.prenom ?? "";
+      }
+    }
     // Même email déjà « à valider » : on met à jour cette demande au lieu d'en créer une 2e.
     const { data: enAttente } = await admin
       .from("demandes_inscription")
@@ -58,15 +72,16 @@ export async function POST(request: Request) {
       .eq("statut", "a_valider")
       .ilike("email", lue.email.replace(/[%_\\]/g, "\\$&"))
       .maybeSingle();
+    const complete = parrainage ? { ...ligne, ...parrainage } : ligne;
     const { error } = enAttente
-      ? await admin.from("demandes_inscription").update(ligne).eq("id", enAttente.id)
-      : await admin.from("demandes_inscription").insert(ligne);
+      ? await admin.from("demandes_inscription").update(complete).eq("id", enAttente.id)
+      : await admin.from("demandes_inscription").insert(complete);
     if (error) {
       console.error("Tally : demande non enregistrée", error.code);
       return Response.json({ erreur: "non enregistrée" }, { status: 500 });
     }
     const prenom = lue.prenom;
-    after(() => notifierCoach({ type: "inscription", prenom }));
+    after(() => notifierCoach({ type: "inscription", prenom, marraine }));
     return Response.json({ ok: true });
   } catch (e) {
     console.error("Tally : échec", e instanceof Error ? e.message.slice(0, 120) : "erreur inconnue");

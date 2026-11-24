@@ -54,7 +54,18 @@ describe("formulaire Tally", () => {
         { question: "Combien de séances de sport par semaine ?", reponse: "3" },
         { question: "Photo", reponse: "(fichier joint : à voir dans Tally)" },
       ],
+      codeParrainage: null,
     });
+  });
+  it("code de parrainage : venu du lien (champ caché « parrain ») ou tapé dans la question", () => {
+    const avec = (champs: object[]) => ({ ...envoi, data: { ...envoi.data, fields: [...envoi.data.fields, ...champs] } });
+    const r1 = lireReponseTally(avec([{ key: "h1", label: "parrain", type: "HIDDEN_FIELDS", value: "abc23d" }]), CATS);
+    expect("erreur" in r1 ? null : r1.codeParrainage).toBe("ABC23D");
+    const r2 = lireReponseTally(avec([{ key: "q9", label: "Code de parrainage (facultatif)", type: "INPUT_TEXT", value: " xyz 789 " }]), CATS);
+    expect("erreur" in r2 ? null : r2.codeParrainage).toBe("XYZ789");
+    expect("erreur" in r2 ? [] : r2.reponses.map((x) => x.question)).not.toContain("Code de parrainage (facultatif)");
+    const r3 = lireReponseTally(avec([{ key: "q9", label: "Code de parrainage", type: "INPUT_TEXT", value: "n'importe quoi" }]), CATS);
+    expect("erreur" in r3 ? undefined : r3.codeParrainage).toBeNull();
   });
   it("refuse une réponse sans email ou sans prénom, ou un autre événement", () => {
     const sansEmail = { ...envoi, data: { ...envoi.data, fields: envoi.data.fields.filter((f) => f.key !== "q3") } };

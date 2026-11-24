@@ -105,9 +105,12 @@ test("planning des repas : choisir ses recettes de la semaine, puis remplir la l
   await page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ }).click();
   await expect(page.getByText(/articles? ajoutés? à ta liste de courses ✓/)).toBeVisible();
   await page.screenshot({ path: "test-results/phase4-planning.png", fullPage: true });
-  // Recommencer ne crée pas de doublon : la semaine est remplacée.
-  await page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ }).click();
-  await expect(page.getByText(/articles? ajoutés? à ta liste de courses ✓/)).toBeVisible();
+  // Recommencer ne crée pas de doublon : la semaine est remplacée (on attend la fin de l'envoi).
+  await Promise.all([
+    page.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/recettes/planning")),
+    page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ }).click(),
+  ]);
+  await expect(page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ })).toBeEnabled();
   await page.goto("/recettes/courses");
   await expect(page.getByText(/Planning de la semaine du/).first()).toBeVisible();
   await page.screenshot({ path: "test-results/phase4-planning-courses.png", fullPage: true });
@@ -147,4 +150,28 @@ test("bilan de fin de suivi : sa transformation, le PDF et « Continuer avec moi
   await expect(offre).toContainText("Demande envoyée à Cindy ✓");
   await page.reload();
   await expect(page.locator("li", { hasText: "Continuer mon accompagnement" })).toContainText("Demande envoyée à Cindy ✓");
+});
+
+test("avis et parrainage : un témoignage avec sa case de publication, et son code à partager", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.goto("/avis?de=fin");
+  await page.getByLabel("Ton témoignage").fill("Grâce à Cindy, j’ai retrouvé de l’énergie et confiance en moi, sans me priver.");
+  // La publication est une case à part : sans elle, le nom n'est même pas demandé.
+  await expect(page.getByText("Sous quel nom ?")).toHaveCount(0);
+  await page.getByText("J’autorise Cindy à publier mon témoignage").click();
+  await page.getByText("Mon initiale").click();
+  await page.screenshot({ path: "test-results/phase4-avis-cliente.png", fullPage: true });
+  await page.getByRole("button", { name: "Envoyer mon témoignage" }).click();
+  await expect(page.getByText(/Merci infiniment pour ton témoignage/)).toBeVisible();
+  await page.reload();
+  const envoye = page.locator("li", { hasText: "Grâce à Cindy" });
+  await expect(envoye.getByRole("checkbox", { name: "Cindy peut le publier" })).toBeChecked();
+
+  // Parrainage : son code et son lien dans le profil.
+  await page.goto("/profil#parrainage");
+  const carte = page.locator("#parrainage");
+  await expect(carte).toContainText("CODE0A");
+  await expect(carte.getByRole("button", { name: "Copier mon lien" })).toBeVisible();
+  await carte.screenshot({ path: "test-results/phase4-parrainage-cliente.png" });
 });

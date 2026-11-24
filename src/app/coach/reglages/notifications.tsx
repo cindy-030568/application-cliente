@@ -33,8 +33,8 @@ const LIGNES: Ligne[] = [
   { cle: "notif_coach_bilans", titre: "Bilan envoyé", aide: "Dès qu’une cliente envoie son bilan (ou son questionnaire d’arrivée)." },
   {
     cle: "notif_coach_inscriptions",
-    titre: "Inscription ou envie de continuer",
-    aide: "Quand quelqu’un remplit ton formulaire d’inscription Tally (sa fiche t’attend dans Clientes, à valider), ou quand une cliente clique sur une offre de son bilan de fin de suivi.",
+    titre: "Inscription, témoignage ou envie de continuer",
+    aide: "Quand quelqu’un remplit ton formulaire d’inscription Tally (sa fiche t’attend dans Clientes, à valider), quand une cliente laisse un témoignage, ou quand elle clique sur une offre de son bilan de fin de suivi.",
     v0026: true,
   },
   { cle: "notif_coach_journal", titre: "Journée remplie", aide: "Une fois par jour et par cliente. Notification seulement, jamais par email.", v0024: true },

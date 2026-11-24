@@ -57,7 +57,8 @@ export type EvenementCoach =
   | { type: "journal"; clienteId: string }
   | { type: "seance"; clienteId: string; nom: string }
   | { type: "alerte"; clienteId: string; motif: MotifAlerte; source: "journal" | "seance" }
-  | { type: "inscription"; prenom: string }
+  | { type: "inscription"; prenom: string; marraine?: string }
+  | { type: "avis"; clienteId: string; publiable: boolean }
   | { type: "questionnaire"; clienteId: string; prenom: string }
   | { type: "suite"; clienteId: string; offre: string };
 
@@ -71,7 +72,7 @@ export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
   if (e.type === "inscription")
     return {
       titre: "Nouvelle demande d’inscription ✨",
-      texte: `${e.prenom.trim() || "Quelqu’un"} a rempli ton formulaire d’inscription : sa fiche t’attend, à vérifier avant de l’inviter.`,
+      texte: `${e.prenom.trim() || "Quelqu’un"} a rempli ton formulaire d’inscription${e.marraine?.trim() ? ` (parrainée par ${e.marraine.trim()})` : ""} : sa fiche t’attend, à vérifier avant de l’inviter.`,
       url: "/coach/clientes#a-valider",
       bouton: "Voir la demande",
       sujet: "Nouvelle demande d’inscription",
@@ -83,6 +84,14 @@ export function contenuNotifCoach(e: EvenementCoach, prenom: string) {
       url: `/coach/clientes/${e.clienteId}`,
       bouton: "Voir ses réponses",
       sujet: `${qui} a rempli son questionnaire d’arrivée`,
+    };
+  if (e.type === "avis")
+    return {
+      titre: "Nouveau témoignage 💌",
+      texte: `${qui} a laissé un témoignage${e.publiable ? " et t’autorise à le publier" : " (pas pour publication)"}.`,
+      url: "/coach/avis",
+      bouton: "Lire son témoignage",
+      sujet: `${qui} a laissé un témoignage`,
     };
   if (e.type === "suite")
     return {
@@ -126,6 +135,7 @@ const CASE: Record<EvenementCoach["type"], keyof PrefsNotifCoach> = {
   inscription: "notif_coach_inscriptions",
   questionnaire: "notif_coach_bilans",
   suite: "notif_coach_inscriptions",
+  avis: "notif_coach_inscriptions",
 };
 /** Trop fréquents pour un email : notification seulement. */
 const SANS_EMAIL: EvenementCoach["type"][] = ["message", "journal", "seance"];

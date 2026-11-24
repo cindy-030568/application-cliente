@@ -12,6 +12,7 @@ import { lirePrefsNotifCoach } from "@/lib/notifications-coach";
 import { NotificationsCoach } from "./notifications";
 import { FormulaireContrat, InterrupteurBrouillon, type ReglagesContrat } from "./contrat";
 import { FormulaireFinSuivi } from "./fin";
+import { FormulaireLienInscription } from "../avis/boutons";
 import { lireOffres } from "@/lib/bilan-fin";
 
 export const metadata: Metadata = { title: "Réglages" };
@@ -29,6 +30,7 @@ export default async function PageReglages() {
     { count: acceptations },
     { data: brouillon, error: sans0028 },
     { data: fin, error: sans0038 },
+    { data: inscription, error: sans0039 },
   ] = await Promise.all([
     lireReglages(),
     chargerChamps(supabase, true),
@@ -48,6 +50,8 @@ export default async function PageReglages() {
     supabase.from("reglages").select("brouillon_claude").maybeSingle<{ brouillon_claude: boolean }>(),
     // Bilan de fin de suivi (0038) : lu à part.
     supabase.from("reglages").select("fin_texte, fin_offres").maybeSingle<{ fin_texte: string; fin_offres: unknown }>(),
+    // Parrainage (0039) : lien du formulaire d'inscription.
+    supabase.from("reglages").select("lien_inscription").maybeSingle<{ lien_inscription: string | null }>(),
   ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
@@ -106,6 +110,19 @@ export default async function PageReglages() {
           <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0038_bilan_fin.sql (voir le guide).</Message>
         ) : (
           <FormulaireFinSuivi texte={fin.fin_texte} offres={lireOffres(fin.fin_offres)} />
+        )}
+      </Carte>
+      <Carte className="flex flex-col gap-4">
+        <div>
+          <h2 className="font-titre text-xl font-bold">Parrainage</h2>
+          <p className="text-[14px] text-texte-2">
+            Chaque cliente a un code personnel et un lien à partager. Quand quelqu’un s’inscrit avec, tu le vois sur sa fiche à valider et sur la fiche de sa marraine.
+          </p>
+        </div>
+        {sans0039 || !inscription ? (
+          <Message ton="info">Fais d’abord la mise à jour de la base : fichier 0039_avis_parrainage.sql (voir le guide).</Message>
+        ) : (
+          <FormulaireLienInscription lien={inscription.lien_inscription} />
         )}
       </Carte>
       <Carte className="flex flex-col gap-4">

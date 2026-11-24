@@ -23,7 +23,21 @@ export default async function PageBilanFin() {
       <Link href="/" className="inline-flex items-center gap-1 text-[15px] text-texte-2">
         <IconeRetour className="size-5" /> Accueil
       </Link>
-      <VueBilanFin d={d} photos={photos} lienPdf="/bilan-de-fin/pdf" suite={<BlocSuite texte={d.texte} offres={d.offres} demandees={d.demandees} />} />
+      <VueBilanFin d={d} photos={photos} lienPdf="/bilan-de-fin/pdf" suite={
+          <>
+            <Link href="/avis?de=fin" className="flex items-center gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-pale text-xl" aria-hidden>
+                💌
+              </span>
+              <span className="flex flex-1 flex-col">
+                <span className="font-medium">Laisser un témoignage</span>
+                <span className="text-[14px] text-texte-2">Quelques mots sur ton accompagnement, publiés seulement si tu le souhaites.</span>
+              </span>
+            </Link>
+            <BlocSuite texte={d.texte} offres={d.offres} demandees={d.demandees} />
+          </>
+        }
+      />
     </div>
   );
 }

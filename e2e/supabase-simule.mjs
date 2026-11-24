@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null,
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(),
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -25,7 +25,7 @@ const clientes = [
 ];
 // Sophie termine son suivi dans 5 jours : son bilan de fin de suivi est visible.
 clientes[0].date_fin = iso(new Date(Date.now() + 5 * 86400000));
-const reglages = { fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
+const reglages = { lien_inscription: "https://tally.so/r/EkdN0A", fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
   message_formation: "Envie d'aller plus loin ? Découvre la Fitw_cindy Academy ✨", lien_contact: "https://wa.me/33600000000",
   tolerance_pct: 10, tolerance_g: 3, hors_tolerance: "masquer", rappels_actifs: true, relance_jours: 2, texte_rappel: "Coucou {prenom} ! Ton bilan est prêt : prends 5 minutes pour faire le point 💛", texte_relance: "{prenom}, ton bilan t'attend toujours. Quelques minutes suffisent, même imparfait 💛", fenetre_bilan_jours: 3, intro_bilan: "Voici les points pour faire le point sur ces {jours} derniers jours. Réponds en toute simplicité, avec tes mots à toi. Pas besoin d’être parfaite : ce bilan, c’est ton espace pour faire le point et avancer 💛" };
 const jour = (n) => iso(new Date(Date.now() + n * 86400000));
@@ -305,6 +305,9 @@ if (process.env.ANALYSE_DEMO) {
 for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
   journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
+
+// ---- Avis (0039)
+const avisListe = [];
 
 // ---- Fin de suivi (0038)
 const demandesSuite = [];
@@ -693,6 +696,11 @@ http.createServer((req, res) => {
       creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
     });
   }
+  if (u.pathname === "/rest/v1/avis") return tableCommu(req, res, u, avisListe, {
+    visibles: coach ? avisListe : avisListe.filter((x) => x.cliente_id === uid),
+    enrichir: (x) => { const c = clientes.find((y) => y.id === x.cliente_id); return { ...x, clientes: c ? { profils: { prenom: c.profils.prenom, nom: c.profils.nom } } : null }; },
+    creer: (b) => (coach ? { erreur: "interdit" } : { id: "a7000000-0000-4000-8000-" + String(avisListe.length + 1).padStart(12, "0"), cree_le: new Date().toISOString(), modifie_le: new Date().toISOString(), contexte: "libre", nom_affiche: null, ...b, cliente_id: uid }),
+  });
   if (u.pathname === "/rest/v1/demandes_suite") return tableCommu(req, res, u, demandesSuite, {
     visibles: coach ? demandesSuite : demandesSuite.filter((x) => x.cliente_id === uid),
     creer: (b) => (coach ? { erreur: "interdit" } : { id: "d5000000-0000-4000-8000-" + String(demandesSuite.length + 1).padStart(12, "0"), cree_le: new Date().toISOString(), traitee: false, ...b, cliente_id: uid }),

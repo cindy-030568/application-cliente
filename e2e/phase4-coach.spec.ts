@@ -84,3 +84,45 @@ test("bilan de fin de suivi : la coach règle ses offres, voit l'aperçu et les 
   await page.goto("/coach");
   await expect(page.getByText("Envie de continuer avec toi : « Continuer mon accompagnement »")).toBeVisible();
 });
+
+test("avis et parrainage : la coach voit les témoignages, les exporte, et les inscriptions parrainées", async ({ page, request }) => {
+  // Une amie s'inscrit par le lien de Sophie (code dans le champ caché « parrain »).
+  const { createHmac } = await import("node:crypto");
+  const corps = JSON.stringify({
+    eventId: "evt-parrain",
+    eventType: "FORM_RESPONSE",
+    createdAt: new Date().toISOString(),
+    data: {
+      responseId: "rep-e2e-parrain",
+      fields: [
+        { key: "h", label: "parrain", type: "HIDDEN_FIELDS", value: "CODE0A" },
+        { key: "q1", label: "Ton prénom", type: "INPUT_TEXT", value: "Margaux" },
+        { key: "q2", label: "Ton nom", type: "INPUT_TEXT", value: "Fictive" },
+        { key: "q3", label: "Ton adresse e-mail", type: "INPUT_EMAIL", value: "margaux.fictive@exemple.fr" },
+        { key: "q4", label: "Code de parrainage (facultatif)", type: "INPUT_TEXT", value: "CODE0A" },
+      ],
+    },
+  });
+  const signature = createHmac("sha256", "tally-test").update(corps).digest("base64");
+  expect((await request.post("/api/tally", { data: corps, headers: { "content-type": "application/json", "tally-signature": signature } })).status()).toBe(200);
+
+  await seConnecter(page, "coach@exemple.fr");
+  await page.goto("/coach/clientes");
+  const fiche = page.locator("#a-valider").locator("div", { hasText: "Margaux Fictive" }).first();
+  await expect(fiche).toContainText("Parrainée par Sophie Martin");
+  // Sur la fiche de la marraine : sa filleule, et la récompense gérée à la main.
+  await page.goto("/coach/clientes/00000000-0000-0000-0000-00000000000a");
+  await page.getByText("Parrainage et avis", { exact: true }).click();
+  await expect(page.getByText(/Margaux Fictive/)).toBeVisible();
+  await page.getByRole("checkbox", { name: "Récompense donnée" }).check();
+  await expect(page.getByRole("checkbox", { name: "Récompense donnée" })).toBeChecked();
+
+  // Témoignages (celui de Sophie vient du test téléphone).
+  await page.goto("/coach/avis");
+  await expect(page.getByText("Publication autorisée, signé « S. »")).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-avis-coach.png", fullPage: true });
+  const [csv] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: "Exporter (Excel / CSV)" }).click()]);
+  expect(csv.suggestedFilename()).toBe("temoignages.csv");
+  const { readFileSync } = await import("node:fs");
+  expect(readFileSync(await csv.path(), "utf8")).toContain("Sophie Martin;Oui;S.;Fin de suivi;");
+});
