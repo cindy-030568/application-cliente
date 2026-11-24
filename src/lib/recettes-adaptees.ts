@@ -41,6 +41,7 @@ export function versMoteur(r: Recette): RecettePourMoteur {
 }
 
 export type RepasCible = {
+  id: string;
   type_repas: TypeRepas;
   libelle: string;
   proteines_g: number;
@@ -73,7 +74,7 @@ export async function recettesAdapteesCliente(
   const [{ data: repas }, { data: exclusions }, recettes] = await Promise.all([
     supabase
       .from("repas_cibles")
-      .select("type_repas, libelle, proteines_g, glucides_g, lipides_g")
+      .select("id, type_repas, libelle, proteines_g, glucides_g, lipides_g")
       .eq("cliente_id", clienteId)
       .order("ordre")
       .returns<RepasCible[]>(),

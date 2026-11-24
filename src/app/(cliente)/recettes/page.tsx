@@ -97,7 +97,15 @@ export default async function PageRecettes({
     <>
       <EnTete titre="Des recettes plaisir, adaptées à toi" sousTitre="Les quantités sont déjà calculées pour toi." />
       <div className="flex flex-col gap-5 px-5 pb-6 pt-3">
-        {lienCourses}
+        <div className="flex flex-wrap gap-2.5">
+          {lienCourses}
+          <Link
+            href="/recettes/planning"
+            className="inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-blanc-casse px-4 text-[14.5px] font-medium shadow-douce"
+          >
+            🗓️ Mon planning de la semaine
+          </Link>
+        </div>
 
         <section className="flex flex-col gap-2.5" aria-labelledby="titre-repas">
           <h2 id="titre-repas" className="font-titre text-lg font-bold">

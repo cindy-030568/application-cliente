@@ -87,3 +87,28 @@ test("compléments : la cliente voit sa liste, coche, et règle son rappel", asy
   await page.reload();
   await expect(page.getByRole("checkbox", { name: /Oméga 3/ })).not.toBeChecked();
 });
+
+test("planning des repas : choisir ses recettes de la semaine, puis remplir la liste de courses", async ({ page }) => {
+  await seConnecter(page, SOPHIE);
+  await fermerMotDuJour(page);
+  await page.goto("/recettes");
+  await page.getByRole("link", { name: /Mon planning de la semaine/ }).click();
+  await expect(page.getByRole("heading", { name: "Mon planning de repas" })).toBeVisible();
+  // Déjeuner du lundi, puis dîner du mardi.
+  for (const [n, repas] of [[0, "déjeuner"], [1, "dîner"]] as const) {
+    await page.getByRole("link", { name: new RegExp(`Choisir une recette pour le ${repas}`) }).nth(n).click();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await page.getByRole("button", { name: "Choisir" }).first().click();
+    await page.waitForURL(/\/recettes\/planning\?semaine=/);
+  }
+  await expect(page.getByRole("button", { name: /^Retirer/ })).toHaveCount(2);
+  await page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ }).click();
+  await expect(page.getByText(/articles? ajoutés? à ta liste de courses ✓/)).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-planning.png", fullPage: true });
+  // Recommencer ne crée pas de doublon : la semaine est remplacée.
+  await page.getByRole("button", { name: /Ajouter ma semaine à ma liste de courses/ }).click();
+  await expect(page.getByText(/articles? ajoutés? à ta liste de courses ✓/)).toBeVisible();
+  await page.goto("/recettes/courses");
+  await expect(page.getByText(/Planning de la semaine du/).first()).toBeVisible();
+  await page.screenshot({ path: "test-results/phase4-planning-courses.png", fullPage: true });
+});

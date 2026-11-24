@@ -1150,6 +1150,7 @@ Pour chacun de ces fichiers, dans l'ordre : lien → **Copy raw file** → Supab
 1. [`0033_recap_semaine.sql`](../supabase/migrations/0033_recap_semaine.sql) (récap de la semaine)
 2. [`0034_cycle.sql`](../supabase/migrations/0034_cycle.sql) (cycle et périménopause)
 3. [`0035_complements.sql`](../supabase/migrations/0035_complements.sql) (compléments)
+4. [`0036_planning_repas.sql`](../supabase/migrations/0036_planning_repas.sql) (planning des repas)
 
 Les victoires hors balance n'ont besoin d'aucune mise à jour de la base.
 
@@ -1220,3 +1221,20 @@ Tu peux **modifier** un complément, le **mettre en pause** sans l'effacer (case
 Seule toi ajoutes des compléments ; une cliente ne voit et ne coche que les siens.
 
 **Tester** : sur la fiche d'une cliente de test, ajoute un complément. Connecte-toi avec elle : la carte « Mes compléments » est sur son accueil. Coche-le, puis active le rappel à une heure proche, avec les notifications activées sur le téléphone.
+
+## 6. Planning des repas de la semaine
+
+Dans l'onglet **Recettes**, ta cliente touche **🗓️ Mon planning de la semaine** :
+- la semaine s'affiche jour par jour, avec **ses repas** (ceux que tu as définis dans « Repas et cibles ») ;
+- sur chaque repas, **+ Choisir** lui propose **ses recettes adaptées** à ce repas : même moteur, mêmes quantités, mêmes exclusions que dans l'onglet Recettes ;
+- une recette choisie peut être ouverte (avec ses quantités) ou retirée (×) ;
+- elle peut préparer la semaine d'après, ou revoir celle d'avant.
+
+Puis **🛒 Ajouter ma semaine à ma liste de courses** : toutes les recettes de la semaine partent dans sa liste de courses habituelle, avec ses quantités **additionnées par aliment** (ex. 2 déjeuners avec du riz = la somme des deux), rangées par rayon. Elle garde la main :
+- si elle recommence après un changement, la semaine est **remplacée** dans la liste (pas de doublon) ;
+- les articles ajoutés à la main ne sont pas touchés ;
+- elle peut retirer toute la semaine d'un coup (« Recettes dans ta liste » → Retirer).
+
+Toi, tu peux consulter son planning (lecture seule) ; une autre cliente ne le voit jamais.
+
+**Tester** : connecte-toi avec une cliente de test qui a des repas et des cibles → **Recettes** → **Mon planning de la semaine** → choisis 2 ou 3 recettes → **Ajouter ma semaine à ma liste de courses** → **Voir ma liste de courses**.

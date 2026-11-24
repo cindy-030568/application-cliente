@@ -26,6 +26,8 @@ export const TABLES_SAUVEGARDEES = [
   "besoins_clientes", "plans_alimentaires", "programmes_sportifs", "seances_faites", "charges_series",
   // Compléments
   "complements", "complements_pris",
+  // Planning des repas
+  "planning_repas",
   // Formules, paiements, revenus
   "paiements_clientes", "echeances_paiement", "revenus_divers",
   // Messages, annonces, rappels

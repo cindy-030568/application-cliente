@@ -111,10 +111,10 @@ const recettes = (process.env.DEPART_PARTIEL ? dep.recettes.slice(0, 62) : dep.r
   recette_ingredients: r.ingredients.map((g, ordre) => { const a = parRef(g.a); return { id: "19000000-0000-0000-0000-" + hex(i * 50 + ordre + 1), aliment_id: a.id, role: g.role, unite: g.unite, qte_base: g.base, qte_min: g.min, qte_max: g.max, pas: g.pas, note: g.note, ordre,
     aliments: { id: a.id, nom: a.nom, proteines_100: a.proteines_100, glucides_100: a.glucides_100, lipides_100: a.lipides_100, kcal_100: a.kcal_100, nom_unite: a.nom_unite, poids_unite_g: a.poids_unite_g, aliments_categories: a.aliments_categories } }; }) }));
 const repasCibles = [
-  { cliente_id: ALICE, type_repas: "petit_dejeuner", libelle: "Petit-déjeuner", ordre: 0, proteines_g: 25, glucides_g: 45, lipides_g: 12 },
-  { cliente_id: ALICE, type_repas: "dejeuner", libelle: "Déjeuner", ordre: 1, proteines_g: 35, glucides_g: 55, lipides_g: 15 },
-  { cliente_id: ALICE, type_repas: "collation", libelle: "Collation", ordre: 2, proteines_g: 15, glucides_g: 20, lipides_g: 6 },
-  { cliente_id: ALICE, type_repas: "diner", libelle: "Dîner", ordre: 3, proteines_g: 35, glucides_g: 45, lipides_g: 15 },
+  { id: "4e000000-0000-4000-8000-000000000000", cliente_id: ALICE, type_repas: "petit_dejeuner", libelle: "Petit-déjeuner", ordre: 0, proteines_g: 25, glucides_g: 45, lipides_g: 12 },
+  { id: "4e000000-0000-4000-8000-000000000001", cliente_id: ALICE, type_repas: "dejeuner", libelle: "Déjeuner", ordre: 1, proteines_g: 35, glucides_g: 55, lipides_g: 15 },
+  { id: "4e000000-0000-4000-8000-000000000002", cliente_id: ALICE, type_repas: "collation", libelle: "Collation", ordre: 2, proteines_g: 15, glucides_g: 20, lipides_g: 6 },
+  { id: "4e000000-0000-4000-8000-000000000003", cliente_id: ALICE, type_repas: "diner", libelle: "Dîner", ordre: 3, proteines_g: 35, glucides_g: 45, lipides_g: 15 },
 ];
 const exclusionsListe = [{ cliente_id: ALICE, categorie_id: catId("Porc"), aliment_id: null, aliments: null }, { cliente_id: ALICE, categorie_id: null, aliment_id: aliments.find((a) => a.code_ciqual === "11094").id, aliments: { id: aliments.find((a) => a.code_ciqual === "11094").id, nom: "Coriandre, fraiche" } }];
 const retours = bilans.filter((b) => b.retours_bilan).map((b) => ({ bilan_id: b.id, ...b.retours_bilan }));
@@ -297,6 +297,9 @@ if (process.env.ANALYSE_DEMO) {
 for (const [i, symptomes] of [[1, ["bouffees", "sueurs"]], [2, ["bouffees"]]]) {
   journal.push({ cliente_id: "00000000-0000-0000-0000-0000000000b2", jour: iso(new Date(Date.now() - i * 864e5)), poids: null, tour_taille: null, sommeil: 6.5, hydratation: 1.5, pas: 7000, trainings: 0, stress: null, digestion: null, regles: false, observations: null, symptomes, updated_at: new Date().toISOString() });
 }
+
+// ---- Planning des repas (0036)
+const planningRepas = [];
 
 // ---- Compléments (0035)
 const complementsListe = [{ id: "c0e00000-0000-4000-8000-000000000000", cliente_id: ALICE, nom: "Oméga 3", moment: "matin", quantite: "2 capsules", note: "pendant le petit-déjeuner", ordre: 0, actif: true, created_at: "2026-11-01T08:00:00Z" }];
@@ -665,6 +668,11 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/annonces") return tableCommu(req, res, u, annonces, {
     visibles: coach ? annonces : annonces.filter((a) => a.expire_le > new Date().toISOString()),
     creer: (b) => ({ id: "a0000000-0000-4000-8000-" + String(annonces.length + 1).padStart(12, "0"), lien: null, cree_le: new Date().toISOString(), expire_le: new Date(Date.now() + 86400000).toISOString(), ...b }),
+  });
+  if (u.pathname === "/rest/v1/planning_repas") return tableCommu(req, res, u, planningRepas, {
+    visibles: coach ? planningRepas : planningRepas.filter((x) => x.cliente_id === uid),
+    enrichir: (x) => ({ ...x, recettes: { titre: recettes.find((r) => r.id === x.recette_id)?.titre ?? "?" } }),
+    creer: (b) => { const ex = planningRepas.find((x) => x.cliente_id === uid && x.jour === b.jour && x.repas_cible_id === b.repas_cible_id); if (ex) { Object.assign(ex, b); return { remplace: true }; } return { portions: 1, ...b, cliente_id: uid }; },
   });
   if (u.pathname === "/rest/v1/complements") return tableCommu(req, res, u, complementsListe, {
     visibles: coach ? complementsListe : complementsListe.filter((x) => x.cliente_id === uid),
