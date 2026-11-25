@@ -1452,3 +1452,53 @@ Sur la page du défi, tu vois chaque participante et sa progression (toi seule v
 3. Côté coach : la page du défi montre la participante « 🏆 Réussi ».
 4. **Sur ton iPhone** (app installée, notifications activées) : publie un défi qui commence aujourd'hui. La notification « Défi du mois 🎯 » arrive dans les 15 minutes (entre 8 h et 21 h).
 5. Supprime ensuite le défi de test : ses participations partent avec lui.
+
+## Phase 3 : audios, recherche et favoris dans les ressources
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0043_ressources_audio_favoris.sql`](../supabase/migrations/0043_ressources_audio_favoris.sql)
+
+Ce fichier crée aussi le stockage privé « audios » (50 Mo par fichier) : rien à régler dans Supabase → Storage.
+
+### 2. Ajouter un audio
+
+Menu **Ressources** → **Nouvelle ressource** (ou **Modifier** sur une ressource existante).
+
+- **Un audio seul** (une relaxation, un conseil…) : type « 🎧 Un audio ».
+- **La version audio d'une fiche ou d'un lien** : garde le type « fiche » ou « lien », et ajoute l'audio dans « Version audio (facultatif) ».
+
+Deux façons :
+
+1. **Déposer un fichier** m4a ou mp3, 50 Mo au plus (environ 45 min). Sur iPhone : l'app **Dictaphone** → ton enregistrement → **Partager** → **Enregistrer dans Fichiers**, puis dépose-le depuis ton ordinateur ou ton téléphone.
+2. **« 🎙 M'enregistrer ici »** : ton navigateur demande l'accès au micro (accepte), tu parles, puis **■ Arrêter**. Tu peux réécouter avant d'enregistrer la ressource.
+
+« ✓ Audio prêt » : clique sur **Ajouter la ressource** (ou **Enregistrer**). Pour changer d'audio, dépose-en un autre. Pour l'enlever, coche « Retirer l'audio ». L'ancien fichier est effacé du stockage.
+
+Clique sur le titre de la ressource pour l'**écouter en aperçu** et voir combien de clientes l'ont écoutée. Sur la fiche d'une cliente, la rubrique **Audios écoutés** te montre ce qu'elle a écouté et où elle s'est arrêtée.
+
+### 3. Pour tes clientes
+
+- Dans **Mes ressources** :
+  - une **barre de recherche** cherche dans le titre, la description et le texte des fiches, sans se soucier des accents ni des majuscules (« magnesium » trouve « Magnésium ») ;
+  - des **filtres** : 🎧 À écouter, ♥ Mes favoris, et chaque catégorie ;
+  - un **cœur** sur chaque ressource pour la garder dans « Mes favoris ».
+- **Une cliente ne trouve jamais une ressource qui n'est pas pour elle** : la recherche ne passe que par ce qu'elle a le droit de voir (publiées, pour toutes ou choisies pour elle).
+- **Le lecteur audio** :
+  - lecture / pause, **−15 s / +15 s**, vitesse **1× / 1,25× / 1,5×**, et une barre pour avancer ;
+  - les **commandes sur l'écran verrouillé** ;
+  - elle **reprend où elle s'est arrêtée**, même sur un autre téléphone (la position est gardée sur son compte).
+- Les audios sont dans un stockage **privé** : chaque écoute passe par un lien temporaire (3 h), qui ne marche que pour elle.
+
+### 4. Tester
+
+1. Crée une ressource « 🎧 Un audio » avec un petit enregistrement (Dictaphone ou « M'enregistrer ici »), publiée pour toutes.
+2. Avec ta cliente test, dans **Mes ressources** :
+   - cherche un mot de son titre, sans accent ;
+   - touche « 🎧 À écouter », puis le cœur, puis « ♥ Mes favoris » ;
+   - ouvre l'audio, lance-le, essaie +15 s et la vitesse, puis mets en pause ;
+   - reviens en arrière et rouvre-le : « Tu reprends où tu t'étais arrêtée ».
+3. **Sur ton iPhone** (app installée) : lance un audio, **verrouille l'écran** : le son continue, et les commandes (pause, ±15 s) sont sur l'écran verrouillé.
+4. Côté coach : la fiche de ta cliente test → **Audios écoutés**.

@@ -13,7 +13,7 @@ export const TABLES_SAUVEGARDEES = [
   // Réglages et comptes
   "reglages", "profils", "clientes", "consentements", "acceptations_contrat", "notes_coach", "demandes_inscription",
   // Plans PDF / liens et ressources
-  "plans", "categories_ressource", "ressources", "ressources_clientes",
+  "plans", "categories_ressource", "ressources", "ressources_clientes", "ressources_favoris", "ressources_ecoutes",
   // Bilans et suivi
   "questions_arrivee", "reponses_arrivee",
   "champs_mesure", "bilans", "bilan_valeurs", "photos_bilan", "retours_bilan", "journal_quotidien",

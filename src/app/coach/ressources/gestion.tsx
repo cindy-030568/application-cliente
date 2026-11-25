@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState, useTransition } from "react";
+import { startTransition, useActionState, useState, useTransition } from "react";
 import { BoutonEnvoi } from "@/components/bouton-envoi";
 import { IconeExterne, IconePlus } from "@/components/icones";
 import { Bouton, CaseACocher, Champ, Etiquette, Message, ZoneTexte, cx } from "@/components/ui";
 import type { CategorieRessource, Ressource } from "@/lib/types";
+import { dureeCourte } from "@/lib/ressources";
+import { ChampAudio } from "./champ-audio";
 import {
   ajouterCategorie,
   enregistrerRessource,
@@ -15,7 +17,7 @@ import {
   type EtatRessource,
 } from "./actions";
 
-export type RessourceAvecClientes = Ressource & { clientes: string[] };
+export type RessourceAvecClientes = Ressource & { clientes: string[]; audio_path?: string | null; audio_duree?: number | null };
 export type ClienteChoix = { id: string; nom: string };
 
 export function GestionRessources({
@@ -23,12 +25,15 @@ export function GestionRessources({
   ressources,
   clientes,
   avecFiches = false,
+  avecAudio = false,
 }: {
   categories: CategorieRessource[];
   ressources: RessourceAvecClientes[];
   clientes: ClienteChoix[];
   /** Fiches écrites dans l'appli et brouillons (après la mise à jour 0037). */
   avecFiches?: boolean;
+  /** Audios (après la mise à jour 0043). */
+  avecAudio?: boolean;
 }) {
   const [edition, setEdition] = useState<string | "nouvelle" | null>(ressources.length ? null : "nouvelle");
   const [etat, setEtat] = useState<EtatRessource>({});
@@ -49,6 +54,7 @@ export function GestionRessources({
           categories={categories}
           clientes={clientes}
           avecFiches={avecFiches}
+          avecAudio={avecAudio}
           onFin={(r) => {
             setEtat(r);
             setEdition(null);
@@ -77,6 +83,7 @@ export function GestionRessources({
                     categories={categories}
                     clientes={clientes}
                     avecFiches={avecFiches}
+                    avecAudio={avecAudio}
                     initiale={r}
                     onFin={(res) => {
                       setEtat(res);
@@ -88,7 +95,7 @@ export function GestionRessources({
               ) : (
                 <li key={r.id} className="flex flex-wrap items-start gap-4 rounded-carte bg-blanc-casse p-4 shadow-douce">
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    {r.url ? (
+                    {r.url && !r.audio_path ? (
                       <a
                         href={r.url}
                         target="_blank"
@@ -99,8 +106,14 @@ export function GestionRessources({
                       </a>
                     ) : (
                       <Link href={`/coach/ressources/${r.id}`} className="font-medium hover:text-accent">
-                        {r.titre} <span className="text-[13px] font-normal text-texte-2">· fiche dans l’appli (aperçu)</span>
+                        {r.titre}{" "}
+                        <span className="text-[13px] font-normal text-texte-2">
+                          · {r.audio_path ? (r.contenu ? "fiche + audio" : r.url ? "lien + audio" : "audio") : "fiche dans l’appli"} (aperçu)
+                        </span>
                       </Link>
+                    )}
+                    {r.audio_path && (
+                      <p className="text-[13px] font-medium text-caramel-texte">🎧 Audio{r.audio_duree ? ` · ${dureeCourte(r.audio_duree)}` : ""}</p>
                     )}
                     {r.description && <p className="text-[14px] text-texte-2">{r.description}</p>}
                     <div className="mt-1 flex flex-wrap gap-2">
@@ -148,6 +161,7 @@ function FormulaireRessource({
   categories,
   clientes,
   avecFiches,
+  avecAudio,
   initiale,
   onFin,
   onAnnuler,
@@ -155,27 +169,43 @@ function FormulaireRessource({
   categories: CategorieRessource[];
   clientes: ClienteChoix[];
   avecFiches: boolean;
+  avecAudio: boolean;
   initiale?: RessourceAvecClientes;
   onFin: (etat: EtatRessource) => void;
   onAnnuler?: () => void;
 }) {
   const [visibilite, setVisibilite] = useState(initiale?.visibilite ?? "toutes");
-  const [type, setType] = useState<"lien" | "fiche">(initiale && !initiale.url ? "fiche" : "lien");
-  const [etat, envoyer] = useActionState(async (precedent: EtatRessource, fd: FormData) => {
+  const [type, setType] = useState<"lien" | "fiche" | "audio">(
+    initiale && !initiale.url && !initiale.contenu && initiale.audio_path ? "audio" : initiale && !initiale.url ? "fiche" : "lien",
+  );
+  const [envoiAudio, setEnvoiAudio] = useState(false);
+  // Le message d'erreur d'avant disparaît dès qu'un audio vient d'être déposé.
+  const [erreurPassee, setErreurPassee] = useState(false);
+  const [etat, envoyer, enregistrement] = useActionState(async (precedent: EtatRessource, fd: FormData) => {
     const r = await enregistrerRessource(precedent, fd);
     if (!r.erreur) onFin(r);
     return r;
   }, {});
 
   return (
-    <form action={envoyer} className="flex flex-col gap-4 rounded-carte border border-ligne bg-blanc-casse p-5 shadow-douce">
+    <form
+      // Envoi manuel : en cas d'erreur, ce qui a été écrit (titre, fiche, audio déposé) reste là.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        setErreurPassee(false);
+        startTransition(() => envoyer(fd));
+      }}
+      className="flex flex-col gap-4 rounded-carte border border-ligne bg-blanc-casse p-5 shadow-douce"
+    >
       {initiale && <input type="hidden" name="id" value={initiale.id} />}
       {avecFiches && <input type="hidden" name="avec_fiches" value="1" />}
+      {avecAudio && <input type="hidden" name="avec_audio" value="1" />}
       <Champ label="Titre" name="titre" required maxLength={120} defaultValue={initiale?.titre} />
       {avecFiches && (
         <fieldset className="flex flex-wrap gap-2">
           <legend className="mb-2 text-sm font-medium">Type de ressource</legend>
-          {(["lien", "fiche"] as const).map((v) => (
+          {(avecAudio ? (["lien", "fiche", "audio"] as const) : (["lien", "fiche"] as const)).map((v) => (
             <label
               key={v}
               className={cx(
@@ -184,12 +214,12 @@ function FormulaireRessource({
               )}
             >
               <input type="radio" name="type" value={v} checked={type === v} onChange={() => setType(v)} className="sr-only" />
-              {v === "lien" ? "Un lien (Drive, PDF…)" : "Une fiche écrite ici"}
+              {v === "lien" ? "Un lien (Drive, PDF…)" : v === "fiche" ? "Une fiche écrite ici" : "🎧 Un audio"}
             </label>
           ))}
         </fieldset>
       )}
-      {type === "fiche" ? (
+      {type === "audio" ? null : type === "fiche" ? (
         <div className="flex flex-col gap-1.5">
           <ZoneTexte
             label="Contenu de la fiche"
@@ -212,6 +242,18 @@ function FormulaireRessource({
           placeholder="https://drive.google.com/…"
           defaultValue={initiale?.url ?? ""}
           aide="Dans Drive : Partager → « Tous les utilisateurs disposant du lien » → Copier le lien. Un dossier entier fonctionne aussi."
+        />
+      )}
+      {avecAudio && (
+        <ChampAudio
+          key={initiale?.audio_path ?? "nouveau"}
+          actuel={initiale?.audio_path ?? null}
+          dureeActuelle={initiale?.audio_duree ?? null}
+          obligatoire={type === "audio"}
+          onEnvoi={(v) => {
+            setEnvoiAudio(v);
+            if (!v) setErreurPassee(true);
+          }}
         />
       )}
       <div className="flex flex-col gap-1.5">
@@ -284,9 +326,11 @@ function FormulaireRessource({
           defaultChecked={initiale?.publiee ?? true}
         />
       )}
-      {etat.erreur && <Message ton="erreur">{etat.erreur}</Message>}
+      {etat.erreur && !erreurPassee && <Message ton="erreur">{etat.erreur}</Message>}
       <div className="flex gap-3">
-        <BoutonEnvoi enCours="Enregistrement…">{initiale ? "Enregistrer" : "Ajouter la ressource"}</BoutonEnvoi>
+        <Bouton type="submit" disabled={enregistrement || envoiAudio} aria-busy={enregistrement}>
+          {enregistrement ? "Enregistrement…" : initiale ? "Enregistrer" : "Ajouter la ressource"}
+        </Bouton>
         {onAnnuler && (
           <Bouton type="button" variante="discret" onClick={onAnnuler}>
             Annuler

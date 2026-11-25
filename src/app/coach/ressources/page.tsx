@@ -26,10 +26,18 @@ export default async function PageRessourcesCoach() {
     .select("id, contenu, publiee")
     .returns<{ id: string; contenu: string | null; publiee: boolean }[]>();
   const fiche = new Map((fiches ?? []).map((f) => [f.id, f]));
+  // Audios (0043) : lus à part, rien avant la mise à jour.
+  const { data: audios, error: sansAudio } = await supabase
+    .from("ressources")
+    .select("id, audio_path, audio_duree")
+    .returns<{ id: string; audio_path: string | null; audio_duree: number | null }[]>();
+  const audio = new Map((audios ?? []).map((a) => [a.id, a]));
   const avecClientes = (ressources ?? []).map((r) => ({
     ...r,
     contenu: fiche.get(r.id)?.contenu ?? null,
     publiee: fiche.get(r.id)?.publiee ?? true,
+    audio_path: audio.get(r.id)?.audio_path ?? null,
+    audio_duree: audio.get(r.id)?.audio_duree ?? null,
     clientes: (liens ?? []).filter((l) => l.ressource_id === r.id).map((l) => l.cliente_id as string),
   }));
   const choix = (clientes ?? [])
@@ -42,12 +50,12 @@ export default async function PageRessourcesCoach() {
         <Surtitre>Ressources</Surtitre>
         <h1 className="font-titre text-[34px] font-bold leading-tight">Mes ressources</h1>
         <p className="mt-1 max-w-2xl text-[15px] text-texte-2">
-          Guides, listes de courses, fiches… hébergés sur ton Google Drive, ou écrits directement ici. Tes clientes les
+          Guides, listes de courses, fiches, audios… hébergés sur ton Google Drive, écrits ou enregistrés directement ici. Tes clientes les
           retrouvent dans leur espace, rangés par catégorie. Un brouillon reste invisible pour elles tant que tu ne l’as pas publié.
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} avecFiches={!sansFiches} />
+        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} avecFiches={!sansFiches} avecAudio={!sansAudio} />
         <Carte className="flex h-fit flex-col gap-4">
           <h2 className="font-titre text-lg font-bold">Catégories</h2>
           <GestionCategories categories={categories ?? []} />

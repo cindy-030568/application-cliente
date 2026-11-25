@@ -142,7 +142,15 @@ const ressources = [
   const contenu = sql.split("$fiche$")[1];
   ressources.push({ id: "eeeeeeee-0000-0000-0000-000000000004", titre: "Je mange dehors", categorie_id: categories[3].id, description: "Restaurant, boulangerie, chez des amis : profiter, sans culpabiliser et sans tout remettre en question.", url: null, contenu, publiee: false, visibilite: "toutes", created_at: "2026-11-24T09:00:00Z" });
 }
-const ressourcesClientes = [{ ressource_id: ressources[2].id, cliente_id: ALICE }];
+// Audios (0043) : un audio seul (relaxation) et la fiche « Je mange dehors » reste en brouillon.
+ressources.push({ id: "eeeeeeee-0000-0000-0000-000000000005", titre: "Respirer avant de manger", categorie_id: categories[3].id, description: "3 minutes pour te poser avant le repas, et manger en pleine conscience.", url: null, contenu: null, publiee: true, visibilite: "toutes", created_at: "2026-11-05T09:00:00Z", audio_path: "aaaaaaaa-0000-4000-8000-000000000005.mp3", audio_duree: 20 });
+for (const r of ressources) { r.audio_path ??= null; r.audio_duree ??= null; r.contenu ??= null; r.publiee ??= true; }
+const ressourcesFavoris = [];
+const ressourcesEcoutes = [];
+const fichiersAudio = new Map();
+// Une ressource réservée à Nathalie : Sophie ne doit jamais la trouver, même en cherchant.
+ressources.push({ id: "eeeeeeee-0000-0000-0000-000000000006", titre: "Guide périménopause", categorie_id: categories[0].id, description: "Bouffées de chaleur, sommeil : mes repères.", url: "https://drive.google.com/p", contenu: null, publiee: true, visibilite: "certaines", created_at: "2026-11-06T09:00:00Z", audio_path: null, audio_duree: null });
+const ressourcesClientes = [{ ressource_id: ressources[2].id, cliente_id: ALICE }, { ressource_id: "eeeeeeee-0000-0000-0000-000000000006", cliente_id: "00000000-0000-0000-0000-0000000000b2" }];
 function filtrer(lignes, params) {
   let r = lignes;
   for (const [k, v] of params) {
@@ -451,6 +459,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/ressources") return json({ ressources, favoris: ressourcesFavoris, ecoutes: ressourcesEcoutes, audios: [...fichiersAudio.keys()] });
   if (u.pathname === "/__test/defis") {
     // { decaler: n } : décale les dates des défis publiés de n jours (pour tester un défi à venir), puis on revient avec -n.
     const b = req.method === "POST" ? await corpsJson(req) : null;
@@ -607,6 +616,40 @@ http.createServer((req, res) => {
       res.writeHead(200, { "content-type": "application/json" }); res.end("[]");
     }); return;
   }
+  // Audios des ressources (0043) : lien temporaire, lecture (le fichier déposé, sinon un son d'essai), dépôt et suppression.
+  if (u.pathname.startsWith("/storage/v1/object/sign/audios/") && req.method === "POST") {
+    const chemin = decodeURIComponent(u.pathname.replace("/storage/v1/object/sign/audios/", ""));
+    return send({ signedURL: "/object/sign/audios/" + chemin + "?token=faux" });
+  }
+  if (u.pathname.startsWith("/storage/v1/object/sign/audios/") && req.method === "GET") {
+    const chemin = decodeURIComponent(u.pathname.replace("/storage/v1/object/sign/audios/", ""));
+    const corps = fichiersAudio.get(chemin) ?? fs.readFileSync(new URL("./audio/essai.mp3", import.meta.url));
+    const plage = /bytes=(\d+)-(\d*)/.exec(req.headers.range ?? "");
+    if (plage) {
+      const debut = Number(plage[1]); const fin = plage[2] ? Number(plage[2]) : corps.length - 1;
+      res.writeHead(206, { "content-type": "audio/mpeg", "accept-ranges": "bytes", "content-range": `bytes ${debut}-${fin}/${corps.length}`, "content-length": fin - debut + 1, "access-control-allow-origin": "*" });
+      return res.end(corps.subarray(debut, fin + 1));
+    }
+    res.writeHead(200, { "content-type": "audio/mpeg", "accept-ranges": "bytes", "content-length": corps.length, "access-control-allow-origin": "*" });
+    return res.end(corps);
+  }
+  if (u.pathname.startsWith("/storage/v1/object/upload/sign/audios/") && req.method === "POST" && !u.searchParams.get("token")) {
+    const chemin = decodeURIComponent(u.pathname.replace("/storage/v1/object/upload/sign/audios/", ""));
+    return send({ url: "/object/upload/sign/audios/" + chemin + "?token=jeton-faux" });
+  }
+  if (u.pathname.startsWith("/storage/v1/object/upload/sign/audios/") && req.method === "PUT") {
+    const chemin = decodeURIComponent(u.pathname.replace("/storage/v1/object/upload/sign/audios/", ""));
+    const morceaux = []; req.on("data", (c) => morceaux.push(c)); req.on("end", () => {
+      fichiersAudio.set(chemin, Buffer.concat(morceaux)); console.log("AUDIO déposé", chemin, Buffer.concat(morceaux).length, "octets");
+      res.writeHead(200, { "content-type": "application/json", "access-control-allow-origin": "*" }); res.end(JSON.stringify({ Key: "audios/" + chemin }));
+    }); return;
+  }
+  if (u.pathname === "/storage/v1/object/audios" && req.method === "DELETE") {
+    let corps = ""; req.on("data", (c) => (corps += c)); req.on("end", () => {
+      const { prefixes } = JSON.parse(corps || "{}"); for (const p of prefixes ?? []) { fichiersAudio.delete(p); console.log("AUDIO supprimé", p); }
+      res.writeHead(200, { "content-type": "application/json" }); res.end("[]");
+    }); return;
+  }
   if (u.pathname.startsWith("/storage/v1/object/sign/plans/") && req.method === "POST") {
     const chemin = decodeURIComponent(u.pathname.replace("/storage/v1/object/sign/plans/", ""));
     return send({ signedURL: "/object/sign/plans/" + chemin + "?token=faux" });
@@ -755,6 +798,20 @@ http.createServer((req, res) => {
       creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
     });
   }
+  if (u.pathname === "/rest/v1/ressources_favoris") return tableCommu(req, res, u, ressourcesFavoris, {
+    visibles: coach ? ressourcesFavoris : ressourcesFavoris.filter((x) => x.cliente_id === uid),
+    creer: (b) => (coach || !ressources.some((r) => r.id === b.ressource_id && r.publiee !== false) ? { erreur: "interdit" } : ressourcesFavoris.some((x) => x.cliente_id === uid && x.ressource_id === b.ressource_id) ? { remplace: true } : { created_at: new Date().toISOString(), ...b, cliente_id: uid }),
+  });
+  if (u.pathname === "/rest/v1/ressources_ecoutes") return tableCommu(req, res, u, ressourcesEcoutes, {
+    visibles: coach ? ressourcesEcoutes : ressourcesEcoutes.filter((x) => x.cliente_id === uid),
+    enrichir: (e) => ({ ...e, ressources: (({ titre, audio_duree }) => ({ titre, audio_duree }))(ressources.find((r) => r.id === e.ressource_id) ?? { titre: "?", audio_duree: null }) }),
+    creer: (b) => {
+      if (coach) return { erreur: "interdit" };
+      const ex = ressourcesEcoutes.find((x) => x.cliente_id === uid && x.ressource_id === b.ressource_id);
+      if (ex) { Object.assign(ex, b, { cliente_id: uid }); return { remplace: true }; }
+      return { terminee: false, ...b, cliente_id: uid };
+    },
+  });
   if (u.pathname === "/rest/v1/seances_express") {
     if (!coach && req.method !== "GET" && req.method !== "HEAD") { res.writeHead(403); return res.end(); }
     return tableCommu(req, res, u, seancesExpress, {

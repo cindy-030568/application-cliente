@@ -1,3 +1,4 @@
+import { horloge } from "@/lib/ressources";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -127,6 +128,14 @@ export default async function PageFicheCliente({
     supabase.from("clientes").select("express_jusqu_au").eq("id", id).maybeSingle<{ express_jusqu_au: string | null }>(),
     supabase.from("seances_faites").select("id", { count: "exact", head: true }).eq("cliente_id", id).not("seance_express_id", "is", null),
   ]);
+  // Audios écoutés (0043) : lus à part, rien avant la mise à jour.
+  const { data: ecoutes, error: sansEcoutes } = await supabase
+    .from("ressources_ecoutes")
+    .select("position_s, terminee, maj_le, ressources(titre, audio_duree)")
+    .eq("cliente_id", id)
+    .order("maj_le", { ascending: false })
+    .limit(30)
+    .returns<{ position_s: number; terminee: boolean; maj_le: string; ressources: { titre: string; audio_duree: number | null } | null }[]>();
   // Contrat accepté (0027) et questionnaire d'arrivée (0031) : lus à part.
   const [{ data: acceptations, error: sansContrat }, { data: contratEnCours }, { data: questionnaire, error: sansQuestionnaire }] = await Promise.all([
     supabase
@@ -411,6 +420,30 @@ export default async function PageFicheCliente({
                 Les nouvelles clientes le remplissent à leur première connexion, après le contrat. Les questions se modifient dans Réglages → Questionnaire
                 d’arrivée.
               </p>
+            )}
+          </Repliable>
+        )}
+        {!sansEcoutes && (
+          <Repliable
+            titre="Audios écoutés"
+            resume={ecoutes?.length ? `${ecoutes.length} audio${ecoutes.length > 1 ? "s" : ""} · ${ecoutes.filter((e) => e.terminee).length} jusqu’au bout` : "Aucun pour l’instant"}
+          >
+            {ecoutes?.length ? (
+              <ul className="flex flex-col gap-2 text-[14.5px]">
+                {ecoutes.map((e, i) => (
+                  <li key={i} className="flex flex-wrap justify-between gap-x-4">
+                    <span>🎧 {e.ressources?.titre ?? "Audio supprimé"}</span>
+                    <span className="text-texte-2">
+                      {e.terminee
+                        ? "écouté jusqu’au bout"
+                        : `arrêtée à ${horloge(e.position_s)}${e.ressources?.audio_duree ? ` sur ${horloge(e.ressources.audio_duree)}` : ""}`}{" "}
+                      · {dateCourte.format(new Date(e.maj_le))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[14px] text-texte-2">Elle n’a pas encore écouté d’audio de tes ressources.</p>
             )}
           </Repliable>
         )}

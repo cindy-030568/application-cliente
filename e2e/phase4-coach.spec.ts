@@ -51,7 +51,7 @@ test("fiche « Je mange dehors » : brouillon relu puis publié par la coach", a
   await page.locator("li", { hasText: "Je mange dehors" }).getByRole("button", { name: "Modifier" }).click();
   await expect(page.getByLabel("Contenu de la fiche")).toHaveValue(/## Au restaurant/);
   await page.getByLabel(/Publiée : visible par tes clientes/).check();
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByText("Ressource modifiée.")).toBeVisible();
   await expect(page.locator("li", { hasText: "Je mange dehors" })).not.toContainText("Brouillon");
 

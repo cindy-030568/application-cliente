@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Seule exception : la coach peut s'enregistrer (audios des ressources) depuis son dashboard.
+        source: "/coach/ressources",
+        headers: [{ key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" }],
+      },
+      {
         // Le service worker doit toujours être relu (mises à jour) et ne servir que ce site.
         source: "/sw.js",
         headers: [
