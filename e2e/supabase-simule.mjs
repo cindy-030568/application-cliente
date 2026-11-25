@@ -451,7 +451,12 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
-  if (u.pathname === "/__test/defis") return json({ defis, participations: defisParticipations, messages: messages.filter((m) => m.texte.startsWith("🎉")) });
+  if (u.pathname === "/__test/defis") {
+    // { decaler: n } : décale les dates des défis publiés de n jours (pour tester un défi à venir), puis on revient avec -n.
+    const b = req.method === "POST" ? await corpsJson(req) : null;
+    if (b?.decaler) for (const d of defis) { const dec = (x) => iso(new Date(new Date(x + "T12:00:00Z").getTime() + b.decaler * 864e5)); d.debut = dec(d.debut); d.fin = dec(d.fin); }
+    return json({ defis, participations: defisParticipations, messages: messages.filter((m) => m.texte.startsWith("🎉")) });
+  }
   if (u.pathname === "/__test/questionnaire") { const b = await corpsJson(req); if (b) { questionnaireActif = Boolean(b.actif); if (!b.actif) reponsesArrivee.length = 0; } return json({ actif: questionnaireActif, reponses: reponsesArrivee, exclusions: exclusionsListe }); }
   res.writeHead(404); return res.end();
 }

@@ -1419,7 +1419,7 @@ Menu **Défis du mois** → **Nouveau défi**.
    - 😴 **Sommeil** : des heures de sommeil par nuit ;
    - 📒 **Journal rempli** : un jour compte dès que la journée est remplie.
 3. **La règle** : le seuil et le **nombre de jours à réussir** (ou de semaines pour les séances). Ex. : « 8 000 pas ou plus, au moins 20 jours ». L'appli propose environ 2 jours sur 3 : à toi d'ajuster.
-4. **Dates** : par défaut le mois en cours (ou le suivant après le 7). Tu peux faire un défi de 2 semaines ou de 21 jours (3 mois au plus).
+4. **Dates** : par défaut le mois en cours (ou le suivant après le 7). Tu peux faire un défi de 2 semaines ou de 21 jours (3 mois au plus). Un défi qui commence plus tard s'affiche déjà sur l'accueil de tes clientes (« Il commence le … »), mais elles ne peuvent le relever qu'à partir du premier jour.
 5. **Pour qui** : toutes tes clientes en suivi, ou seulement les membres de la communauté.
 6. L'encadré « **Ce que verront tes clientes** » te montre la phrase exacte.
 7. Coche « **Publié tout de suite** », ou laisse-le en brouillon et clique sur **Publier** plus tard.
@@ -1443,7 +1443,7 @@ Sur la page du défi, tu vois chaque participante et sa progression (toi seule v
 
 ### 4. Tester
 
-1. Crée un défi « Journal rempli », au moins 1 jour, du jour même à la fin du mois. Publie-le.
+1. Crée un défi « Journal rempli », au moins 1 jour. **Change la date de début pour aujourd'hui** (sinon il commence le mois prochain). Publie-le.
 2. Connecte-toi avec une cliente de test :
    - la carte « Défi du mois » apparaît sur l'accueil ;
    - ouvre-la, coche « Afficher mon prénom… », puis « Je relève le défi » ;

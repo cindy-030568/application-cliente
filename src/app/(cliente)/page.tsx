@@ -93,7 +93,10 @@ export default async function PageAccueil() {
   // Séances express (0040) : la RLS ne compte que celles publiées pour elle, si elle y a accès.
   const { count: nbExpress } = await supabase.from("seances_express").select("id", { count: "exact", head: true });
   // Défi du mois en cours (0042) : le premier, avec sa progression si elle participe.
-  const defi = (await defisDeLaCliente(supabase, profil.id, auj)).find((d) => etatDefi(d, auj) === "en_cours") ?? null;
+  // Sinon, le prochain qui commence bientôt (pour qu'elle le voie venir).
+  const tousDefis = await defisDeLaCliente(supabase, profil.id, auj);
+  const defi = tousDefis.find((d) => etatDefi(d, auj) === "en_cours") ?? tousDefis.find((d) => etatDefi(d, auj) === "a_venir") ?? null;
+  const defiAVenir = defi !== null && etatDefi(defi, auj) === "a_venir";
   const defiReussi = Boolean(defi?.participation?.reussi_le || defi?.progression?.reussi);
   // Récap de la semaine : carte du dimanche 18 h au mardi soir (pour les clientes en cours de suivi).
   const recapPret = fiche.statut === "active" && recapRecent(auj, heureParis(new Date())) !== null;
@@ -215,7 +218,9 @@ export default async function PageAccueil() {
                 <span className="text-[12px] font-medium uppercase tracking-[0.12em] text-caramel-texte">Défi du mois</span>
                 <span className="font-medium leading-snug">{defi.titre}</span>
                 <span className="text-[14px] text-texte-2">
-                  {!defi.participation
+                  {defiAVenir
+                    ? `Il commence le ${formaterDate(defi.debut, { year: undefined })} : prépare-toi 💪`
+                    : !defi.participation
                     ? "Tu le relèves avec moi ? 💪"
                     : defi.progression
                       ? texteProgression(defi.type, { ...defi.progression, reussi: defiReussi }, fiche.mode_sans_chiffres)

@@ -7,7 +7,17 @@ import { TYPES_DEFI, maxObjectif, objectifParDefaut, texteObjectif, textePeriode
 import { enregistrerDefi, publierDefi, supprimerDefi, type EtatDefi } from "./actions";
 
 /** Création ou modification d'un défi du mois, avec l'aperçu de la règle telle que la verront tes clientes. */
-export function FormulaireDefi({ initial, periode, communauteOuverte }: { initial?: Defi; periode: { debut: string; fin: string }; communauteOuverte: boolean }) {
+export function FormulaireDefi({
+  initial,
+  periode,
+  communauteOuverte,
+  aujourdhui,
+}: {
+  initial?: Defi;
+  periode: { debut: string; fin: string };
+  communauteOuverte: boolean;
+  aujourdhui: string;
+}) {
   const router = useRouter();
   const [etat, envoyer, enCours] = useActionState<EtatDefi, FormData>(async (avant, fd) => {
     const r = await enregistrerDefi(initial?.id ?? null, avant, fd);
@@ -119,6 +129,11 @@ export function FormulaireDefi({ initial, periode, communauteOuverte }: { initia
         </div>
         {!communauteOuverte && <span className="text-[12.5px] text-texte-2">La communauté est fermée : un défi « communauté » ne sera vu par personne, et aucun prénom ne sera fêté.</span>}
       </fieldset>
+      {datesOk && debut > aujourdhui && (
+        <Message ton="info">
+          Ce défi commence dans le futur : tes clientes le verront sur leur accueil (« Il commence le … »), et pourront le relever à partir de ce jour-là. Pour un test, mets la date de début à aujourd’hui.
+        </Message>
+      )}
       {apercu && (
         <div className="rounded-xl bg-creme/70 p-4">
           <p className="text-[12.5px] font-medium uppercase tracking-[0.1em] text-caramel-texte">Ce que verront tes clientes</p>

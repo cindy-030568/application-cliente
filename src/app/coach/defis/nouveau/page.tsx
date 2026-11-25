@@ -23,7 +23,7 @@ export default async function NouveauDefi() {
         <h1 className="font-titre text-[32px] font-bold leading-tight">Nouveau défi</h1>
       </div>
       <Carte>
-        <FormulaireDefi periode={periodeParDefaut(aujourdhuiParis())} communauteOuverte={Boolean(communaute?.ouverte)} />
+        <FormulaireDefi periode={periodeParDefaut(aujourdhuiParis())} communauteOuverte={Boolean(communaute?.ouverte)} aujourdhui={aujourdhuiParis()} />
       </Carte>
     </div>
   );

@@ -52,3 +52,20 @@ test("défi réussi : la base le marque, mon prénom est fêté dans la communau
   await page.goto("/communaute");
   await expect(page.getByText(/Bravo Sophie : défi « Mon journal, mon rituel » relevé/)).toBeVisible();
 });
+
+test("défi à venir : la cliente le voit déjà sur son accueil, avec sa date de début", async ({ page, request }) => {
+  await request.post(`${SIMULE}/__test/defis`, { data: { decaler: 13 } });
+  try {
+    await seConnecter(page, "sophie@exemple.fr");
+    await fermerMotDuJour(page);
+    const carte = page.getByRole("link", { name: /Défi du mois.*Bouger un peu plus chaque jour/ });
+    await expect(carte).toContainText(/Il commence le \d+ \w+ : prépare-toi/);
+    await carte.click();
+    const defi = page.getByRole("article", { name: /Bouger un peu plus chaque jour/ });
+    await expect(defi.getByText(/^Commence le /)).toBeVisible();
+    await expect(defi.getByText("Tu pourras le relever dès le premier jour 💪")).toBeVisible();
+    await expect(defi.getByRole("button", { name: "Je relève le défi 💪" })).toHaveCount(0);
+  } finally {
+    await request.post(`${SIMULE}/__test/defis`, { data: { decaler: -13 } });
+  }
+});

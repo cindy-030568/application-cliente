@@ -81,7 +81,7 @@ export default async function PageDefiCoach({ params }: { params: Promise<{ id: 
         </Carte>
         <Carte>
           <h2 className="mb-4 font-titre text-xl font-bold">Modifier</h2>
-          <FormulaireDefi initial={d} periode={{ debut: d.debut, fin: d.fin }} communauteOuverte={Boolean(communaute?.ouverte)} />
+          <FormulaireDefi initial={d} periode={{ debut: d.debut, fin: d.fin }} communauteOuverte={Boolean(communaute?.ouverte)} aujourdhui={auj} />
         </Carte>
       </div>
     </div>

@@ -16,6 +16,10 @@ test("défis du mois : la coach crée un défi avec l'aperçu de la règle, le p
   await expect(page.getByText(/^😴 7 h 30 de sommeil ou plus, au moins \d+ nuits, du /)).toBeVisible();
   await page.getByLabel("Nombre de nuits à réussir").fill("12");
   await expect(page.getByText(/au moins 12 nuits/)).toBeVisible();
+  // Un défi qui commence dans le futur : la coach est prévenue.
+  const demain = new Date(Date.now() + 2 * 864e5).toISOString().slice(0, 10);
+  await page.getByLabel("Début").fill(demain);
+  await expect(page.getByText(/Ce défi commence dans le futur/)).toBeVisible();
   await page.getByText("Les membres de la communauté").click();
   await page.getByLabel(/Publié tout de suite/).check();
   await page.screenshot({ path: "test-results/defis-coach-nouveau.png", fullPage: true });
