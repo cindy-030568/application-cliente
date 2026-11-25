@@ -1336,10 +1336,23 @@ Sur sa fiche, **« Voir son bilan de fin tel qu'elle le voit »** ouvre un aper�
 Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
 
 1. [`0040_seances_express.sql`](../supabase/migrations/0040_seances_express.sql)
+2. [`0041_seances_express_depart.sql`](../supabase/migrations/0041_seances_express_depart.sql) : ajoute **18 séances de départ**, écrites dans l'esprit de ta fiche « Séances courtes de secours » et de tes programmes. Elles arrivent toutes en **brouillon** : tes clientes ne voient rien tant que tu ne les as pas publiées. Si tu relances ce fichier, il ne crée pas de doublon.
 
 ### 2. Créer tes séances express
 
 Menu **Séances express** (côté coach).
+
+**Les 18 séances de départ** : 5 à 30 min, renfo, cardio, gainage, mobilité, étirements et marche, avec ou sans matériel. Pour chacune :
+
+1. ouvre-la, lis-la, puis teste-la avec « **▶ Tester le mode séance** » ;
+2. si besoin, modifie-la (« Copier pour la modifier avec Claude ») ou supprime-la ;
+3. clique sur **Publier** quand elle te va.
+
+Astuce : si un exercice porte le même nom qu'une vidéo de ta bibliothèque, le lien « Revoir le mouvement en vidéo » apparaît tout seul. Sinon, renomme l'exercice comme ta vidéo.
+
+**Exercices au temps** : quand un exercice se fait au temps (« 30 s », « 1 min »), ta cliente a un bouton « **▶ Lancer le chrono** ». À la fin, ça bipe, ça vibre, et le repos démarre tout seul. Cela marche aussi dans les programmes.
+
+**Pour en créer d'autres :**
 
 1. **Préparer la séance avec Claude** :
    - « **Copier la consigne** » : colle-la dans Claude, décris la séance voulue (par exemple « 15 min de renfo à la maison, sans matériel, pour une débutante »), puis dis « format application ».
@@ -1374,7 +1387,7 @@ La **liste du matériel** et la **liste des types** se modifient dans **Réglage
 
 ### 5. Tester
 
-1. Crée une séance express, teste-la avec « ▶ Tester le mode séance », puis publie-la.
+1. Ouvre une séance de départ (par exemple « Cardio 30/30 au salon »), teste-la avec « ▶ Tester le mode séance » et lance le chrono d'un exercice au temps, puis publie-la.
 2. Connecte-toi avec une cliente de test :
    - le lien « Pas le temps aujourd'hui ? » apparaît sur son accueil ;
    - filtre par durée, mets la séance en favori, puis « ▶ C'est parti » et valide la séance ;

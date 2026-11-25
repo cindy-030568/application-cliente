@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Exercice, Seance } from "./programme-sportif";
-import { chargeProposee, derniereFois, etapesSeance, formaterDuree, formaterKg, lireFormat, lireKg, lireSecondes, nombreSeries, phaseIntervalle, regrouperCharges } from "./seance-guidee";
+import { chargeProposee, derniereFois, dureeEffort, etapesSeance, formaterDuree, formaterKg, lireFormat, lireKg, lireSecondes, nombreSeries, phaseIntervalle, regrouperCharges } from "./seance-guidee";
 
 const ex = (nom: string, o: Partial<Exercice> = {}): Exercice => ({ nom, series: null, repetitions: null, charge: null, repos: null, tempo: null, consignes: null, ...o });
 
@@ -125,5 +125,22 @@ describe("poids utilisés", () => {
     expect(chargeProposee({}, "squat goblet", 4, d)).toBe(16); // sinon sa dernière charge
     expect(chargeProposee({ "squat goblet#1": 18 }, "squat goblet", 2, d)).toBe(18); // série d'avant aujourd'hui
     expect(chargeProposee({}, "squat goblet", 1, null)).toBeNull();
+  });
+});
+
+describe("dureeEffort", () => {
+  it("lit un effort au temps", () => {
+    expect(dureeEffort("30 s")).toBe(30);
+    expect(dureeEffort("40 sec")).toBe(40);
+    expect(dureeEffort("1 min")).toBe(60);
+    expect(dureeEffort("1 min 30")).toBe(90);
+    expect(dureeEffort("3 min")).toBe(180);
+  });
+  it("ignore les répétitions et le temps par côté", () => {
+    expect(dureeEffort("12")).toBeNull();
+    expect(dureeEffort("10 / jambe")).toBeNull();
+    expect(dureeEffort("30 s / côté")).toBeNull();
+    expect(dureeEffort(null)).toBeNull();
+    expect(dureeEffort("max")).toBeNull();
   });
 });

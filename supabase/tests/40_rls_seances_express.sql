@@ -12,6 +12,16 @@ insert into public.clientes (id, statut) values
   ('00000000-0000-0000-0000-00000000b400', 'active'),
   ('00000000-0000-0000-0000-00000000d400', 'terminee');
 
+-- Séances de départ (0041) : présentes, toutes en brouillon, invisibles pour une cliente.
+select test.verifier((select count(*) from public.seances_express) >= 15 and not exists (select 1 from public.seances_express where publiee),
+  'les séances de départ sont là, toutes en brouillon');
+set role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000a400"}', false);
+select test.verifier((select count(*) from public.seances_express) = 0, 'une cliente ne voit pas les séances de départ tant qu''elles ne sont pas publiées');
+reset role;
+-- On les met de côté pour la suite des tests.
+delete from public.seances_express;
+
 -- La coach crée : une pour toutes, une réservée à B, un brouillon.
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000c400"}', false);

@@ -50,6 +50,16 @@ export function lireSecondes(t: string | null): number | null {
 }
 const borner = (x: number) => (x > 0 ? Math.min(x, 15 * 60) : null);
 
+/**
+ * Durée d'effort quand l'exercice se fait « au temps » : « 30 s », « 40 sec », « 1 min », « 1 min 30 ».
+ * null pour des répétitions (« 12 », « 10 / jambe ») ou un temps par côté (« 30 s / côté » : la cliente gère).
+ */
+export function dureeEffort(repetitions: string | null): number | null {
+  const s = (repetitions ?? "").toLowerCase().trim();
+  if (!/^\d+\s*(?:s|sec|secondes?|min|mn)(?:\s*\d{1,2}\s*(?:s|sec)?)?$/.test(s)) return null;
+  return lireSecondes(s);
+}
+
 /** Nombre de séries : « 4 » → 4 ; « 3-4 » → 4 ; vide → 1. */
 export function nombreSeries(t: string | null): number {
   const n = t ? nombres(t) : [];

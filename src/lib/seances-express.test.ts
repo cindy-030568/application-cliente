@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { accesExpress, extraireSeance, filtrerExpress, lireFiltres, lireListe } from "./seances-express";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { etapesSeance } from "./seance-guidee";
+import { DUREES_EXPRESS, accesExpress, extraireSeance, filtrerExpress, lireContenuExpress, lireFiltres, lireListe } from "./seances-express";
 
 const seance = { nom: "Cardio salon", duree: "10 min", blocs: [{ titre: "Tabata", format: "Tabata", exercices: [{ nom: "Jumping jacks" }, { nom: "Squats" }] }] };
 
@@ -41,5 +44,33 @@ describe("séances express", () => {
 
   it("listes de Réglages : une valeur par ligne, sans doublon", () => {
     expect(lireListe("Tapis\n\n  Élastique \ntapis\nHaltères")).toEqual(["Tapis", "Élastique", "Haltères"]);
+  });
+});
+
+describe("séances express de départ (migration 0041)", () => {
+  const sql = readFileSync(join(process.cwd(), "supabase/migrations/0041_seances_express_depart.sql"), "utf8");
+  const lignes = [...sql.matchAll(/\(\s*'((?:[^']|'')+)',\s*'(?:[^']|'')*',\s*(\d+),[^$]*\$seance\$([\s\S]*?)\$seance\$/g)];
+
+  it("contient une bibliothèque variée", () => {
+    expect(lignes.length).toBeGreaterThanOrEqual(15);
+    const durees = new Set(lignes.map((l) => Number(l[2])));
+    expect([...durees].sort((a, b) => a - b)).toEqual([...DUREES_EXPRESS]);
+    for (const type of ["Renfo", "Cardio", "Mobilité", "Étirements", "Marche à la maison", "Gainage"]) {
+      expect(sql).toContain(`'${type}'`);
+    }
+  });
+
+  it("chaque séance se lit et se joue en mode guidé", () => {
+    for (const [, titre, , json] of lignes) {
+      const seance = lireContenuExpress(JSON.parse(json), titre.replace(/''/g, "'"));
+      expect(seance, titre).not.toBeNull();
+      const etapes = etapesSeance(seance!);
+      expect(etapes.some((e) => e.type === "serie" || e.type === "chrono"), titre).toBe(true);
+    }
+  });
+
+  it("toutes en brouillon : rien n'est publié sans relecture", () => {
+    expect(sql).toMatch(/v\.contenu, false, 'toutes'/);
+    expect(sql).toContain("where not exists");
   });
 });

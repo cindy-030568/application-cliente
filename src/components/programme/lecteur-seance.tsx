@@ -10,6 +10,7 @@ import {
   RESSENTIS,
   chargeProposee,
   derniereFois,
+  dureeEffort,
   etapesSeance,
   formaterDuree,
   formaterKg,
@@ -254,6 +255,9 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
             {etape.unite === "tour" ? "Tour" : "Série"} {etape.numero} / {etape.total}
           </p>
           {etape.exercice.repetitions && <p className="font-titre text-[40px] font-bold leading-none">{repetitions(etape.exercice.repetitions)}</p>}
+          {dureeEffort(etape.exercice.repetitions) && (
+            <ChronoEffort key={etat.index} secondes={dureeEffort(etape.exercice.repetitions)!} son={son} fini={() => serieFaite(etape)} />
+          )}
           {(etape.exercice.charge || etape.exercice.tempo) && (
             <div className="flex flex-wrap gap-2 text-[14px]">
               {etape.exercice.charge && <span className="rounded-full bg-sable px-3 py-1">{etape.exercice.charge}</span>}
@@ -402,6 +406,60 @@ function Actions({ children, precedent, ensuite }: { children: ReactNode; preced
           Étape précédente
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * Exercice « au temps » (30 s, 1 min…) : un minuteur d'effort. Bips 3-2-1, bip long + vibration,
+ * puis on passe tout seul à la suite (le repos démarre). « Fait ✓ » reste possible à tout moment.
+ */
+function ChronoEffort({ secondes, son, fini }: { secondes: number; son: Son; fini: () => void }) {
+  const [fin, setFin] = useState<number | null>(null);
+  const [maintenant, setMaintenant] = useState(() => Date.now());
+  const suite = useRef(fini);
+  useEffect(() => {
+    suite.current = fini;
+  }, [fini]);
+  useEffect(() => {
+    if (fin === null) return;
+    let dernier = "";
+    const t = setInterval(() => {
+      const now = Date.now();
+      setMaintenant(now);
+      const reste = Math.ceil((fin - now) / 1000);
+      if (reste <= 0) {
+        clearInterval(t);
+        son.fin();
+        suite.current();
+      } else if (reste <= 3 && dernier !== String(reste)) {
+        dernier = String(reste);
+        son.bip();
+      }
+    }, 250);
+    return () => clearInterval(t);
+  }, [fin, son]);
+
+  if (fin === null) {
+    return (
+      <Bouton
+        variante="contour"
+        className="min-h-12 w-fit"
+        onClick={() => {
+          son.debloquer();
+          son.bip(990, 300);
+          const now = Date.now();
+          setMaintenant(now);
+          setFin(now + secondes * 1000);
+        }}
+      >
+        ▶ Lancer le chrono ({formaterDuree(secondes)})
+      </Bouton>
+    );
+  }
+  return (
+    <div className="flex justify-center">
+      <Cercle reste={Math.max(0, (fin - maintenant) / 1000)} total={secondes} />
     </div>
   );
 }

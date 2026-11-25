@@ -49,6 +49,21 @@ test("séances express : « Pas le temps aujourd'hui ? », filtres, favori et s�
   expect(seances.at(-1)).toMatchObject({ seance_nom: "Cardio salon sans matériel", seance_express_id: CARDIO, programme_id: null });
 });
 
+test("exercice au temps : le chrono d'effort compte puis lance le repos tout seul", async ({ page }) => {
+  await page.clock.install();
+  await seConnecter(page, SOPHIE);
+  await page.goto(`/seance/express/${CARDIO}`);
+  for (let i = 0; i < 10 && !(await page.getByRole("heading", { name: "Jumping jacks" }).isVisible().catch(() => false)); i++) {
+    await page.getByRole("button", { name: /^(Commencer|C’est parti|Démarrer|Fait ✓|Passer le repos|Passer|Suivant)/ }).first().click();
+  }
+  await expect(page.getByText("30 s", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "▶ Lancer le chrono (0:30)" }).click();
+  await expect(page.getByRole("timer")).toBeVisible();
+  await page.screenshot({ path: "test-results/express-chrono-effort.png" });
+  await page.clock.runFor(31_000);
+  await expect(page.getByText("Repos", { exact: true })).toBeVisible();
+});
+
 test("séances express hors connexion : une séance ouverte une fois marche sans réseau", async ({ page, context, request }) => {
   await seConnecter(page, SOPHIE);
   await fermerMotDuJour(page);
