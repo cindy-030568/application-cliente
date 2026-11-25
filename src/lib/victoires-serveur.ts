@@ -53,12 +53,18 @@ export async function chargerDonneesVictoires(supabase: SupabaseClient, aujourdh
     ),
   ]);
 
+  // Défis réussis ces 7 derniers jours (0042) : rien avant la mise à jour.
+  const { data: defis } = await (clienteId ? supabase.from("defis_participations").select("cliente_id, defi_id, reussi_le, defis(titre)").eq("cliente_id", clienteId) : supabase.from("defis_participations").select("cliente_id, defi_id, reussi_le, defis(titre)"))
+    .gte("reussi_le", `${ajouterJours(aujourdhui, -8)}T00:00:00Z`)
+    .returns<{ cliente_id: string; defi_id: string; reussi_le: string; defis: { titre: string } | null }[]>();
+
   const parCliente = new Map<string, Donnees>();
   const de = (id: string) => {
     let d = parCliente.get(id);
-    if (!d) parCliente.set(id, (d = { charges: [], seances: [], journal: [] }));
+    if (!d) parCliente.set(id, (d = { charges: [], seances: [], journal: [], defis: [] }));
     return d;
   };
+  for (const r of defis ?? []) de(r.cliente_id).defis!.push({ id: r.defi_id, titre: r.defis?.titre ?? "du mois", jour: jourParisDe(r.reussi_le) });
   for (const c of charges) {
     de(c.cliente_id).charges.push({ exercice_cle: c.exercice_cle, exercice_nom: c.exercice_nom, charge_kg: Number(c.charge_kg), jour: jourParisDe(c.faite_le) });
   }

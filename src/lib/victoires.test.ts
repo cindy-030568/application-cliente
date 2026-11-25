@@ -94,3 +94,20 @@ describe("victoires hors balance", () => {
     sansNombre(un.message);
   });
 });
+
+describe("victoire : défi du mois relevé", () => {
+  const base = { prenom: "Léa", charges: [], seances: [], journal: [] };
+  it("fête un défi réussi cette semaine, avec son titre", () => {
+    const v = detecterVictoires({ ...base, sansChiffres: false, defis: [{ id: "d1", titre: "10 000 pas", jour: "2026-12-20" }] }, "2026-12-22");
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatchObject({ type: "defi", cle: "defi-d1", titre: "Défi « 10 000 pas » relevé : bravo !" });
+  });
+  it("sans chiffres : pas le titre (il peut contenir des nombres)", () => {
+    const v = detecterVictoires({ ...base, sansChiffres: true, defis: [{ id: "d1", titre: "10 000 pas", jour: "2026-12-20" }] }, "2026-12-22");
+    expect(v[0].titre).not.toMatch(/\d/);
+    expect(v[0].message).not.toMatch(/\d/);
+  });
+  it("plus après 7 jours", () => {
+    expect(detecterVictoires({ ...base, sansChiffres: false, defis: [{ id: "d1", titre: "x", jour: "2026-12-01" }] }, "2026-12-22")).toHaveLength(0);
+  });
+});

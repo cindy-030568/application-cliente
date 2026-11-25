@@ -14,7 +14,7 @@ const profils = {
 };
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
-  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(), express_jusqu_au: null,
+  created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(), express_jusqu_au: null, defis_notif: true,
   mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
@@ -249,6 +249,7 @@ function filtrerCommu(lignes, params) {
     if (v.startsWith("lt.")) r = r.filter((x) => String(x[k]) < decodeURIComponent(v.slice(3)));
     if (v.startsWith("gt.")) r = r.filter((x) => String(x[k]) > decodeURIComponent(v.slice(3)));
     if (v.startsWith("lte.")) r = r.filter((x) => String(x[k]) <= decodeURIComponent(v.slice(4)));
+    if (v.startsWith("gte.")) r = r.filter((x) => x[k] != null && String(x[k]) >= decodeURIComponent(v.slice(4)));
   }
   if (params.get("order") && !params.get("order").includes("desc")) { const c = params.get("order").split(".")[0]; r = [...r].sort((a, b) => String(a[c]).localeCompare(String(b[c]))); }
   if ((params.get("order") || "").includes("desc")) { const c = params.get("order").split(".")[0]; r = [...r].sort((a, b) => String(b[c]).localeCompare(String(a[c]))); }
@@ -315,6 +316,24 @@ const seancesExpress = [
   { id: "e5000000-0000-4000-8000-000000000003", titre: "Brouillon pas prêt", description: null, duree_minutes: 5, materiel: [], type: "Renfo", niveau: "tous", publiee: false, visibilite: "toutes",
     contenu: { nom: "Brouillon", blocs: [{ titre: "x", format: "1 série", exercices: [{ nom: "Pompes", series: "1", repetitions: "5" }] }] } },
 ];
+// ---- Défis du mois (0042) : un défi pas en cours pour toutes, un brouillon.
+const defis = [
+  { id: "d3f10000-0000-4000-8000-000000000001", titre: "Bouger un peu plus chaque jour", description: "Une marche après le déjeuner, les escaliers plutôt que l’ascenseur : on bouge ensemble ce mois-ci !", type: "pas", seuil: 8000, objectif: 15, debut: jour(-10), fin: jour(20), audience: "toutes", publie: true, annonce_le: null },
+  { id: "d3f10000-0000-4000-8000-000000000003", titre: "Mon journal, mon rituel", description: null, type: "journal", seuil: null, objectif: 3, debut: jour(-5), fin: jour(20), audience: "toutes", publie: true, annonce_le: null },
+  { id: "d3f10000-0000-4000-8000-000000000002", titre: "Brouillon sommeil", description: null, type: "sommeil", seuil: 7, objectif: 10, debut: jour(0), fin: jour(20), audience: "toutes", publie: false, annonce_le: null },
+];
+const defisParticipations = [];
+const reussitesDefi = (d, cid) => {
+  const fin = d.fin < jour(0) ? d.fin : jour(0);
+  if (d.type === "seances") return 0;
+  return journal.filter((j) => j.cliente_id === cid && j.jour >= d.debut && j.jour <= fin && (d.type === "journal" || (j[d.type] ?? 0) >= d.seuil)).length;
+};
+const defiPourMoi = (d, uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (d.audience === "toutes" ? c.statut === "active" : membres.some((m) => m.cliente_id === uid && m.statut === "membre")); };
+const celebrerDefi = (d, p) => {
+  if (!p.afficher_prenom || !p.reussi_le || p.celebre_le || !reglages.communaute_ouverte) return;
+  p.celebre_le = new Date().toISOString();
+  messages.push({ id: idMsg(), auteur_id: COACH, auteur_prenom: "Cindy", auteur_coach: true, texte: `🎉 Bravo ${profils[p.cliente_id]?.prenom ?? clientes.find((c) => c.id === p.cliente_id)?.profils.prenom} : défi « ${d.titre} » relevé ! Je suis tellement fière de toi 💛`, photo_path: null, epingle: false, created_at: new Date().toISOString() });
+};
 const seancesExpressClientes = [];
 const seancesExpressFavoris = [];
 const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.statut === "active" || (c.statut === "terminee" && c.express_jusqu_au && c.express_jusqu_au >= new Date().toISOString().slice(0, 10))); };
@@ -432,6 +451,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/defis") return json({ defis, participations: defisParticipations, messages: messages.filter((m) => m.texte.startsWith("🎉")) });
   if (u.pathname === "/__test/questionnaire") { const b = await corpsJson(req); if (b) { questionnaireActif = Boolean(b.actif); if (!b.actif) reponsesArrivee.length = 0; } return json({ actif: questionnaireActif, reponses: reponsesArrivee, exclusions: exclusionsListe }); }
   res.writeHead(404); return res.end();
 }
@@ -656,6 +676,27 @@ http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "application/json" });
     return res.end(JSON.stringify({ demande_adresse: t.includes("{{adresse}}"), demande_date_naissance: t.includes("{{date_naissance}}"), date_naissance: null }));
   }
+  if (u.pathname === "/rest/v1/rpc/ma_progression_defi") return corpsJson(req).then((b) => {
+    const d = defis.find((x) => x.id === b?.p_defi && x.publie && defiPourMoi(x, uid));
+    if (!d) return send([]);
+    const parts = defisParticipations.filter((p) => p.defi_id === d.id);
+    const moi = parts.find((p) => p.cliente_id === uid);
+    const n = moi ? Math.min(reussitesDefi(d, uid), d.objectif) : null;
+    if (moi && !moi.reussi_le && n >= d.objectif) { moi.reussi_le = new Date().toISOString(); moi.notifie_le = moi.reussi_le; celebrerDefi(d, moi); }
+    const groupe = parts.length >= 3 ? Math.round((100 * parts.reduce((s, p) => s + Math.min(reussitesDefi(d, p.cliente_id) / d.objectif, 1), 0)) / parts.length) : null;
+    return send([{ reussites: n, objectif: d.objectif, reussi: Boolean(moi?.reussi_le), groupe, participantes: parts.length }]);
+  });
+  if (u.pathname === "/rest/v1/rpc/progressions_defi") return corpsJson(req).then((b) => {
+    const d = defis.find((x) => x.id === b?.p_defi);
+    if (profils[uid]?.role !== "coach" || !d) return send([]);
+    return send(defisParticipations.filter((p) => p.defi_id === d.id).map((p) => ({ cliente_id: p.cliente_id, reussites: reussitesDefi(d, p.cliente_id), reussi_le: p.reussi_le, afficher_prenom: p.afficher_prenom })));
+  });
+  if (u.pathname === "/rest/v1/rpc/afficher_prenom_defi") return corpsJson(req).then((b) => {
+    const p = defisParticipations.find((x) => x.defi_id === b?.p_defi && x.cliente_id === uid);
+    if (p) { p.afficher_prenom = Boolean(b.p_afficher); if (p.afficher_prenom) celebrerDefi(defis.find((x) => x.id === p.defi_id), p); }
+    res.writeHead(204); res.end();
+  });
+  if (u.pathname === "/rest/v1/rpc/definir_defis_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.defis_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname.startsWith("/rest/v1/rpc/")) { res.writeHead(204); return res.end(); }
   if (u.pathname === "/auth/v1/user") return send({ id: uid, aud: "authenticated", role: "authenticated", email: profils[uid]?.email, user_metadata: { mot_de_passe_defini: true } });
   if (u.pathname.startsWith("/auth/v1/")) return routeAuth(req, res, u);
@@ -720,6 +761,23 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/seances_express_favoris") return tableCommu(req, res, u, seancesExpressFavoris, {
     visibles: coach ? seancesExpressFavoris : seancesExpressFavoris.filter((x) => x.cliente_id === uid),
     creer: (b) => (coach ? { erreur: "interdit" } : seancesExpressFavoris.some((x) => x.cliente_id === uid && x.seance_id === b.seance_id) ? { remplace: true } : { created_at: new Date().toISOString(), ...b, cliente_id: uid }),
+  });
+  if (u.pathname === "/rest/v1/defis") {
+    if (!coach && req.method !== "GET" && req.method !== "HEAD") { res.writeHead(403); return res.end(); }
+    return tableCommu(req, res, u, defis, {
+      visibles: coach ? defis : defis.filter((d) => d.publie && defiPourMoi(d, uid)),
+      creer: (b) => ({ id: "d3f10000-0000-4000-8000-" + String(defis.length + 10).padStart(12, "0"), description: null, audience: "toutes", publie: false, annonce_le: null, ...b }),
+    });
+  }
+  if (u.pathname === "/rest/v1/defis_participations") return tableCommu(req, res, u, defisParticipations, {
+    enrichir: (p) => ({ ...p, defis: { titre: defis.find((d) => d.id === p.defi_id)?.titre ?? "" } }),
+    visibles: coach ? defisParticipations : defisParticipations.filter((x) => x.cliente_id === uid && (req.method !== "DELETE" || !x.reussi_le)),
+    creer: (b) => {
+      const d = defis.find((x) => x.id === b.defi_id);
+      if (coach || !d || !d.publie || !defiPourMoi(d, uid) || d.debut > jour(0) || d.fin < jour(0)) return { erreur: "interdit" };
+      if (defisParticipations.some((x) => x.defi_id === b.defi_id && x.cliente_id === uid)) return { erreur: "doublon" };
+      return { afficher_prenom: false, ...b, cliente_id: uid, inscrite_le: new Date().toISOString(), reussi_le: null, notifie_le: null, celebre_le: null };
+    },
   });
   if (u.pathname === "/rest/v1/avis") return tableCommu(req, res, u, avisListe, {
     visibles: coach ? avisListe : avisListe.filter((x) => x.cliente_id === uid),

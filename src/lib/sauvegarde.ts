@@ -38,6 +38,8 @@ export const TABLES_SAUVEGARDEES = [
   "messages_cliente", "annonces", "rappels_envoyes", "taches_du_matin",
   // Communauté
   "membres_communaute", "messages_communaute", "reactions_communaute", "signalements_communaute",
+  // Défis du mois
+  "defis", "defis_participations",
 ] as const;
 
 /** Exclusions volontaires (et pourquoi). */

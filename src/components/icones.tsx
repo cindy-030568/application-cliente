@@ -98,3 +98,6 @@ export const IconeRecherche = (p: P) => (
 export const IconeCommunaute = (p: P) => (
   <svg {...base} {...p}><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h7A2.5 2.5 0 0 1 16 6.5v4a2.5 2.5 0 0 1-2.5 2.5H9l-3.5 3v-3A2.5 2.5 0 0 1 4 10.5z" /><path d="M16 8.5h1.5A2.5 2.5 0 0 1 20 11v4a2.5 2.5 0 0 1-1.5 2.3V20l-3-2.5H12a2.5 2.5 0 0 1-2.4-1.8" /></svg>
 );
+export const IconeTrophee = (p: P) => (
+  <svg {...base} {...p}><path d="M8 4h8v5a4 4 0 0 1-8 0z" /><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4" /><path d="M12 13v4M8.5 20h7M9.5 17h5v3h-5z" /></svg>
+);

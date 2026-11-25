@@ -10,7 +10,7 @@
 import { ajouterJours, joursEntre } from "./bilan";
 import { semaineIso } from "./propositions-messages";
 
-export type TypeVictoire = "record" | "regularite" | "seances" | "taille" | "stress" | "digestion";
+export type TypeVictoire = "record" | "regularite" | "seances" | "taille" | "stress" | "digestion" | "defi";
 
 export type Victoire = {
   /** Unique et stable : sert à ne plus la remontrer une fois vue, et à ne la proposer qu'une fois à la coach. */
@@ -33,6 +33,8 @@ export type DonneesVictoires = {
   /** Jour (Paris) de chaque séance validée. */
   seances: string[];
   journal: { jour: string; tour_taille: number | null; stress: number | null; digestion: number | null }[];
+  /** Défis du mois réussis (jour à Paris de la réussite). */
+  defis?: { id: string; titre: string; jour: string }[];
 };
 
 export const PALIERS_REGULARITE = [3, 4, 6, 8, 10, 12, 16, 20, 26, 52];
@@ -189,6 +191,21 @@ export function detecterVictoires(d: DonneesVictoires, aujourdhui: string): Vict
       titre: "Ta digestion va mieux : ton corps te dit merci !",
       constat: `Digestion ${f1(digestion.maintenant)}/5 cette semaine, contre ${f1(digestion.avant)}/5 les 3 semaines d’avant.`,
       message: `${p}, ta digestion va beaucoup mieux ces derniers jours ✨ Ton corps te dit merci : bravo pour tes efforts !`,
+    });
+  }
+
+  // ---------- Défi du mois relevé (le titre est écrit par la coach : pas affiché en mode sans chiffres).
+  for (const defi of d.defis ?? []) {
+    if (!recent(defi.jour)) continue;
+    victoires.push({
+      cle: `defi-${defi.id}`,
+      type: "defi",
+      emoji: "🏆",
+      titre: d.sansChiffres ? "Défi du mois relevé : bravo !" : `Défi « ${defi.titre} » relevé : bravo !`,
+      constat: `Défi « ${defi.titre} » réussi.`,
+      message: d.sansChiffres
+        ? `${p}, tu as relevé le défi du mois 🏆 Tu es allée au bout, je suis tellement fière de toi !`
+        : `${p}, tu as relevé le défi « ${defi.titre} » 🏆 Tu es allée au bout, je suis tellement fière de toi !`,
     });
   }
 

@@ -15,6 +15,7 @@ import {
   IconeSport,
   IconeSuivi,
   IconeTableau,
+  IconeTrophee,
   IconeVideo,
 } from "@/components/icones";
 import { cx } from "@/components/ui";
@@ -30,6 +31,7 @@ const LIENS = [
   { href: "/coach/aliments", label: "Aliments", Icone: IconeNutrition },
   { href: "/coach/videos", label: "Vidéos", Icone: IconeVideo },
   { href: "/coach/seances-express", label: "Séances express", Icone: IconeSport },
+  { href: "/coach/defis", label: "Défis du mois", Icone: IconeTrophee },
   { href: "/coach/ressources", label: "Ressources", Icone: IconeRessources },
   { href: "/coach/reglages", label: "Réglages", Icone: IconeReglages },
 ];

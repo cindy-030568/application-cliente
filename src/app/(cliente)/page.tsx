@@ -30,6 +30,9 @@ import { recapRecent } from "@/lib/recap-semaine";
 import { bilanFinVisible } from "@/lib/bilan-fin";
 import { heureParis } from "@/lib/journal";
 import { EnTete } from "./composants";
+import { etatDefi, texteProgression, typeDefi } from "@/lib/defis";
+import { defisDeLaCliente } from "@/lib/defis-serveur";
+import { Jauge } from "./defis/participation";
 
 export default async function PageAccueil() {
   const { supabase, profil, fiche, reglages } = await exigerCliente();
@@ -89,6 +92,9 @@ export default async function PageAccueil() {
   const resteComplements = nbComplements - (complementsPris ?? []).filter((p) => (complements ?? []).some((c) => c.id === p.complement_id)).length;
   // Séances express (0040) : la RLS ne compte que celles publiées pour elle, si elle y a accès.
   const { count: nbExpress } = await supabase.from("seances_express").select("id", { count: "exact", head: true });
+  // Défi du mois en cours (0042) : le premier, avec sa progression si elle participe.
+  const defi = (await defisDeLaCliente(supabase, profil.id, auj)).find((d) => etatDefi(d, auj) === "en_cours") ?? null;
+  const defiReussi = Boolean(defi?.participation?.reussi_le || defi?.progression?.reussi);
   // Récap de la semaine : carte du dimanche 18 h au mardi soir (pour les clientes en cours de suivi).
   const recapPret = fiche.statut === "active" && recapRecent(auj, heureParis(new Date())) !== null;
   const { data: annonces } = await supabase.from("annonces").select("id, texte, lien").gt("expire_le", new Date().toISOString()).order("cree_le", { ascending: false });
@@ -196,6 +202,29 @@ export default async function PageAccueil() {
               <span className="text-[14px] text-texte-2">Sommeil, eau, pas, ressenti : 1 minute 💛</span>
             </span>
             <IconeFleche className="size-5 shrink-0 text-texte-2" />
+          </Link>
+        )}
+
+        {defi && (
+          <Link href="/defis" className="flex flex-col gap-3 rounded-carte bg-blanc-casse p-4 shadow-douce apparition">
+            <span className="flex items-center gap-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent-pale text-xl" aria-hidden>
+                {defiReussi ? "🏆" : typeDefi(defi.type).emoji}
+              </span>
+              <span className="flex flex-1 flex-col">
+                <span className="text-[12px] font-medium uppercase tracking-[0.12em] text-caramel-texte">Défi du mois</span>
+                <span className="font-medium leading-snug">{defi.titre}</span>
+                <span className="text-[14px] text-texte-2">
+                  {!defi.participation
+                    ? "Tu le relèves avec moi ? 💪"
+                    : defi.progression
+                      ? texteProgression(defi.type, { ...defi.progression, reussi: defiReussi }, fiche.mode_sans_chiffres)
+                      : "Tu participes 💪"}
+                </span>
+              </span>
+              <IconeFleche className="size-5 shrink-0 text-texte-2" />
+            </span>
+            {defi.participation && defi.progression && <Jauge part={defiReussi ? 1 : (defi.progression.reussites ?? 0) / defi.progression.objectif} />}
           </Link>
         )}
 

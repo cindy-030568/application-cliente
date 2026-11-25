@@ -75,7 +75,7 @@ export async function testerNotification(): Promise<EtatRappels> {
 }
 
 /** Notifications facultatives choisies par la cliente (récap du dimanche…). */
-const PREFERENCES = { recap: "definir_recap_notif" } as const;
+const PREFERENCES = { recap: "definir_recap_notif", defis: "definir_defis_notif" } as const;
 export type Preference = keyof typeof PREFERENCES;
 
 export async function definirPreference(cle: Preference, actif: boolean): Promise<EtatRappels> {

@@ -9,6 +9,7 @@ import { SUJETS, cleRappel, emailRappel, personnaliser, rappelDu, type TypeRappe
 import { recapADonner, texteNotificationRecap } from "@/lib/recap-semaine";
 import { rappelComplementsDu, texteRappelComplements } from "@/lib/complements";
 import { chargerRecaps } from "@/lib/recap-semaine-serveur";
+import { HEURES_NOTIF_DEFIS, texteAnnonceDefi, texteReussiteDefi } from "@/lib/defis";
 
 /** Ce qui est configuré dans Vercel (sans jamais exposer les valeurs). */
 export function configurationRappels() {
@@ -508,6 +509,77 @@ export async function executerRecapsSemaine(admin: SupabaseClient, maintenant = 
       else bilan.erreurs++;
     }
     if (parti) bilan.recaps++;
+  }
+  return bilan;
+}
+
+// ---------------------------------------------------------------- Défis du mois (toutes les 15 min)
+
+/**
+ * Défis du mois, entre 8 h et 21 h (heure de Paris) : notification de lancement le jour où un défi
+ * publié commence (une seule fois), puis réussites repérées par la base (verifier_defis) pour celles
+ * qui ne l'ont pas déjà vu dans l'app. Seulement pour les clientes qui n'ont pas décoché les défis.
+ * La célébration dans la communauté est faite par la base elle-même.
+ */
+export async function executerDefis(admin: SupabaseClient, maintenant = new Date()) {
+  const bilan = { annonces: 0, reussites: 0, erreurs: 0 };
+  const heure = heureParis(maintenant);
+  if (heure < HEURES_NOTIF_DEFIS.debut || heure >= HEURES_NOTIF_DEFIS.fin) return bilan;
+  const aujourdhui = aujourdhuiParis();
+  const push = configurationRappels().push;
+  const envoyer = async (clienteId: string, contenu: { titre: string; texte: string; url: string }) => {
+    if (!push) return false;
+    const { data: appareils } = await admin.from("abonnements_push").select("id, endpoint, p256dh, auth").eq("cliente_id", clienteId);
+    let parti = false;
+    for (const a of (appareils ?? []) as AbonnementPush[]) {
+      const r = await envoyerPush(a, contenu);
+      if (r === "ok") parti = true;
+      else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+      else bilan.erreurs++;
+    }
+    return parti;
+  };
+
+  // 1. Lancement : défis publiés qui commencent (ou ont commencé) et pas encore annoncés.
+  const { data: aAnnoncer, error } = await admin
+    .from("defis")
+    .select("id, titre, audience")
+    .eq("publie", true)
+    .is("annonce_le", null)
+    .lte("debut", aujourdhui)
+    .gte("fin", aujourdhui);
+  if (error) return bilan; // mise à jour 0042 pas encore faite
+  for (const d of aAnnoncer ?? []) {
+    // Réservation avant l'envoi : jamais deux annonces du même défi.
+    const { data: reserve } = await admin.from("defis").update({ annonce_le: new Date().toISOString() }).eq("id", d.id).is("annonce_le", null).select("id").maybeSingle();
+    if (!reserve || !push) continue;
+    let ids: string[] = [];
+    if (d.audience === "communaute") {
+      const { data: ouverte } = await admin.from("reglages").select("communaute_ouverte").maybeSingle();
+      if (!ouverte?.communaute_ouverte) continue;
+      const { data } = await admin.from("membres_communaute").select("cliente_id, clientes!inner(statut, defis_notif)").eq("statut", "membre").neq("clientes.statut", "fermee").eq("clientes.defis_notif", true);
+      ids = (data ?? []).map((m) => m.cliente_id as string);
+    } else {
+      const { data } = await admin.from("clientes").select("id").eq("statut", "active").eq("defis_notif", true);
+      ids = (data ?? []).map((c) => c.id as string);
+    }
+    for (const id of ids) if (await envoyer(id, { titre: "Défi du mois 🎯", texte: texteAnnonceDefi(d), url: "/defis" })) bilan.annonces++;
+  }
+
+  // 2. Réussites repérées par la base (et pas encore vues dans l'app).
+  const { data: reussites } = await admin.rpc("verifier_defis");
+  for (const r of (reussites ?? []) as { defi_id: string; cliente_id: string }[]) {
+    const { data: reserve } = await admin
+      .from("defis_participations")
+      .update({ notifie_le: new Date().toISOString() })
+      .eq("defi_id", r.defi_id)
+      .eq("cliente_id", r.cliente_id)
+      .is("notifie_le", null)
+      .select("defis(titre), clientes(defis_notif, mode_sans_chiffres)")
+      .maybeSingle<{ defis: { titre: string } | null; clientes: { defis_notif: boolean; mode_sans_chiffres: boolean } | null }>();
+    if (!reserve?.clientes?.defis_notif) continue;
+    const texte = texteReussiteDefi({ titre: reserve.defis?.titre ?? "" }, reserve.clientes.mode_sans_chiffres);
+    if (await envoyer(r.cliente_id, { titre: "Défi relevé 🏆", texte, url: "/defis" })) bilan.reussites++;
   }
   return bilan;
 }

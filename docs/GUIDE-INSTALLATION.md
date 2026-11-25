@@ -1396,3 +1396,59 @@ La **liste du matériel** et la **liste des types** se modifient dans **Réglage
    - ouvre une séance express avec du réseau, puis active le mode avion ;
    - ferme et rouvre l'app, puis rouvre la même séance : elle marche ;
    - valide-la, coupe le mode avion et rouvre l'app : elle est envoyée.
+
+## Phase 2 : défis du mois
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0042_defis.sql`](../supabase/migrations/0042_defis.sql)
+
+Rien d'autre à régler : les notifications des défis partent avec les rappels du journal (toutes les 15 minutes), déjà en place.
+
+### 2. Créer un défi
+
+Menu **Défis du mois** → **Nouveau défi**.
+
+1. **Titre** et **petit mot** (facultatif). Évite les chiffres dans le titre : tes clientes en mode sans chiffres le voient aussi.
+2. **Type** :
+   - 👟 **Pas** : un nombre de pas par jour ;
+   - 💪 **Séances par semaine** : les séances du programme et les séances express comptent. Les semaines démarrent le premier jour du défi ;
+   - 💧 **Hydratation** : des litres d'eau par jour ;
+   - 😴 **Sommeil** : des heures de sommeil par nuit ;
+   - 📒 **Journal rempli** : un jour compte dès que la journée est remplie.
+3. **La règle** : le seuil et le **nombre de jours à réussir** (ou de semaines pour les séances). Ex. : « 8 000 pas ou plus, au moins 20 jours ». L'appli propose environ 2 jours sur 3 : à toi d'ajuster.
+4. **Dates** : par défaut le mois en cours (ou le suivant après le 7). Tu peux faire un défi de 2 semaines ou de 21 jours (3 mois au plus).
+5. **Pour qui** : toutes tes clientes en suivi, ou seulement les membres de la communauté.
+6. L'encadré « **Ce que verront tes clientes** » te montre la phrase exacte.
+7. Coche « **Publié tout de suite** », ou laisse-le en brouillon et clique sur **Publier** plus tard.
+
+Sur la page du défi, tu vois chaque participante et sa progression (toi seule vois le détail), et tu peux le modifier ou le supprimer.
+
+### 3. Pour tes clientes
+
+- Une carte « **Défi du mois** » apparaît sur leur accueil pendant le défi, avec « Tu le relèves avec moi ? ».
+- Sur la page **Défis du mois**, elles choisissent « **Je relève le défi** ». C'est volontaire, et elles peuvent abandonner tant que ce n'est pas réussi.
+- **La progression se calcule toute seule** à partir de leur journal et de leurs séances faites. Rien à cocher en plus, et impossible de tricher dans l'appli.
+- Elles voient **leur progression** et la **progression moyenne du groupe**, jamais les chiffres des autres. Le pourcentage du groupe n'apparaît qu'à partir de **3 participantes** : à 2, on pourrait deviner les chiffres de l'autre.
+- **Mode sans chiffres** : une jauge et des mots (« Tu avances, continue comme ça 🌱 »), sans aucun nombre. La règle du défi reste écrite.
+- « **Afficher mon prénom dans la communauté quand je réussis** » (facultatif) : quand elle réussit, un message part dans la communauté, à ton nom : « 🎉 Bravo Léa : défi « … » relevé ! Je suis tellement fière de toi 💛 ».
+- Un défi réussi devient une **victoire hors balance** sur son accueil, et t'est proposé dans les petits mots à envoyer.
+- **Notifications** (si elle les a activées), seulement entre 8 h et 21 h :
+  - le jour où le défi commence ;
+  - quand elle le réussit, si elle n'était pas dans l'appli à ce moment-là.
+  
+  Elle peut les couper dans **Profil → Mes autres notifications → Mes défis du mois**.
+
+### 4. Tester
+
+1. Crée un défi « Journal rempli », au moins 1 jour, du jour même à la fin du mois. Publie-le.
+2. Connecte-toi avec une cliente de test :
+   - la carte « Défi du mois » apparaît sur l'accueil ;
+   - ouvre-la, coche « Afficher mon prénom… », puis « Je relève le défi » ;
+   - remplis son journal du jour : en revenant sur **Défis du mois**, c'est « Défi relevé : bravo 🏆 » ;
+   - le message « Bravo … » est dans la communauté, et la victoire sur l'accueil.
+3. Côté coach : la page du défi montre la participante « 🏆 Réussi ».
+4. **Sur ton iPhone** (app installée, notifications activées) : publie un défi qui commence aujourd'hui. La notification « Défi du mois 🎯 » arrive dans les 15 minutes (entre 8 h et 21 h).
+5. Supprime ensuite le défi de test : ses participations partent avec lui.

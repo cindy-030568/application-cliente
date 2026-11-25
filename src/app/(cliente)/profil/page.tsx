@@ -34,6 +34,8 @@ export default async function PageProfil() {
     .select("recap_notif")
     .eq("id", profil.id)
     .maybeSingle<{ recap_notif: boolean }>();
+  // Défis du mois (0042) : lu à part, rien avant la mise à jour.
+  const { data: prefDefis } = await supabase.from("clientes").select("defis_notif").eq("id", profil.id).maybeSingle<{ defis_notif: boolean }>();
   const [cycle, avecJournal, { data: parrain }, { data: lien }] = await Promise.all([
     lireCycle(supabase, profil.id),
     journalActif(supabase, profil.id),
@@ -82,6 +84,14 @@ export default async function PageProfil() {
             titre="Mon récap du dimanche"
             detail="Le dimanche à 18 h : tes séances, ton sommeil, tes pas et ton eau de la semaine."
           />
+          {prefDefis && (
+            <InterrupteurPreference
+              cle="defis"
+              actif={prefDefis.defis_notif}
+              titre="Mes défis du mois"
+              detail="Quand un nouveau défi commence, et quand tu en relèves un. Jamais le soir."
+            />
+          )}
         </Carte>
       )}
 
