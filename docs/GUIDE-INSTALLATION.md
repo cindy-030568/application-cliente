@@ -1519,3 +1519,77 @@ Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** →
 2. Sur sa fiche (dashboard), la rubrique **Séances express** indique « accès à vie ».
 
 La future offre par abonnement (pour des femmes qui ne suivent pas ton coaching) est décrite dans [`ESPACE-ABONNEES.md`](./ESPACE-ABONNEES.md).
+
+# Espace abonnées
+
+Le plan complet est dans [`ESPACE-ABONNEES.md`](./ESPACE-ABONNEES.md).
+
+## Étape 2 : le socle (inscription et paiement Stripe)
+
+Ce qui est en place :
+
+- une **page publique** d'inscription (`/abonnement`) : ton titre, ton texte, ce qu'elles trouvent, tes deux formules (au mois, à l'année), et le lien « Découvrir mon coaching » ;
+- le **paiement par Stripe** (elle ne donne jamais sa carte à l'appli) ;
+- à la fin du paiement, son **compte est créé tout seul** et elle reçoit un email pour se connecter ;
+- son **espace** (`/espace`) : son abonnement, « Gérer mon abonnement » (carte, factures, formule, arrêt, dans l'espace sécurisé de Stripe), « Passer au coaching ». Le contenu (recettes, séances, défis…) arrive à l'étape 3 ;
+- **par défaut, une abonnée ne voit rien de ton coaching**, et tu ne vois pas ses données personnelles : seulement la liste de tes abonnées et leur abonnement (menu **Abonnées**) ;
+- quand elle arrête : accès jusqu'à la fin de la période payée, puis espace fermé ; elle peut **reprendre** son abonnement ; ses données sont **effacées 6 mois** après l'arrêt (automatiquement, avec la tâche du matin) ;
+- les rappels du coaching (bilans, récap, annonces) ne partent jamais aux abonnées.
+
+> **Garde les inscriptions fermées** tant que l'étape 3 n'est pas faite : pour l'instant, l'espace d'une abonnée ne contient que son abonnement. Tu peux tout tester en **mode test** de Stripe, sans vrai paiement.
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0045_abonnees.sql`](../supabase/migrations/0045_abonnees.sql)
+
+### 2. Préparer Stripe (en mode test d'abord)
+
+Sur [dashboard.stripe.com](https://dashboard.stripe.com), avec ton compte professionnel. Active le bouton **Mode test** en haut à droite : tout ce que tu crées en test est sans vrai argent.
+
+1. **Ton abonnement** : **Catalogue de produits** → **Ajouter un produit**.
+   - Nom : par exemple le titre de ton offre.
+   - Ajoute un **prix récurrent mensuel** (par exemple 9,90 €), puis **un deuxième prix récurrent annuel** sur le même produit.
+   - Ouvre chaque prix et copie son identifiant : il commence par `price_…`.
+2. **La clé** : **Développeurs** → **Clés API** → copie la **clé secrète** (`sk_test_…`). (Encore mieux : **Créer une clé restreinte** avec les droits *Checkout Sessions : écriture*, *Customer portal : écriture*, *Prices : lecture*, *Subscriptions : lecture*.)
+3. **Les messages de Stripe (webhook)** : **Développeurs** → **Webhooks** → **Ajouter une destination** (ou « point de terminaison ») :
+   - adresse : `https://app.fitw-cindy.fr/api/stripe/webhook` (affichée aussi dans ton dashboard → Abonnées) ;
+   - événements : `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` ;
+   - enregistre, puis copie le **secret de signature** (`whsec_…`).
+4. **L'espace de gestion de tes abonnées** : **Paramètres** → **Facturation** → **Portail client** : autorise la mise à jour de la carte, l'historique des factures, l'**annulation à la fin de la période**, et le **changement de formule** entre tes deux prix. Enregistre.
+
+### 3. Mettre les clés dans Vercel (jamais dans un message)
+
+Vercel → ton projet → **Settings** → **Environment Variables** → ajoute :
+
+- `STRIPE_SECRET_KEY` : la clé (`sk_test_…` ou `rk_test_…`) ;
+- `STRIPE_WEBHOOK_SECRET` : le secret de signature (`whsec_…`).
+
+Puis **Deployments** → les trois points du dernier → **Redeploy**.
+
+### 4. Régler ton offre
+
+Dashboard → **Abonnées** → **Mon offre** :
+
+1. vérifie les lignes ✓ (clé et secret enregistrés) ;
+2. ton **titre** et ton **texte** de présentation ;
+3. colle tes deux identifiants de prix : le montant s'affiche (✓ 9,90 € / mois) s'ils sont bons ;
+4. le **lien de tes conditions de vente** (une page publique : Google Docs publié, Notion…). Fais-les relire par un professionnel : abonnement sans engagement, résiliation, droit de rétractation de 14 jours et son renoncement si l'accès commence tout de suite ;
+5. pour tester, coche « Inscriptions ouvertes » le temps du test (ou regarde la page en aperçu : connectée en coach, tu la vois même fermée).
+
+Le bouton « Passer au coaching » utilise ton lien d'inscription (Réglages → Parrainage).
+
+### 5. Tester (mode test, sans vrai paiement)
+
+1. Ouvre `https://app.fitw-cindy.fr/abonnement` **dans une fenêtre de navigation privée**.
+2. Choisis une formule, mets un prénom et **une adresse email à toi qui n'a pas encore de compte**, coche les deux cases → **Continuer vers le paiement sécurisé**.
+3. Sur la page Stripe, carte de test **4242 4242 4242 4242**, une date future, n'importe quel code (123).
+4. Tu arrives sur « Bienvenue » : l'email de connexion arrive. Connecte-toi : tu es dans **son espace**, et « Gérer mon abonnement » ouvre l'espace Stripe.
+5. Dans ton dashboard → **Abonnées** : elle apparaît, « Active ». Elle n'apparaît pas dans **Clientes**.
+6. Dans son espace → **Gérer mon abonnement** → annule : « tu gardes ton accès jusqu'au … ».
+7. Referme ensuite les inscriptions (étape 3 à venir).
+
+### 6. Plus tard : passer en réel
+
+Quand l'étape 3 sera faite : refais les points 1 à 4 de Stripe **en mode réel** (produit et prix, clé `sk_live_…` ou `rk_live_…`, webhook et son nouveau `whsec_…`, portail client), remplace les deux clés dans Vercel (Redeploy) et les deux identifiants de prix dans **Mon offre**, puis ouvre les inscriptions.

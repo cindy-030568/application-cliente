@@ -10,6 +10,8 @@ import { recapADonner, texteNotificationRecap } from "@/lib/recap-semaine";
 import { rappelComplementsDu, texteRappelComplements } from "@/lib/complements";
 import { chargerRecaps } from "@/lib/recap-semaine-serveur";
 import { HEURES_NOTIF_DEFIS, texteAnnonceDefi, texteReussiteDefi } from "@/lib/defis";
+import { idsAbonnees } from "@/lib/abonnees-serveur";
+import { conservationAbonneeDepassee } from "@/lib/abonnement";
 
 /** Ce qui est configuré dans Vercel (sans jamais exposer les valeurs). */
 export function configurationRappels() {
@@ -153,13 +155,16 @@ export async function executerRappels(admin: SupabaseClient, aujourdhui = aujour
   if (!reglages) throw new Error("Réglages introuvables");
   if (!reglages.rappels_actifs) return { ...bilan, actifs: false };
 
-  const { data: clientes } = await admin
+  const { data: toutes } = await admin
     .from("clientes")
     .select("id, statut, date_debut, frequence_bilan_jours, rappels_email, profils!inner(prenom, email)")
     .eq("statut", "active")
     .not("date_debut", "is", null)
     .returns<ClienteRappel[]>();
-  if (!clientes?.length) return bilan;
+  // Les abonnées (sans coaching) n'ont pas de bilans.
+  const abonnees = await idsAbonnees(admin);
+  const clientes = (toutes ?? []).filter((c) => !abonnees.has(c.id));
+  if (!clientes.length) return bilan;
   const ids = clientes.map((c) => c.id);
   const depuis = new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10);
 
@@ -338,7 +343,23 @@ export async function executerRappelsPaiement(admin: SupabaseClient, aujourdhui 
   return bilan;
 }
 
-/** Tâche du matin complète : rappels de bilan puis rappels de paiement. */
+/**
+ * Abonnées : 6 mois après l'arrêt de l'abonnement, le compte et toutes ses données sont effacés
+ * (décision de la coach : on garde 6 mois pour qu'elle retrouve tout si elle revient).
+ */
+export async function effacerAnciennesAbonnees(admin: SupabaseClient, aujourdhui = aujourdhuiParis()): Promise<number> {
+  const { data, error } = await admin.from("clientes").select("id, ferme_le").eq("formule", "abonnement").eq("statut", "fermee");
+  if (error) return 0; // mise à jour 0045 pas encore faite
+  let effacees = 0;
+  for (const c of data ?? []) {
+    if (!conservationAbonneeDepassee(c.ferme_le as string | null, aujourdhui)) continue;
+    const { error: e } = await admin.auth.admin.deleteUser(c.id as string);
+    if (!e) effacees++;
+  }
+  return effacees;
+}
+
+/** Tâche du matin complète : rappels de bilan, rappels de paiement, puis effacement des anciennes abonnées. */
 export async function executerTachesDuMatin(admin: SupabaseClient, aujourdhui = aujourdhuiParis()) {
   const bilans = await executerRappels(admin, aujourdhui);
   let paiements: BilanPaiements = { rappels: 0, emails: 0, notifications: 0, erreurs: 0 };
@@ -347,7 +368,8 @@ export async function executerTachesDuMatin(admin: SupabaseClient, aujourdhui = 
   } catch (e) {
     console.warn("Rappels de paiement : échec", e instanceof Error ? e.message.slice(0, 120) : "");
   }
-  return { ...bilans, paiements };
+  const abonneesEffacees = await effacerAnciennesAbonnees(admin, aujourdhui).catch(() => 0);
+  return { ...bilans, paiements, abonneesEffacees };
 }
 
 // ---------------------------------------------------------------- Rappel du journal (toutes les 15 min)
@@ -362,13 +384,17 @@ export async function executerRappelsJournal(admin: SupabaseClient, maintenant =
   if (!configurationRappels().push) return bilan;
   const aujourdhui = aujourdhuiParis();
   const heure = heureParis(maintenant);
-  const { data: clientes, error } = await admin
+  const { data: toutes, error } = await admin
     .from("clientes")
     .select("id, rappel_journal_heure, rappel_journal_envoye")
     .neq("statut", "fermee")
     .eq("journal_actif", true)
     .not("rappel_journal_heure", "is", null);
-  if (error || !clientes?.length) return bilan; // rien à faire (ou mise à jour 0014 pas encore faite)
+  if (error || !toutes?.length) return bilan; // rien à faire (ou mise à jour 0014 pas encore faite)
+  // Les abonnées n'ont pas (encore) le journal du coaching.
+  const abonneesJ = await idsAbonnees(admin);
+  const clientes = toutes.filter((c) => !abonneesJ.has(c.id as string));
+  if (!clientes.length) return bilan;
   const ids = clientes.map((c) => c.id as string);
   const [{ data: remplies }, { data: appareils }] = await Promise.all([
     admin.from("journal_quotidien").select("cliente_id").eq("jour", aujourdhui).in("cliente_id", ids),
@@ -476,13 +502,16 @@ export async function executerRecapsSemaine(admin: SupabaseClient, maintenant = 
   const bilan = { recaps: 0, erreurs: 0 };
   const aujourdhui = aujourdhuiParis();
   if (!configurationRappels().push || !recapADonner({ aujourdhui, heure: heureParis(maintenant), dejaEnvoye: null })) return bilan;
-  const { data: clientes, error } = await admin
+  const { data: toutes, error } = await admin
     .from("clientes")
     .select("id, recap_envoye, profils!inner(prenom)")
     .eq("statut", "active")
     .eq("recap_notif", true)
     .or(`recap_envoye.is.null,recap_envoye.lt.${aujourdhui}`);
-  if (error || !clientes?.length) return bilan; // rien à faire (ou mise à jour 0033 pas encore faite)
+  if (error || !toutes?.length) return bilan; // rien à faire (ou mise à jour 0033 pas encore faite)
+  const abonneesR = await idsAbonnees(admin);
+  const clientes = toutes.filter((c) => !abonneesR.has(c.id as string));
+  if (!clientes.length) return bilan;
   const ids = clientes.map((c) => c.id as string);
   const { data: appareils } = await admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids);
   const avecAppareil = clientes.filter((c) => (appareils ?? []).some((a) => a.cliente_id === c.id));
@@ -562,7 +591,8 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
     } else {
       // Clientes en suivi, et clientes coachées après leur suivi (accès à vie).
       const { data } = await admin.from("clientes").select("id").in("statut", ["active", "terminee"]).eq("defis_notif", true);
-      ids = (data ?? []).map((c) => c.id as string);
+      const abonneesD = await idsAbonnees(admin);
+      ids = (data ?? []).map((c) => c.id as string).filter((id) => !abonneesD.has(id));
     }
     for (const id of ids) if (await envoyer(id, { titre: "Défi du mois 🎯", texte: texteAnnonceDefi(d), url: "/defis" })) bilan.annonces++;
   }
@@ -596,7 +626,9 @@ export async function envoyerAnnonce(admin: SupabaseClient, texte: string, url: 
     .select("id, cliente_id, endpoint, p256dh, auth, clientes!inner(statut)")
     .neq("clientes.statut", "fermee");
   const touchees = new Set<string>();
-  for (const a of (appareils ?? []) as (AbonnementPush & { cliente_id: string })[]) {
+  // Les annonces sont pour les clientes coachées.
+  const abonneesA = await idsAbonnees(admin);
+  for (const a of ((appareils ?? []) as (AbonnementPush & { cliente_id: string })[]).filter((x) => !abonneesA.has(x.cliente_id))) {
     const r = await envoyerPush(a, { titre: "Un petit mot pour toi 💛", texte, url });
     if (r === "ok") {
       res.notifications++;

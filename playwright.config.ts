@@ -22,6 +22,10 @@ const ENV_TEST = {
   TALLY_SIGNING_SECRET: "tally-test",
   ANTHROPIC_API_KEY: "sk-ant-test",
   ANTHROPIC_BASE_URL: `${SIMULE}/anthropic`,
+  // Stripe simulé (abonnées) : aucune vraie transaction.
+  STRIPE_SECRET_KEY: "sk_test_faux",
+  STRIPE_WEBHOOK_SECRET: "whsec_test",
+  STRIPE_API_URL: `${SIMULE}/stripe`,
   NEXT_TELEMETRY_DISABLED: "1",
 };
 

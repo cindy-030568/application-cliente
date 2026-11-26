@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COLONNES_FICHE, type FicheCliente, type Profil, type Reglages } from "@/lib/types";
+import { COLONNES_ABONNEE, lireFormule, type FicheAbonnee } from "@/lib/abonnees-serveur";
 
 /** Lit la session et le profil (une seule fois par requête). */
 export const lireSession = cache(async () => {
@@ -57,6 +58,8 @@ export const exigerCliente = cache(async (
 ) => {
   const session = await exigerConnexion();
   if (session.profil.role === "coach") redirect("/coach");
+  // Une abonnée (sans coaching) a son propre espace : jamais les pages du coaching.
+  if ((await lireFormule(session.supabase, session.profil.id)) === "abonnement") redirect("/espace");
 
   const { data: fiche } = await session.supabase
     .from("clientes")
@@ -88,5 +91,33 @@ export const exigerCliente = cache(async (
     if (aRemplir === true) redirect("/questionnaire");
   }
 
+  return { ...session, fiche, reglages };
+});
+
+/**
+ * Réservé aux abonnées (espace sans coaching). La coach va vers son dashboard, une cliente coachée
+ * vers son accueil, une abonnée dont l'abonnement est terminé vers /acces-ferme,
+ * une abonnée sans consentement vers /espace/bienvenue.
+ */
+export const exigerAbonnee = cache(async (verifierConsentement: boolean = true) => {
+  const session = await exigerConnexion();
+  if (session.profil.role === "coach") redirect("/coach");
+  const { data: fiche, error } = await session.supabase
+    .from("clientes")
+    .select(COLONNES_ABONNEE)
+    .eq("id", session.profil.id)
+    .maybeSingle<FicheAbonnee>();
+  if (error || !fiche || fiche.formule !== "abonnement") redirect("/");
+  if (fiche.statut === "fermee") redirect("/acces-ferme");
+  const reglages = await lireReglages();
+  if (verifierConsentement) {
+    const { data: consentement } = await session.supabase
+      .from("consentements")
+      .select("id")
+      .eq("cliente_id", session.profil.id)
+      .eq("version", reglages.version_consentement)
+      .maybeSingle();
+    if (!consentement) redirect("/espace/bienvenue");
+  }
   return { ...session, fiche, reglages };
 });

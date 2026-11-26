@@ -7,7 +7,8 @@ import { SUPABASE_URL } from "@/lib/env";
  * À n'utiliser QUE pour les opérations sur les comptes (créer, bloquer,
  * supprimer, générer un lien), toujours après avoir vérifié exigerCoach(),
  * pour la tâche quotidienne des rappels (protégée par CRON_SECRET), et pour
- * prévenir la coach ou les membres de la communauté (notifications, sans rien renvoyer à l'appelante).
+ * prévenir la coach ou les membres de la communauté (notifications, sans rien renvoyer à l'appelante),
+ * et pour les abonnées : messages signés de Stripe (webhook), réglages publics de l'offre, liste des abonnées.
  */
 export function createAdminClient() {
   const cle = process.env.SUPABASE_SECRET_KEY;

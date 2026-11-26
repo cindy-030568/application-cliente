@@ -4,7 +4,8 @@ import { COOKIE_RESTER, appliquerPreference } from "@/lib/session-preference";
 
 // /api/rappels : tâche quotidienne protégée par son propre secret (CRON_SECRET).
 // /api/tally : formulaire d'inscription, protégé par la signature Tally (TALLY_SIGNING_SECRET).
-const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm", "/api/rappels", "/api/tally"];
+// /abonnement : page publique de l'offre (inscription des abonnées). /api/stripe : messages signés de Stripe.
+const ROUTES_PUBLIQUES = ["/connexion", "/auth/confirm", "/api/rappels", "/api/tally", "/abonnement", "/api/stripe"];
 // /compte/mot-de-passe exige une session : il n'est pas public.
 
 /** Rafraîchit la session et renvoie vers /connexion si personne n'est connecté. */

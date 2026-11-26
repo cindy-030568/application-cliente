@@ -15,7 +15,7 @@ const profils = {
 const fiche = (id, statut, prenom, nom, email, d, formation) => ({ id, statut, date_debut: d, date_fin: null,
   acces_formation: formation, masquer_graph_poids: false, frequence_bilan_jours: 14, ferme_le: statut === "fermee" ? iso(today) : null,
   created_at: "2026-09-01T08:00:00Z", profils: { prenom, nom, email }, rappels_email: true, recap_notif: true, recap_envoye: null, suivi_cycle: id.endsWith("b2") ? "perimenopause" : "aucun", cycle_duree: 28, rappel_complements_heure: null, code_parrainage: "CODE" + id.slice(-2).toUpperCase(), express_jusqu_au: null, defis_notif: true,
-  mode_sans_chiffres: false, journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
+  mode_sans_chiffres: false, formule: "coaching", journal_actif: true, rappel_journal_heure: "20:30:00", suivi_sport: !(process.env.SANS_SPORT && id.endsWith("0a")), prochain_rdv: new Date(Date.now() + 3 * 86400000).toISOString(), lien_rdv: "https://meet.google.com/abc-defg-hij",
   derniere_visite: new Date(Date.now() - (id.endsWith("b3") ? 14 : 0) * 86400000).toISOString(), clientes: { statut } });
 const clientes = [
   fiche(ALICE, "active", "Sophie", "Martin", "sophie@exemple.fr", iso(debut), false),
@@ -25,7 +25,7 @@ const clientes = [
 ];
 // Sophie termine son suivi dans 5 jours : son bilan de fin de suivi est visible.
 clientes[0].date_fin = iso(new Date(Date.now() + 5 * 86400000));
-const reglages = { express_materiel: ["Aucun", "Tapis", "Élastique", "Haltères", "Kettlebell", "Chaise ou banc", "Corde à sauter"], express_types: ["Renfo", "Cardio", "Mobilité", "Étirements", "Marche à la maison", "Gainage"], lien_inscription: "https://tally.so/r/EkdN0A", fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
+const reglages = { abonnement_actif: true, abonnement_prix_mensuel: "price_Mensuel", abonnement_prix_annuel: "price_Annuel", abonnement_titre: "Mon appli bien-être, sans coaching", abonnement_texte: "Mes recettes, mes séances express, les défis du mois et un thème chaque mois.", lien_cgv: "https://exemple.fr/cgv", express_materiel: ["Aucun", "Tapis", "Élastique", "Haltères", "Kettlebell", "Chaise ou banc", "Corde à sauter"], express_types: ["Renfo", "Cardio", "Mobilité", "Étirements", "Marche à la maison", "Gainage"], lien_inscription: "https://tally.so/r/EkdN0A", fin_texte: "Ton accompagnement touche à sa fin, et tu peux être tellement fière du chemin parcouru 💛 Si tu as envie de continuer à avancer avec moi, voici ce que je te propose :", fin_offres: [{ titre: "Continuer mon accompagnement", description: "On continue ensemble, au même rythme ou plus en douceur : on en parle et on choisit ce qui te convient." }], notif_coach_email: true, notif_coach_bilans: true, notif_coach_signalements: true, notif_coach_messages: false, communaute_ouverte: true, communaute_charte: "Bienvenue dans la communauté fitw_cindy 💛\n• Bienveillance avant tout.\n• Pas de conseils médicaux.\n• Ce qui se dit ici reste ici.", version_consentement: "2026-11", lien_politique: "https://exemple.fr/confidentialite", lien_formation: "https://www.notion.so/exemple",
   message_formation: "Envie d'aller plus loin ? Découvre la Fitw_cindy Academy ✨", lien_contact: "https://wa.me/33600000000",
   tolerance_pct: 10, tolerance_g: 3, hors_tolerance: "masquer", rappels_actifs: true, relance_jours: 2, texte_rappel: "Coucou {prenom} ! Ton bilan est prêt : prends 5 minutes pour faire le point 💛", texte_relance: "{prenom}, ton bilan t'attend toujours. Quelques minutes suffisent, même imparfait 💛", fenetre_bilan_jours: 3, intro_bilan: "Voici les points pour faire le point sur ces {jours} derniers jours. Réponds en toute simplicité, avec tes mots à toi. Pas besoin d’être parfaite : ce bilan, c’est ton espace pour faire le point et avancer 💛" };
 const jour = (n) => iso(new Date(Date.now() + n * 86400000));
@@ -460,6 +460,8 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/abonnees") return json({ abonnees: clientes.filter((c) => c.formule === "abonnement").map((c) => ({ ...c, email: profils[c.id]?.email, prenom: profils[c.id]?.prenom })), abonnements: [...stripe.abonnements.values()] });
+  if (u.pathname === "/__test/stripe-webhook") { const b = await corpsJson(req); return json({ statut: await envoyerWebhook(b.type, b.objet) }); }
   if (u.pathname === "/__test/ressources") return json({ ressources, favoris: ressourcesFavoris, ecoutes: ressourcesEcoutes, audios: [...fichiersAudio.keys()] });
   if (u.pathname === "/__test/defis") {
     // { decaler: n } : décale les dates des défis publiés de n jours (pour tester un défi à venir), puis on revient avec -n.
@@ -534,7 +536,79 @@ async function routeAuth(req, res, u) {
     return profils[id] ? json(200, session(id)) : json(400, { error: "invalid_grant" });
   }
   if (u.pathname === "/auth/v1/logout") { res.writeHead(204); return res.end(); }
+  // Comptes créés / supprimés par le serveur (clé secrète) : abonnées créées par le message de Stripe.
+  if (u.pathname === "/auth/v1/admin/users" && req.method === "POST") {
+    if (parEmail(b?.email)) return json(422, { code: "email_exists", msg: "A user with this email address has already been registered" });
+    const id = crypto.randomUUID();
+    profils[id] = { id, role: "cliente", prenom: b?.user_metadata?.prenom ?? "", nom: "", email: String(b.email).toLowerCase() };
+    return json(200, { id, aud: "authenticated", role: "authenticated", email: profils[id].email, user_metadata: b?.user_metadata ?? {}, app_metadata: {} });
+  }
+  if (u.pathname.startsWith("/auth/v1/admin/users/") && req.method === "DELETE") {
+    const id = u.pathname.split("/").pop();
+    delete profils[id];
+    const i = clientes.findIndex((c) => c.id === id); if (i >= 0) clientes.splice(i, 1);
+    return json(200, {});
+  }
   return json(404, {});
+}
+
+// ---- Stripe simulé (abonnées) : prix, page de paiement, abonnements, espace de gestion, messages signés.
+const APP = "http://localhost:3100";
+const WHSEC = "whsec_test";
+const stripe = { sessions: new Map(), abonnements: new Map(), n: 0 };
+const PRIX = { price_Mensuel: { unit_amount: 990, interval: "month" }, price_Annuel: { unit_amount: 9900, interval: "year" } };
+const prixStripe = (id) => (PRIX[id] ? { id, object: "price", active: true, currency: "eur", unit_amount: PRIX[id].unit_amount, recurring: { interval: PRIX[id].interval } } : null);
+async function envoyerWebhook(type, objet) {
+  const corps = JSON.stringify({ id: "evt_" + ++stripe.n, type, data: { object: objet } });
+  const t = Math.floor(Date.now() / 1000);
+  const v1 = crypto.createHmac("sha256", WHSEC).update(`${t}.${corps}`).digest("hex");
+  const r = await fetch(`${APP}/api/stripe/webhook`, { method: "POST", headers: { "content-type": "application/json", "stripe-signature": `t=${t},v1=${v1}` }, body: corps });
+  console.log("WEBHOOK", type, r.status);
+  return r.status;
+}
+function finPeriode(sub) { const d = new Date(); d.setUTCMonth(d.getUTCMonth() + (sub.items.data[0].price.recurring.interval === "year" ? 12 : 1)); return Math.floor(d.getTime() / 1000); }
+async function routeStripe(req, res, u) {
+  const json = (code, corps) => { res.writeHead(code, { "content-type": "application/json" }); res.end(JSON.stringify(corps)); };
+  const html = (corps) => { res.writeHead(200, { "content-type": "text/html; charset=utf-8" }); res.end(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Stripe (simulé)</title></head><body style="font-family:sans-serif;padding:24px">${corps}</body></html>`); };
+  const lireForm = async () => { let c = ""; for await (const m of req) c += m; return new URLSearchParams(c); };
+  const chemin = u.pathname.replace(/^\/stripe/, "");
+  if (chemin.startsWith("/v1/") && !String(req.headers.authorization ?? "").startsWith("Bearer sk_test_")) return json(401, { error: { message: "clé invalide" } });
+  if (chemin.startsWith("/v1/prices/")) { const p = prixStripe(chemin.split("/").pop()); return p ? json(200, p) : json(404, { error: { message: "No such price" } }); }
+  if (chemin === "/v1/checkout/sessions" && req.method === "POST") {
+    const f = await lireForm();
+    const id = "cs_test_" + ++stripe.n;
+    stripe.sessions.set(id, { id, prix: f.get("line_items[0][price]"), email: f.get("customer_email"), client: f.get("customer"), prenom: f.get("metadata[prenom]"), succes: f.get("success_url"), annulation: f.get("cancel_url") });
+    return json(200, { id, url: `http://127.0.0.1:54321/stripe/paiement/${id}` });
+  }
+  if (chemin.startsWith("/v1/subscriptions/")) { const a = stripe.abonnements.get(chemin.split("/").pop()); return a ? json(200, a) : json(404, { error: { message: "No such subscription" } }); }
+  if (chemin === "/v1/billing_portal/sessions" && req.method === "POST") {
+    const f = await lireForm();
+    return json(200, { url: `http://127.0.0.1:54321/stripe/portail/${f.get("customer")}?retour=${encodeURIComponent(f.get("return_url") ?? "")}` });
+  }
+  // Page de paiement simulée.
+  if (chemin.startsWith("/paiement/")) {
+    const s = stripe.sessions.get(chemin.split("/").pop());
+    if (!s) return html("Session inconnue");
+    if (req.method === "GET") return html(`<h1>Paiement (Stripe simulé)</h1><p>${s.email ?? s.client} · ${s.prix}</p><form method="post"><button>Payer</button></form><a href="${s.annulation}">Retour</a>`);
+    const client = s.client || "cus_test" + ++stripe.n;
+    const sub = { id: "sub_test" + ++stripe.n, object: "subscription", customer: client, status: "active", cancel_at_period_end: false, metadata: { prenom: s.prenom }, items: { data: [{ price: prixStripe(s.prix) }] } };
+    sub.items.data[0].current_period_end = finPeriode(sub);
+    stripe.abonnements.set(sub.id, sub);
+    await envoyerWebhook("checkout.session.completed", { id: s.id, object: "checkout.session", mode: "subscription", customer: client, subscription: sub.id, customer_email: s.email, customer_details: { email: s.email }, metadata: { prenom: s.prenom } });
+    res.writeHead(303, { location: s.succes }); return res.end();
+  }
+  // Espace de gestion simulé : arrêter (fin de période) ou arrêt immédiat (fin de l'abonnement).
+  if (chemin.startsWith("/portail/")) {
+    const client = chemin.split("/").pop();
+    const sub = [...stripe.abonnements.values()].find((a) => a.customer === client && a.status !== "canceled");
+    const retour = u.searchParams.get("retour") ?? APP;
+    if (req.method === "GET") return html(`<h1>Gérer l'abonnement (Stripe simulé)</h1><form method="post"><button name="action" value="arreter">Annuler l'abonnement</button> <button name="action" value="terminer">Terminer maintenant</button></form><a href="${retour}">Retour</a>`);
+    const f = await lireForm();
+    if (sub && f.get("action") === "arreter") { sub.cancel_at_period_end = true; await envoyerWebhook("customer.subscription.updated", sub); }
+    if (sub && f.get("action") === "terminer") { sub.status = "canceled"; await envoyerWebhook("customer.subscription.deleted", sub); }
+    res.writeHead(303, { location: retour }); return res.end();
+  }
+  return json(404, { error: { message: "inconnu" } });
 }
 
 // ---- Réponses d'un bilan (rangées dans le bilan, comme les lit l'app)
@@ -745,10 +819,15 @@ http.createServer((req, res) => {
     if (p) { p.afficher_prenom = Boolean(b.p_afficher); if (p.afficher_prenom) celebrerDefi(defis.find((x) => x.id === p.defi_id), p); }
     res.writeHead(204); res.end();
   });
+  if (u.pathname === "/rest/v1/rpc/liste_abonnees") {
+    if (profils[uid]?.role !== "coach") return send([]);
+    return send(clientes.filter((c) => c.formule === "abonnement").map((c) => ({ id: c.id, prenom: profils[c.id]?.prenom ?? "", nom: profils[c.id]?.nom ?? "", email: profils[c.id]?.email ?? "", statut: c.statut, depuis: c.date_debut, ferme_le: c.ferme_le, abonnement_statut: c.abonnement_statut ?? null, abonnement_formule: c.abonnement_formule ?? null, abonnement_fin_periode: c.abonnement_fin_periode ?? null, abonnement_resilie: Boolean(c.abonnement_resilie) })));
+  }
   if (u.pathname === "/rest/v1/rpc/definir_defis_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.defis_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname.startsWith("/rest/v1/rpc/")) { res.writeHead(204); return res.end(); }
   if (u.pathname === "/auth/v1/user") return send({ id: uid, aud: "authenticated", role: "authenticated", email: profils[uid]?.email, user_metadata: { mot_de_passe_defini: true } });
   if (u.pathname.startsWith("/auth/v1/")) return routeAuth(req, res, u);
+  if (u.pathname.startsWith("/stripe/")) return routeStripe(req, res, u);
   if (u.pathname.startsWith("/__test/")) return routeTest(req, res, u);
   if (u.pathname === "/anthropic/v1/messages") return routeClaude(req, res);
   const eqId = (u.searchParams.get("id") || u.searchParams.get("cliente_id") || "").replace("eq.", "");
@@ -880,6 +959,15 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/abonnements_push") return tableLibre(req, res, u, abonnementsPush, coach, uid);
   if (u.pathname === "/rest/v1/favoris") return table(req, res, u, uid, favoris);
   if (u.pathname === "/rest/v1/courses") return table(req, res, u, uid, courses);
+  if (u.pathname === "/rest/v1/clientes" && req.method !== "GET" && req.method !== "HEAD") return tableCommu(req, res, u, clientes, {
+    visibles: admin ? clientes : coach ? clientes.filter((c) => c.formule !== "abonnement") : [],
+    creer: (b) => (admin || coach ? { formule: "coaching", date_fin: null, ferme_le: null, profils: { prenom: profils[b.id]?.prenom ?? "", nom: "", email: profils[b.id]?.email ?? "" }, clientes: { statut: b.statut ?? "active" }, abonnement_resilie: false, ...b } : { erreur: "interdit" }),
+  });
+  if (u.pathname === "/rest/v1/profils" && (u.searchParams.has("email") || u.searchParams.has("role"))) {
+    const motif = (u.searchParams.get("email") ?? "").replace(/^ilike\./, "").replace(/\\/g, "").toLowerCase();
+    const role = (u.searchParams.get("role") ?? "").replace(/^eq\./, "");
+    return send(Object.values(profils).filter((p) => (!motif || p.email === motif) && (!role || p.role === role)));
+  }
   switch (u.pathname) {
     case "/rest/v1/profils": return send([profils[uid]]);
     case "/rest/v1/reglages": return send([reglages]);
@@ -898,7 +986,8 @@ http.createServer((req, res) => {
     case "/rest/v1/champs_mesure": return send(filtrer(champs, u.searchParams));
     case "/rest/v1/retours_bilan": return send(filtrer(coach ? retours : retours.filter((r) => bilans.find((b) => b.id === r.bilan_id)?.cliente_id === uid), u.searchParams));
     case "/rest/v1/clientes": {
-      const visibles = coach ? clientes : clientes.filter((c) => c.id === uid);
+      // La coach ne voit pas les abonnées (0045) ; le serveur (clé secrète) voit tout.
+      const visibles = admin ? clientes : coach ? clientes.filter((c) => c.formule !== "abonnement") : clientes.filter((c) => c.id === uid);
       return send(filtrer(eqId ? visibles.filter((c) => c.id === eqId) : visibles, [...u.searchParams].filter(([k]) => k !== "id")));
     }
   }
