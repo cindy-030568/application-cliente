@@ -188,7 +188,7 @@ Quand je te dis « format application » (ou quand le programme est validé), r�
   • « AMRAP 10 min », « EMOM 12 min », « E2MOM 10 min », « For time (cap 15 min) », « Tabata » : un minuteur pour tout le bloc.
 - exercices : nom, series, repetitions, charge, repos, tempo, consignes — tout en texte, null si sans objet :
   • series : le nombre de séries en chiffres (« 4 ») ;
-  • repetitions : « 10 », « 8-12 », « 30 s », « 12 calories », « max » ;
+  • repetitions : « 10 », « 8-12 », « 30 s », « 30 s / côté » (gainage latéral, exercice d’un côté puis de l’autre), « 12 calories », « max ». Un exercice au temps (planche, gainage, chaise…) s’écrit TOUJOURS avec son unité (« 30 s », « 1 min ») : l’appli lance alors un chrono ;
   • repos : le temps de repos après chaque série (« 90 s », « 2 min ») ;
   • consignes : ce que la cliente doit avoir en tête pendant la série (placement, respiration, sensations), ainsi que le RPE et les notes du coach s’il y en a ;
   • si le programme change de semaine en semaine (charges, répétitions), écris la progression dans consignes (ex. « S1 : 3 × 10 à 20 kg · S2 : 3 × 12 · S3 : 4 × 10 »).

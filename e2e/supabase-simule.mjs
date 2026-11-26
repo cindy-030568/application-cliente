@@ -323,6 +323,9 @@ const seancesExpress = [
     contenu: { nom: "Cardio salon sans matériel", duree: "10 min", echauffement: null, blocs: [{ titre: "Circuit", format: "2 séries", exercices: [{ nom: "Squats", series: "2", repetitions: "15", repos: "10 s" }, { nom: "Jumping jacks", series: "2", repetitions: "30 s", repos: "10 s" }] }], retour_au_calme: null, notes: null } },
   { id: "e5000000-0000-4000-8000-000000000002", titre: "Mobilité du dos au tapis", description: null, duree_minutes: 15, materiel: ["Tapis"], type: "Mobilité", niveau: "debutante", publiee: true, visibilite: "toutes",
     contenu: { nom: "Mobilité du dos au tapis", blocs: [{ titre: "Mobilité", format: "1 série", exercices: [{ nom: "Chat-vache", series: "1", repetitions: "10" }] }] } },
+  // Gainage : planche notée sans unité, planche de côté « par côté » (retour d'une cliente : il n'y avait pas de chrono).
+  { id: "e5000000-0000-4000-8000-000000000004", titre: "Gainage express", description: null, duree_minutes: 5, materiel: ["Tapis"], type: "Gainage", niveau: "tous", publiee: true, visibilite: "toutes",
+    contenu: { nom: "Gainage express", blocs: [{ titre: "Gainage", format: "1 série", exercices: [{ nom: "Planche sur les coudes", series: "1", repetitions: "30", repos: "15 s" }, { nom: "Planche de côté", series: "1", repetitions: "20 s / côté" }] }] } },
   { id: "e5000000-0000-4000-8000-000000000003", titre: "Brouillon pas prêt", description: null, duree_minutes: 5, materiel: [], type: "Renfo", niveau: "tous", publiee: false, visibilite: "toutes",
     contenu: { nom: "Brouillon", blocs: [{ titre: "x", format: "1 série", exercices: [{ nom: "Pompes", series: "1", repetitions: "5" }] }] } },
 ];

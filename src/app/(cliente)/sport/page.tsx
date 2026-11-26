@@ -49,7 +49,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ v
             sousTitre={`${programme.titre} · mis à jour le ${dateLongue.format(new Date(programme.publie_le ?? programme.updated_at))}`}
           />
           {!programme.vu_le && <MarquerProgrammeVu programmeId={programme.id} />}
-          <PreparerHorsConnexion proprietaire={profil.id} nbSeances={programme.contenu.seances.length} />
+          <PreparerHorsConnexion
+            proprietaire={profil.id}
+            nbSeances={programme.contenu.seances.length}
+            version={`${programme.id}:${programme.updated_at ?? ""}:${programme.publie_le ?? ""}`}
+          />
           <div className="flex flex-col gap-4 px-5 pt-3">
             {(!programme.vu_le || semaine) && (
               <div className="flex flex-wrap items-center gap-2">

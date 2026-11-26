@@ -64,6 +64,36 @@ test("exercice au temps : le chrono d'effort compte puis lance le repos tout seu
   await expect(page.getByText("Repos", { exact: true })).toBeVisible();
 });
 
+test("gainage : un chrono pour la planche (même sans « s ») et pour la planche de côté, côté par côté, avec pause et reprise après rechargement", async ({ page }) => {
+  await page.clock.install();
+  await seConnecter(page, SOPHIE);
+  await page.goto("/seance/express/e5000000-0000-4000-8000-000000000004");
+  await page.getByRole("button", { name: "Commencer la séance" }).click();
+  await expect(page.getByRole("heading", { name: "Planche sur les coudes" })).toBeVisible();
+  await page.getByRole("button", { name: "▶ Lancer le chrono (0:30)" }).click();
+  await page.clock.runFor(10_000);
+  await page.getByRole("button", { name: "❚❚ Pause" }).click();
+  await expect(page.getByRole("timer")).toHaveAccessibleName("Reste 0:20");
+  // La page se recharge (vidéo, téléphone en veille) : le chrono est gardé.
+  await page.reload();
+  await expect(page.getByRole("timer")).toHaveAccessibleName("Reste 0:20");
+  await page.getByRole("button", { name: "▶ Reprendre" }).click();
+  await page.clock.runFor(21_000);
+  await expect(page.getByText("Repos", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+
+  await expect(page.getByRole("heading", { name: "Planche de côté" })).toBeVisible();
+  await page.getByRole("button", { name: "▶ Lancer le chrono (0:20 par côté)" }).click();
+  await expect(page.getByText("Côté 1 / 2")).toBeVisible();
+  await page.clock.runFor(21_000);
+  await expect(page.getByText("Change de côté !")).toBeVisible();
+  await page.clock.runFor(5_000);
+  await expect(page.getByText("Côté 2 / 2")).toBeVisible();
+  await page.screenshot({ path: "test-results/chrono-planche-cote.png" });
+  await page.clock.runFor(21_000);
+  await expect(page.getByRole("heading", { name: "Séance terminée !" })).toBeVisible();
+});
+
 test("séances express hors connexion : une séance ouverte une fois marche sans réseau", async ({ page, context, request }) => {
   await seConnecter(page, SOPHIE);
   await fermerMotDuJour(page);

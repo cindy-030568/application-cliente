@@ -10,14 +10,17 @@ import {
   RESSENTIS,
   chargeProposee,
   derniereFois,
-  dureeEffort,
   etapesSeance,
   formaterDuree,
   formaterKg,
+  lireEffort,
+  CHANGEMENT_COTE,
   lireKg,
+  phaseEffort,
   phaseIntervalle,
   type Etape,
   type EtapeChrono,
+  type Effort,
   type EtapeSerie,
   type HistoriqueCharges,
   type SeanceCharges,
@@ -91,7 +94,6 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
   const stockage = `seance-guidee:${cle}`;
   const [sauvegarde] = useState(() => lireSauvegarde(stockage, n));
   const [etat, setEtat] = useState<Etat>(sauvegarde ?? DEPART);
-  const [maintenant, setMaintenant] = useState(() => Date.now());
   const [reprise, setReprise] = useState(sauvegarde !== null);
   const son = useSon();
   useEffect(() => {
@@ -109,17 +111,8 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
   const etape: Etape | undefined = enCours ? etapes[etat.index] : undefined;
   const aller = useCallback(
     (index: number) => {
-      const cible = etapes[index];
-      setEtat((e) => ({
-        ...e,
-        index,
-        debut: e.debut ?? Date.now(),
-        ref: e.ref ?? nouvelleRef(),
-        finRepos: cible?.type === "repos" ? Date.now() + cible.secondes * 1000 : null,
-        chrono: CHRONO_VIDE,
-      }));
+      setEtat((e) => avancer(e, etapes, index));
       setReprise(false);
-      setMaintenant(Date.now());
       window.scrollTo({ top: 0 });
     },
     [etapes],
@@ -176,34 +169,6 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
     aller(Math.max(i, 0));
   };
 
-  // Horloge : seulement pendant un repos ou un minuteur.
-  const tic = etape?.type === "repos" || (etape?.type === "chrono" && etat.chrono.debut !== null && etat.chrono.pause === null && etat.chrono.fini === null);
-  const etatCourant = useRef(etat);
-  useEffect(() => {
-    etatCourant.current = etat;
-  }, [etat]);
-  const dernierBip = useRef<string>("");
-  useEffect(() => {
-    if (!tic) return;
-    const t = setInterval(() => {
-      const now = Date.now();
-      setMaintenant(now);
-      // Fin du repos : bips 3-2-1, puis bip long + vibration, et on passe à la suite.
-      const e = etatCourant.current;
-      if (etapes[e.index]?.type !== "repos" || !e.finRepos) return;
-      const reste = Math.ceil((e.finRepos - now) / 1000);
-      if (reste <= 0) {
-        etatCourant.current = { ...e, finRepos: null };
-        son.fin();
-        aller(e.index + 1);
-      } else if (reste <= 3 && dernierBip.current !== `${e.index}-${reste}`) {
-        dernierBip.current = `${e.index}-${reste}`;
-        son.bip();
-      }
-    }, 250);
-    return () => clearInterval(t);
-  }, [tic, etapes, aller, son]);
-
   const lienDe = (e: Exercice) => (lienVideo && videos[cleExercice(e.nom)] ? `${lienVideo}${videos[cleExercice(e.nom)]}` : null);
   const prochaine = (() => {
     for (let i = etat.index + 1; i < n; i++) if (etapes[i].type !== "repos") return etapes[i];
@@ -255,8 +220,15 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
             {etape.unite === "tour" ? "Tour" : "Série"} {etape.numero} / {etape.total}
           </p>
           {etape.exercice.repetitions && <p className="font-titre text-[40px] font-bold leading-none">{repetitions(etape.exercice.repetitions)}</p>}
-          {dureeEffort(etape.exercice.repetitions) && (
-            <ChronoEffort key={etat.index} secondes={dureeEffort(etape.exercice.repetitions)!} son={son} fini={() => serieFaite(etape)} />
+          {lireEffort(etape.exercice.repetitions, etape.exercice.nom) && (
+            <ChronoEffort
+              key={etat.index}
+              effort={lireEffort(etape.exercice.repetitions, etape.exercice.nom)!}
+              chrono={etat.chrono}
+              setChrono={(f) => setEtat((e) => (e.index === etat.index ? { ...e, chrono: f(e.chrono) } : e))}
+              son={son}
+              fini={() => serieFaite(etape)}
+            />
           )}
           {(etape.exercice.charge || etape.exercice.tempo) && (
             <div className="flex flex-wrap gap-2 text-[14px]">
@@ -296,36 +268,25 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
       )}
 
       {etape?.type === "repos" && etat.finRepos && (
-        <Ecran centre>
-          <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-caramel-texte">Repos</p>
-          <Cercle reste={Math.max(0, (etat.finRepos - maintenant) / 1000)} total={etape.secondes} />
-          <div className="flex gap-3">
-            <Bouton variante="contour" className="min-h-11" onClick={() => setEtat((e) => ({ ...e, finRepos: Math.max(Date.now() + 1000, (e.finRepos ?? 0) - 15000) }))}>
-              −15 s
-            </Bouton>
-            <Bouton variante="contour" className="min-h-11" onClick={() => setEtat((e) => ({ ...e, finRepos: (e.finRepos ?? Date.now()) + 15000 }))}>
-              +15 s
-            </Bouton>
-          </div>
-          <p className="text-center text-[15px]">
-            <span className="text-texte-2">Ensuite : </span>
-            <strong className="font-medium">{etape.ensuite}</strong>
-          </p>
-          <Actions precedent={precedent}>
-            <Bouton variante="sombre" pleineLargeur onClick={suivant}>
-              Passer le repos
-            </Bouton>
-          </Actions>
-        </Ecran>
+        <EcranRepos
+          key={etat.index}
+          finRepos={etat.finRepos}
+          total={etape.secondes}
+          ensuite={etape.ensuite}
+          decaler={(ms) => setEtat((e) => (e.index === etat.index && e.finRepos ? { ...e, finRepos: Math.max(Date.now() + 1000, e.finRepos + ms) } : e))}
+          son={son}
+          // Fin du repos : on passe à la suite (une seule fois, même si elle touche « Passer » au même moment).
+          fini={() => setEtat((e) => (e.index === etat.index ? avancer(e, etapes, etat.index + 1) : e))}
+          passer={suivant}
+          precedent={precedent}
+        />
       )}
 
       {etape?.type === "chrono" && (
         <EcranChrono
           etape={etape}
           chrono={etat.chrono}
-          maintenant={maintenant}
-          setChrono={(f) => setEtat((e) => ({ ...e, chrono: f(e.chrono) }))}
-          demarre={() => setMaintenant(Date.now())}
+          setChrono={(f) => setEtat((e) => (e.index === etat.index ? { ...e, chrono: f(e.chrono) } : e))}
           son={son}
           suivant={suivant}
           precedent={etat.index > 0 ? precedent : undefined}
@@ -374,6 +335,102 @@ function Lecteur({ seance, cle, retour, videos = {}, lienVideo = null, valider, 
   );
 }
 
+/** Passe à l'étape `index` (le repos démarre tout de suite, le minuteur repart de zéro). */
+function avancer(e: Etat, etapes: Etape[], index: number): Etat {
+  const cible = etapes[index];
+  return {
+    ...e,
+    index,
+    debut: e.debut ?? Date.now(),
+    ref: e.ref ?? nouvelleRef(),
+    finRepos: cible?.type === "repos" ? Date.now() + cible.secondes * 1000 : null,
+    chrono: CHRONO_VIDE,
+  };
+}
+
+/**
+ * L'heure, rafraîchie 4 fois par seconde tant que `actif` (et tout de suite au retour sur l'appli).
+ * Chaque écran a sa propre horloge : seul le minuteur se redessine, pas toute la séance.
+ */
+function useHorloge(actif: boolean) {
+  const [maintenant, setMaintenant] = useState(() => Date.now());
+  useEffect(() => {
+    if (!actif) return;
+    const maj = () => setMaintenant(Date.now());
+    maj();
+    const t = setInterval(maj, 250);
+    const auRetour = () => {
+      if (document.visibilityState === "visible") maj();
+    };
+    document.addEventListener("visibilitychange", auRetour);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", auRetour);
+    };
+  }, [actif]);
+  return maintenant;
+}
+
+/** Repos : minuteur, bips 3-2-1, bip long + vibration, puis la suite s'affiche toute seule. */
+function EcranRepos({
+  finRepos,
+  total,
+  ensuite,
+  decaler,
+  son,
+  fini,
+  passer,
+  precedent,
+}: {
+  finRepos: number;
+  total: number;
+  ensuite: string;
+  decaler: (ms: number) => void;
+  son: Son;
+  fini: () => void;
+  passer: () => void;
+  precedent: () => void;
+}) {
+  const maintenant = useHorloge(true);
+  const reste = Math.ceil((finRepos - maintenant) / 1000);
+  const dernierBip = useRef("");
+  const termine = useRef(false);
+  useEffect(() => {
+    if (termine.current) return;
+    if (reste <= 0) {
+      termine.current = true;
+      son.fin();
+      fini();
+    } else if (reste <= 3 && dernierBip.current !== String(reste)) {
+      dernierBip.current = String(reste);
+      son.bip();
+    }
+  }, [reste, son, fini]);
+  return (
+    <Ecran centre>
+      <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-caramel-texte">Repos</p>
+      <Cercle reste={Math.max(0, (finRepos - maintenant) / 1000)} total={total} />
+      <div className="flex gap-3">
+        <Bouton variante="contour" className="min-h-11" onClick={() => decaler(-15000)}>
+          −15 s
+        </Bouton>
+        <Bouton variante="contour" className="min-h-11" onClick={() => decaler(15000)}>
+          +15 s
+        </Bouton>
+      </div>
+      <p className="text-center text-[15px]">
+        <span className="text-texte-2">Ensuite : </span>
+        <strong className="font-medium">{ensuite}</strong>
+      </p>
+      <Actions precedent={precedent}>
+        <Bouton variante="sombre" pleineLargeur onClick={passer}>
+          Passer le repos
+        </Bouton>
+      </Actions>
+    </Ecran>
+  );
+}
+
 function repetitions(r: string) {
   if (/^\d+(\s*[-–à]\s*\d+)?$/.test(r.trim())) return `${r} répétitions`;
   if (/^max/i.test(r.trim())) return "Max de répétitions";
@@ -411,36 +468,55 @@ function Actions({ children, precedent, ensuite }: { children: ReactNode; preced
 }
 
 /**
- * Exercice « au temps » (30 s, 1 min…) : un minuteur d'effort. Bips 3-2-1, bip long + vibration,
- * puis on passe tout seul à la suite (le repos démarre). « Fait ✓ » reste possible à tout moment.
+ * Exercice « au temps » (30 s, 1 min, 30 s / côté…) : un minuteur d'effort, avec pause.
+ * Par côté : côté 1, 5 s pour changer de côté, côté 2. Bips 3-2-1, bip long + vibration, puis on passe
+ * tout seul à la suite (le repos démarre). Sans durée (« max ») : un chrono qui compte, et « Fait ✓ ».
+ * Le chrono est gardé avec la séance : il continue même si la page se recharge (vidéo, téléphone en veille).
  */
-function ChronoEffort({ secondes, son, fini }: { secondes: number; son: Son; fini: () => void }) {
-  const [fin, setFin] = useState<number | null>(null);
-  const [maintenant, setMaintenant] = useState(() => Date.now());
+function ChronoEffort({
+  effort,
+  chrono,
+  setChrono,
+  son,
+  fini,
+}: {
+  effort: Effort;
+  chrono: Chrono;
+  setChrono: (f: (c: Chrono) => Chrono) => void;
+  son: Son;
+  fini: () => void;
+}) {
+  const lance = chrono.debut !== null;
+  const enPause = chrono.pause !== null;
+  const maintenant = useHorloge(lance && !enPause && chrono.fini === null);
+  const ecoule = lance ? ((chrono.pause ?? maintenant) - chrono.debut! - chrono.cumul) / 1000 : 0;
+  const p = phaseEffort(effort, ecoule);
+  const reste = Math.ceil(p.reste);
   const suite = useRef(fini);
   useEffect(() => {
     suite.current = fini;
   }, [fini]);
+  const repere = useRef("");
+  const termine = useRef(false);
   useEffect(() => {
-    if (fin === null) return;
-    let dernier = "";
-    const t = setInterval(() => {
-      const now = Date.now();
-      setMaintenant(now);
-      const reste = Math.ceil((fin - now) / 1000);
-      if (reste <= 0) {
-        clearInterval(t);
-        son.fin();
-        suite.current();
-      } else if (reste <= 3 && dernier !== String(reste)) {
-        dernier = String(reste);
-        son.bip();
-      }
-    }, 250);
-    return () => clearInterval(t);
-  }, [fin, son]);
+    if (!lance || enPause || termine.current || effort.secondes === null) return;
+    if (p.phase === "fini") {
+      termine.current = true;
+      son.fin();
+      setChrono((c) => ({ ...c, fini: Date.now() }));
+      suite.current();
+      return;
+    }
+    const cle = `${p.phase}-${p.cote}-${reste}`;
+    if (cle === repere.current) return;
+    const avant = repere.current;
+    repere.current = cle;
+    if (avant === "") return; // premier passage (le bip de départ est déjà joué au lancement)
+    if (!avant.startsWith(`${p.phase}-${p.cote}-`)) son.bip(p.phase === "changement" ? 520 : 990, 300); // change de côté / c'est reparti
+    else if (reste <= 3 && reste > 0) son.bip();
+  }, [lance, enPause, p.phase, p.cote, reste, effort.secondes, son, setChrono]);
 
-  if (fin === null) {
+  if (!lance) {
     return (
       <Bouton
         variante="contour"
@@ -448,18 +524,41 @@ function ChronoEffort({ secondes, son, fini }: { secondes: number; son: Son; fin
         onClick={() => {
           son.debloquer();
           son.bip(990, 300);
-          const now = Date.now();
-          setMaintenant(now);
-          setFin(now + secondes * 1000);
+          setChrono(() => ({ ...CHRONO_VIDE, debut: Date.now() }));
         }}
       >
-        ▶ Lancer le chrono ({formaterDuree(secondes)})
+        ▶ {effort.secondes === null ? "Lancer le chrono" : `Lancer le chrono (${formaterDuree(effort.secondes)}${effort.cotes === 2 ? " par côté" : ""})`}
       </Bouton>
     );
   }
+  const libre = effort.secondes === null;
   return (
-    <div className="flex justify-center">
-      <Cercle reste={Math.max(0, (fin - maintenant) / 1000)} total={secondes} />
+    <div className="flex flex-col items-center gap-3">
+      {effort.cotes === 2 && (
+        <p className={cx("rounded-full px-3.5 py-1 text-[14px] font-medium", p.phase === "changement" ? "bg-sable" : "bg-chocolat text-creme")}>
+          {p.phase === "changement" ? "Change de côté !" : `Côté ${p.cote} / 2`}
+        </p>
+      )}
+      {libre ? (
+        <p className="font-titre text-[64px] font-bold leading-none tabular-nums" role="timer">
+          {formaterDuree(ecoule)}
+        </p>
+      ) : (
+        <Cercle
+          reste={p.reste}
+          total={p.phase === "changement" ? CHANGEMENT_COTE : effort.secondes!}
+          couleur={p.phase === "changement" ? "var(--caramel)" : "var(--accent)"}
+        />
+      )}
+      {chrono.fini === null && (
+        <Bouton
+          variante="contour"
+          className="min-h-11"
+          onClick={() => setChrono((c) => (c.pause === null ? { ...c, pause: Date.now() } : { ...c, cumul: c.cumul + (Date.now() - c.pause), pause: null }))}
+        >
+          {enPause ? "▶ Reprendre" : "❚❚ Pause"}
+        </Bouton>
+      )}
     </div>
   );
 }
@@ -513,19 +612,15 @@ function Intro({ seance, etapes, commencer }: { seance: Seance; etapes: Etape[];
 function EcranChrono({
   etape,
   chrono,
-  maintenant,
   setChrono,
   son,
   suivant,
   precedent,
   lienDe,
   dernier,
-  demarre,
 }: {
-  demarre: () => void;
   etape: EtapeChrono;
   chrono: Chrono;
-  maintenant: number;
   setChrono: (f: (c: Chrono) => Chrono) => void;
   son: Son;
   suivant: () => void;
@@ -533,6 +628,7 @@ function EcranChrono({
   lienDe: (e: Exercice) => string | null;
   dernier: boolean;
 }) {
+  const maintenant = useHorloge(chrono.debut !== null && chrono.pause === null && chrono.fini === null);
   const ecoule = chrono.debut === null ? 0 : ((chrono.pause ?? maintenant) - chrono.debut - chrono.cumul) / 1000;
   const total = etape.secondes;
   const termine = chrono.fini !== null || (total !== null && ecoule >= total);
@@ -622,7 +718,6 @@ function EcranChrono({
             onClick={() => {
               son.debloquer();
               setChrono(() => ({ ...CHRONO_VIDE, debut: Date.now() + DECOMPTE }));
-              demarre();
             }}
           >
             Démarrer le minuteur
@@ -774,6 +869,8 @@ function useSon(): Son {
       const c = contexte.current;
       if (!c) return;
       try {
+        // Après une mise en veille ou un appel, le téléphone coupe le son de la page : on le relance.
+        if (c.state !== "running") void c.resume().catch(() => {});
         const o = c.createOscillator();
         const g = c.createGain();
         o.frequency.value = frequence;

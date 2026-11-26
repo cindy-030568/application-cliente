@@ -50,14 +50,68 @@ export function lireSecondes(t: string | null): number | null {
 }
 const borner = (x: number) => (x > 0 ? Math.min(x, 15 * 60) : null);
 
+/** Exercice au temps : durée par côté (null = chrono libre qui compte, ex. « max »), et nombre de côtés. */
+export type Effort = { secondes: number | null; cotes: 1 | 2 };
+
+/** Exercices de gainage / isométriques : toujours au temps. */
+const ISOMETRIQUE = /planche|plank|gainage|chaise|isom[ée]tri|hollow|maintien|wall ?sit|dead ?hang|suspension|superman tenu|tenue? (?:en|du|de)/i;
+/** « par côté » : « / côté », « par côté », « chaque côté », « de chaque côté », « / jambe », « G/D »… */
+const PAR_COTE = /(?:de\s+)?(?:\/|par|chaque|each|x\s*2)\s*(?:c[ôo]t[ée]s?|jambes?|bras|sides?)(?![a-zà-ÿ])|\bg\s*\/\s*d\b|\bd\s*\/\s*g\b|gauche\s*(?:et|\/|-)\s*droite/gi;
+/** Le nom suffit à dire qu'on le fait des deux côtés (planche latérale, de côté…). */
+const COTES_DANS_LE_NOM = /(?:de|sur le|par) c[ôo]t[ée]|lat[ée]ral|\bside\b|unilat[ée]ral/i;
+
 /**
- * Durée d'effort quand l'exercice se fait « au temps » : « 30 s », « 40 sec », « 1 min », « 1 min 30 ».
- * null pour des répétitions (« 12 », « 10 / jambe ») ou un temps par côté (« 30 s / côté » : la cliente gère).
+ * Durée d'effort quand l'exercice se fait « au temps » : « 30 s », « 40 sec », « 30'' », « 1 min », « 1 min 30 », « 1'30 »,
+ * « 30-45 s » (le plus long), « 2 x 30 s ». « 30 s / côté » : deux fois 30 s, un côté puis l'autre.
+ * Un gainage noté sans unité (« Planche : 30 ») compte en secondes ; « max » ou rien : chrono libre.
+ * null pour des répétitions (« 12 », « 10 / jambe »).
  */
-export function dureeEffort(repetitions: string | null): number | null {
-  const s = (repetitions ?? "").toLowerCase().trim();
-  if (!/^\d+\s*(?:s|sec|secondes?|min|mn)(?:\s*\d{1,2}\s*(?:s|sec)?)?$/.test(s)) return null;
-  return lireSecondes(s);
+export function lireEffort(repetitions: string | null, nom = ""): Effort | null {
+  const brut = (repetitions ?? "").toLowerCase().replace(/[’`´]/g, "'").replace(/[″”“]/g, '"').replace(/\s+/g, " ").trim();
+  const iso = ISOMETRIQUE.test(nom);
+  PAR_COTE.lastIndex = 0;
+  const parCote = PAR_COTE.test(brut);
+  PAR_COTE.lastIndex = 0;
+  const cotes: 1 | 2 = parCote || (iso && COTES_DANS_LE_NOM.test(nom)) ? 2 : 1;
+  const s = brut
+    .replace(/\(.*?\)/g, " ")
+    .replace(PAR_COTE, " ")
+    .replace(/^\d+\s*[x×]\s*/, "") // « 2 x 30 s » : les séries sont ailleurs
+    .replace(/\s+(?:de|à|a)\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  let m: RegExpMatchArray | null;
+  let secondes: number | null = null;
+  const sec = "(?:s|sec|secs|secondes?|''|\")";
+  if ((m = s.match(new RegExp(`^(\\d+)\\s*(?:min|mn|'|:)\\s*(\\d{1,2})\\s*${sec}?$`)))) secondes = Number(m[1]) * 60 + Number(m[2]);
+  else if ((m = s.match(/^(?:\d+(?:[.,]\d+)?\s*(?:min|mn|')?\s*(?:-|–|à|a)\s*)?(\d+(?:[.,]\d+)?)\s*(?:min|mn|minutes?|')$/))) secondes = Math.round(Number(m[1].replace(",", ".")) * 60);
+  else if ((m = s.match(new RegExp(`^(?:\\d+\\s*${sec}?\\s*(?:-|–|à|a)\\s*)?(\\d+)\\s*${sec}$`)))) secondes = Number(m[1]);
+  else if (iso && (m = s.match(/^(?:\d+\s*(?:-|–|à|a)\s*)?(\d+)$/)) && Number(m[1]) >= 10 && Number(m[1]) <= 300) secondes = Number(m[1]);
+  else if (iso && (!s || /^max|tenir|tenu|le plus longtemps/.test(s))) return { secondes: null, cotes };
+  if (!secondes || secondes <= 0) return null;
+  return { secondes: Math.min(secondes, 15 * 60), cotes };
+}
+
+/** Durée d'effort (pour un seul côté) : voir lireEffort. */
+export function dureeEffort(repetitions: string | null, nom = ""): number | null {
+  return lireEffort(repetitions, nom)?.secondes ?? null;
+}
+
+/** Les 5 secondes pour changer de côté. */
+export const CHANGEMENT_COTE = 5;
+
+/**
+ * Où en est le chrono d'effort à `ecoule` secondes : côté 1, changement de côté, côté 2, ou fini.
+ * `reste` : secondes restantes dans la phase. Chrono libre (secondes null) : jamais fini, `reste` = temps écoulé.
+ */
+export function phaseEffort(effort: Effort, ecoule: number): { phase: "effort" | "changement" | "fini"; cote: 1 | 2; reste: number } {
+  if (effort.secondes === null) return { phase: "effort", cote: 1, reste: Math.max(0, ecoule) };
+  const d = effort.secondes;
+  if (ecoule < d) return { phase: "effort", cote: 1, reste: d - ecoule };
+  if (effort.cotes === 1) return { phase: "fini", cote: 1, reste: 0 };
+  if (ecoule < d + CHANGEMENT_COTE) return { phase: "changement", cote: 2, reste: d + CHANGEMENT_COTE - ecoule };
+  if (ecoule < 2 * d + CHANGEMENT_COTE) return { phase: "effort", cote: 2, reste: 2 * d + CHANGEMENT_COTE - ecoule };
+  return { phase: "fini", cote: 2, reste: 0 };
 }
 
 /** Nombre de séries : « 4 » → 4 ; « 3-4 » → 4 ; vide → 1. */

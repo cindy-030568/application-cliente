@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Exercice, Seance } from "./programme-sportif";
-import { chargeProposee, derniereFois, dureeEffort, etapesSeance, formaterDuree, formaterKg, lireFormat, lireKg, lireSecondes, nombreSeries, phaseIntervalle, regrouperCharges } from "./seance-guidee";
+import { chargeProposee, derniereFois, dureeEffort, etapesSeance, lireEffort, phaseEffort, formaterDuree, formaterKg, lireFormat, lireKg, lireSecondes, nombreSeries, phaseIntervalle, regrouperCharges } from "./seance-guidee";
 
 const ex = (nom: string, o: Partial<Exercice> = {}): Exercice => ({ nom, series: null, repetitions: null, charge: null, repos: null, tempo: null, consignes: null, ...o });
 
@@ -128,19 +128,39 @@ describe("poids utilisés", () => {
   });
 });
 
-describe("dureeEffort", () => {
-  it("lit un effort au temps", () => {
-    expect(dureeEffort("30 s")).toBe(30);
-    expect(dureeEffort("40 sec")).toBe(40);
-    expect(dureeEffort("1 min")).toBe(60);
-    expect(dureeEffort("1 min 30")).toBe(90);
-    expect(dureeEffort("3 min")).toBe(180);
+describe("dureeEffort / lireEffort", () => {
+  it("lit les durées, sous toutes leurs écritures", () => {
+    for (const [t, d] of [["30 s", 30], ["40 sec", 40], ["45 secondes", 45], ["30s", 30], ["30''", 30], ["30”", 30], ["1 min", 60], ["1min", 60], ["1 min 30", 90], ["1'30", 90], ["1:30", 90], ["3 min", 180], ["30-45 s", 45], ["30 à 45 sec", 45], ["2 x 30 s", 30], ["1,5 min", 90]] as const)
+      expect(dureeEffort(t), t).toBe(d);
   });
-  it("ignore les répétitions et le temps par côté", () => {
-    expect(dureeEffort("12")).toBeNull();
-    expect(dureeEffort("10 / jambe")).toBeNull();
-    expect(dureeEffort("30 s / côté")).toBeNull();
-    expect(dureeEffort(null)).toBeNull();
-    expect(dureeEffort("max")).toBeNull();
+
+  it("des répétitions ne sont pas un temps", () => {
+    for (const t of ["12", "10 / jambe", "10-12 / bras", "max", "12 calories", "10 (5 / jambe)", null]) expect(dureeEffort(t), String(t)).toBeNull();
+  });
+
+  it("par côté : deux fois la durée, un côté puis l'autre", () => {
+    for (const t of ["30 s / côté", "30 s/côté", "45 s par côté", "30 sec de chaque côté", "30 s chaque côté", "20 s (chaque côté)", "30 s G/D", "30 s / jambe"])
+      expect(lireEffort(t), t).toEqual({ secondes: Number(t.match(/\d+/)![0]), cotes: 2 });
+    expect(lireEffort("30 s")).toEqual({ secondes: 30, cotes: 1 });
+  });
+
+  it("gainage et isométrie : toujours un chrono", () => {
+    expect(lireEffort("30", "Planche sur les coudes")).toEqual({ secondes: 30, cotes: 1 });
+    expect(lireEffort("30 s", "Planche de côté")).toEqual({ secondes: 30, cotes: 2 });
+    expect(lireEffort("30", "Gainage latéral")).toEqual({ secondes: 30, cotes: 2 });
+    expect(lireEffort("max", "Chaise contre le mur")).toEqual({ secondes: null, cotes: 1 });
+    expect(lireEffort(null, "Planche")).toEqual({ secondes: null, cotes: 1 });
+    expect(lireEffort("12", "Squat")).toBeNull();
+    expect(lireEffort("5", "Planche")).toBeNull(); // 5 : sûrement des répétitions (planche to push-up…)
+  });
+
+  it("phases : côté 1, changement de côté, côté 2, fini", () => {
+    const e = { secondes: 30, cotes: 2 as const };
+    expect(phaseEffort(e, 10)).toEqual({ phase: "effort", cote: 1, reste: 20 });
+    expect(phaseEffort(e, 32)).toEqual({ phase: "changement", cote: 2, reste: 3 });
+    expect(phaseEffort(e, 40)).toEqual({ phase: "effort", cote: 2, reste: 25 });
+    expect(phaseEffort(e, 65).phase).toBe("fini");
+    expect(phaseEffort({ secondes: 30, cotes: 1 }, 30).phase).toBe("fini");
+    expect(phaseEffort({ secondes: null, cotes: 1 }, 75)).toEqual({ phase: "effort", cote: 1, reste: 75 });
   });
 });

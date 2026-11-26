@@ -49,13 +49,33 @@ export function BandeauHorsConnexion() {
  * Sur l'onglet Sport, avec du réseau : garde sur le téléphone le programme en cours et chaque séance guidée
  * (et les fichiers nécessaires pour les afficher), pour qu'elles marchent dans une salle sans réseau.
  */
-export function PreparerHorsConnexion({ proprietaire, nbSeances = 0, pages: autres }: { proprietaire: string; nbSeances?: number; pages?: string[] }) {
+export function PreparerHorsConnexion({
+  proprietaire,
+  nbSeances = 0,
+  pages: autres,
+  version = "",
+}: {
+  proprietaire: string;
+  nbSeances?: number;
+  pages?: string[];
+  /** Change quand le programme change : la copie sur le téléphone est alors refaite tout de suite. */
+  version?: string;
+}) {
   const [, setPret] = useState(false);
   const liste = autres ? autres.join("|") : null;
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !navigator.onLine) return;
+    // Pas à chaque visite : une fois toutes les 12 h, ou quand le programme a changé.
+    // (Retélécharger toutes les séances à chaque ouverture ralentissait l'appli avec un réseau faible.)
+    const cle = `hors-connexion-pret:${proprietaire}:${liste ?? nbSeances}`;
+    try {
+      const deja = JSON.parse(localStorage.getItem(cle) ?? "null") as { version: string; le: number } | null;
+      if (deja && deja.version === version && Date.now() - deja.le < 12 * 60 * 60 * 1000) return;
+    } catch {}
     let annule = false;
-    (async () => {
+    // On laisse d'abord la page s'afficher et la cliente naviguer.
+    const attente = window.setTimeout(() => void preparer(), 4000);
+    const preparer = async () => {
       await verifierProprietaire(proprietaire);
       await synchroniser();
       await navigator.serviceWorker.ready;
@@ -80,12 +100,17 @@ export function PreparerHorsConnexion({ proprietaire, nbSeances = 0, pages: autr
           for (const m of css.matchAll(/url\((\/_next\/static\/media\/[^)"']+)\)/g)) await fetch(m[1]).catch(() => undefined);
         }
       }
-      if (!annule) setPret(true);
-    })();
+      if (annule) return;
+      try {
+        localStorage.setItem(cle, JSON.stringify({ version, le: Date.now() }));
+      } catch {}
+      setPret(true);
+    };
     return () => {
       annule = true;
+      window.clearTimeout(attente);
     };
-  }, [proprietaire, nbSeances, liste]);
+  }, [proprietaire, nbSeances, liste, version]);
   return null;
 }
 

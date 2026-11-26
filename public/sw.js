@@ -44,17 +44,29 @@ async function statique(requete) {
   return reponse;
 }
 
-/** Programme et séances : d'abord le réseau (toujours à jour), sinon la copie gardée sur le téléphone. */
-async function sport(requete, chemin, navigation) {
+/** Au-delà de ce délai, une page de séance déjà gardée s'affiche depuis le téléphone (réseau faible en salle). */
+const PATIENCE_RESEAU = 3500;
+
+/**
+ * Programme et séances : d'abord le réseau (toujours à jour), sinon la copie gardée sur le téléphone.
+ * Si le réseau traîne (salle de sport, sous-sol), la copie gardée s'affiche sans attendre ;
+ * la page du réseau, quand elle arrive, remplace la copie pour la prochaine fois.
+ */
+async function sport(requete, chemin, navigation, event) {
   const cache = await caches.open(CACHE_SPORT);
-  try {
-    const reponse = await fetch(requete);
+  const garde = await cache.match(chemin);
+  const reseau = fetch(requete).then(async (reponse) => {
     // Jamais une page de connexion ou d'erreur : seulement la vraie page, pour la cliente connectée.
     if (reponse.ok && !reponse.redirected && new URL(reponse.url).pathname === chemin) await cache.put(chemin, reponse.clone());
     return reponse;
+  });
+  if (garde) {
+    event.waitUntil(reseau.catch(() => undefined));
+    return Promise.race([reseau.catch(() => garde), new Promise((ok) => setTimeout(() => ok(garde), PATIENCE_RESEAU))]);
+  }
+  try {
+    return await reseau;
   } catch (erreur) {
-    const garde = await cache.match(chemin);
-    if (garde) return garde;
     if (!navigation) throw erreur;
     return new Response(
       '<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors connexion</title><body style="font-family:system-ui;background:#f5ecdc;color:#3b2314;padding:32px;text-align:center"><h1>Pas de réseau</h1><p>Cette page n’est pas disponible hors connexion. Ton programme sportif, tes séances et les séances express déjà ouvertes le sont, si tu les as ouverts avec du réseau auparavant.</p><p><a href="/sport" style="color:#d6336c">Mon programme sportif</a></p></body></html>',
@@ -80,7 +92,7 @@ self.addEventListener("fetch", (event) => {
   const navigation = requete.mode === "navigate";
   const preparation = requete.headers.get("x-fitw-hors-connexion") === "1";
   if (pageSport(url.pathname) && (navigation || preparation) && !url.search) {
-    event.respondWith(sport(requete, url.pathname, navigation));
+    event.respondWith(sport(requete, url.pathname, navigation, event));
   }
 });
 
