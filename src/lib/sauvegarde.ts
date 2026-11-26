@@ -24,6 +24,8 @@ export const TABLES_SAUVEGARDEES = [
   "tags", "recettes", "recettes_repas", "recettes_tags", "recette_ingredients", "favoris",
   // Séances express (séances de secours) : avant les séances faites qui y renvoient
   "seances_express", "seances_express_clientes", "seances_express_favoris",
+  // Menus de la semaine des abonnées (0047)
+  "menus_semaine", "menus_repas",
   // Plan alimentaire et programme sportif construits dans l'app
   "besoins_clientes", "plans_alimentaires", "programmes_sportifs", "seances_faites", "charges_series",
   // Compléments

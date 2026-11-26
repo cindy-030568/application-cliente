@@ -49,7 +49,7 @@ test.describe.serial("espace abonnée", () => {
     // Recettes : telles quelles (1 portion) + l'assiette.
     await nav.getByRole("link", { name: "Recettes" }).click();
     await expect(page.getByRole("heading", { name: "Mes recettes" })).toBeVisible();
-    await page.locator("main a[href^='/espace/recettes/'], a[href^='/espace/recettes/']").first().click();
+    await page.locator("a[href^='/espace/recettes/']:not([href$='/menu']):not([href$='/frigo']):not([href$='/courses'])").first().click();
     await expect(page.getByRole("heading", { name: "Ton assiette" })).toBeVisible();
     await page.screenshot({ path: "test-results/espace-recette.png", fullPage: true });
 

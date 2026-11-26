@@ -12,6 +12,12 @@ const SESSION_EXPIREE = "Ta session a expiré. Reconnecte-toi, puis réessaie.";
 
 export type EtatAction = { erreur?: string; succes?: string };
 
+/** La liste de courses vit à deux adresses : celle des coachées et celle des abonnées. */
+function rafraichirCourses() {
+  revalidatePath("/recettes/courses");
+  revalidatePath("/espace/recettes/courses");
+}
+
 /** Session d'une cliente dont l'accès est ouvert (jamais la coach). */
 async function sessionCliente() {
   const session = await lireSession();
@@ -99,7 +105,7 @@ export async function ajouterAuxCourses(recetteId: string, indexRepas: number, p
       erreur: error.code === "23514" ? "Ta liste de courses est pleine : retire quelques articles d’abord." : "L’ajout a échoué. Réessaie.",
     };
   }
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return { succes: "Ajoutée à ta liste de courses." };
 }
 
@@ -109,7 +115,7 @@ export async function cocherArticles(ids: string[], coche: boolean): Promise<Eta
   if (!Array.isArray(ids) || ids.length === 0 || ids.length > 300 || !ids.every((id) => UUID.test(id))) return {};
   const { error } = await session.supabase.from("courses").update({ coche }).in("id", ids);
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return {};
 }
 
@@ -122,7 +128,7 @@ export async function ajouterArticle(_e: EtatAction, formData: FormData): Promis
   if (error) {
     return { erreur: error.code === "23514" ? "Ta liste de courses est pleine : retire quelques articles d’abord." : "L’ajout a échoué." };
   }
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return { succes: "Ajouté." };
 }
 
@@ -131,7 +137,7 @@ export async function retirerCoches(): Promise<EtatAction> {
   if (!session) return { erreur: SESSION_EXPIREE };
   const { error } = await session.supabase.from("courses").delete().eq("cliente_id", session.profil.id).eq("coche", true);
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return {};
 }
 
@@ -140,7 +146,7 @@ export async function viderListe(): Promise<EtatAction> {
   if (!session) return { erreur: SESSION_EXPIREE };
   const { error } = await session.supabase.from("courses").delete().eq("cliente_id", session.profil.id);
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return {};
 }
 
@@ -150,7 +156,7 @@ export async function retirerRecetteDesCourses(lot: string): Promise<EtatAction>
   if (!UUID.test(lot)) return {};
   const { error } = await session.supabase.from("courses").delete().eq("cliente_id", session.profil.id).eq("lot", lot);
   if (error) return { erreur: "Ça n’a pas fonctionné. Réessaie." };
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return {};
 }
 
@@ -255,7 +261,7 @@ export async function remplirCoursesSemaine(lundi: string): Promise<EtatAction> 
   if (error) {
     return { erreur: error.code === "23514" ? "Ta liste de courses est pleine : retire quelques articles d’abord." : "L’ajout a échoué. Réessaie." };
   }
-  revalidatePath("/recettes/courses");
+  rafraichirCourses();
   return {
     succes: `${total.length} article${total.length > 1 ? "s" : ""} ajouté${total.length > 1 ? "s" : ""} à ta liste de courses ✓${oubliees ? ` (${oubliees} recette${oubliees > 1 ? "s ne sont" : " n’est"} plus proposée${oubliees > 1 ? "s" : ""} pour ce repas : choisis-en une autre.)` : ""}`,
   };

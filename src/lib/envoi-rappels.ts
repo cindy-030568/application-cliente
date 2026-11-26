@@ -11,6 +11,7 @@ import { rappelComplementsDu, texteRappelComplements } from "@/lib/complements";
 import { chargerRecaps } from "@/lib/recap-semaine-serveur";
 import { HEURES_NOTIF_DEFIS, texteAnnonceDefi, texteReussiteDefi } from "@/lib/defis";
 import { idsAbonnees } from "@/lib/abonnees-serveur";
+import { HEURES_ANNONCE_MENU, menuAAnnoncer } from "@/lib/menus";
 import { conservationAbonneeDepassee } from "@/lib/abonnement";
 
 /** Ce qui est configuré dans Vercel (sans jamais exposer les valeurs). */
@@ -625,6 +626,49 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
     const texte = texteReussiteDefi({ titre: reserve.defis?.titre ?? "" }, reserve.clientes.mode_sans_chiffres);
     const url = reserve.clientes.formule === "abonnement" ? "/espace/bouger" : "/defis";
     if (await envoyer(r.cliente_id, { titre: "Défi relevé 🏆", texte, url })) bilan.reussites++;
+  }
+  return bilan;
+}
+
+// ---------------------------------------------------------------- Menu de la semaine (abonnées)
+
+/**
+ * Annonce le menu de la semaine aux abonnées actives (une seule fois par menu) : le dimanche qui précède,
+ * ou dès sa publication s'il arrive pendant la semaine. Notification seulement, de 10 h à 20 h.
+ */
+export async function executerMenus(admin: SupabaseClient, maintenant = new Date()) {
+  const bilan = { annonces: 0, erreurs: 0 };
+  const heure = heureParis(maintenant);
+  if (heure < HEURES_ANNONCE_MENU.debut || heure >= HEURES_ANNONCE_MENU.fin || !configurationRappels().push) return bilan;
+  const aujourdhui = aujourdhuiParis();
+  const { data: menus, error } = await admin
+    .from("menus_semaine")
+    .select("id, lundi")
+    .eq("publie", true)
+    .is("annonce_le", null)
+    .gte("lundi", ajouterJours(aujourdhui, -6))
+    .lte("lundi", ajouterJours(aujourdhui, 1));
+  if (error) return bilan; // mise à jour 0047 pas encore faite
+  for (const m of (menus ?? []) as { id: string; lundi: string }[]) {
+    if (!menuAAnnoncer(m.lundi, aujourdhui)) continue;
+    const { data: reserve } = await admin.from("menus_semaine").update({ annonce_le: new Date().toISOString() }).eq("id", m.id).is("annonce_le", null).select("id").maybeSingle();
+    if (!reserve) continue;
+    const { data: abonnees } = await admin.from("clientes").select("id").eq("formule", "abonnement").eq("statut", "active");
+    const ids = (abonnees ?? []).map((a) => a.id as string);
+    if (!ids.length) continue;
+    const { data: appareils } = await admin.from("abonnements_push").select("id, cliente_id, endpoint, p256dh, auth").in("cliente_id", ids);
+    const prevenues = new Set<string>();
+    for (const a of (appareils ?? []) as (AbonnementPush & { cliente_id: string })[]) {
+      const r = await envoyerPush(a, {
+        titre: "Ton menu de la semaine 🍽️",
+        texte: "Il est prêt, avec ta liste de courses et ton batch cooking du dimanche.",
+        url: "/espace/recettes/menu",
+      });
+      if (r === "ok") prevenues.add(a.cliente_id);
+      else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);
+      else bilan.erreurs++;
+    }
+    bilan.annonces += prevenues.size;
   }
   return bilan;
 }

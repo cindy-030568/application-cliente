@@ -359,6 +359,24 @@ const seancesExpressFavoris = [];
 const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.formule === "abonnement" ? c.statut === "active" : c.statut === "active" || c.statut === "terminee"); };
 // Métabolisme (0046) : privé, à l'abonnée seulement.
 const metabolismes = [];
+// Menus de la semaine (0047) : la coach prépare, l'abonnée active lit les menus publiés.
+const menusSemaine = [];
+const menusRepas = [];
+const lundiCourant = () => { const d = new Date(); const j = (d.getUTCDay() + 6) % 7; return iso(new Date(Date.now() - j * 86400000)); };
+/** Pour les tests côté abonnée : un menu publié pour la semaine en cours (les premières recettes de chaque repas). */
+function menuDemo() {
+  const lundi = lundiCourant();
+  let m = menusSemaine.find((x) => x.lundi === lundi);
+  if (!m) {
+    m = { id: "3e000000-0000-4000-8000-000000000001", lundi, mot: "Cette semaine, on mise sur les légumes de saison 🥕", batch: "🛒 Faire les courses avec la liste du menu.\n🍚 Cuire le riz et le quinoa en avance.\n📦 Ranger le tout dans des boîtes hermétiques.", publie: true, annonce_le: null, created_at: new Date().toISOString(), maj_le: new Date().toISOString() };
+    menusSemaine.push(m);
+    for (const repas of ["petit_dejeuner", "dejeuner", "collation", "diner"]) {
+      const choix = recettes.filter((r) => r.publiee && r.recettes_repas.some((x) => x.type_repas === repas));
+      for (let jour = 1; jour <= 7 && choix.length; jour++) menusRepas.push({ menu_id: m.id, jour, repas, recette_id: choix[(jour - 1) % choix.length].id });
+    }
+  }
+  return m;
+}
 
 // ---- Avis (0039)
 const avisListe = [];
@@ -475,6 +493,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/menus") { if (u.searchParams.get("demo")) menuDemo(); return json({ menus: menusSemaine, repas: menusRepas }); }
   if (u.pathname === "/__test/espace") return json({ metabolismes, messages, defis, journal });
   if (u.pathname === "/__test/abonnees") return json({ abonnees: clientes.filter((c) => c.formule === "abonnement").map((c) => ({ ...c, email: profils[c.id]?.email, prenom: profils[c.id]?.prenom })), abonnements: [...stripe.abonnements.values()] });
   if (u.pathname === "/__test/stripe-webhook") { const b = await corpsJson(req); return json({ statut: await envoyerWebhook(b.type, b.objet) }); }
@@ -960,6 +979,19 @@ http.createServer((req, res) => {
     visibles: coach ? complementsPris : complementsPris.filter((x) => x.cliente_id === uid),
     creer: (b) => (complementsPris.some((x) => x.complement_id === b.complement_id && x.jour === b.jour) ? { remplace: true } : { pris_le: new Date().toISOString(), ...b, cliente_id: uid }),
   });
+  if (u.pathname === "/rest/v1/menus_semaine" || u.pathname === "/rest/v1/menus_repas") {
+    if (!coach && req.method !== "GET" && req.method !== "HEAD") { res.writeHead(403, { "content-type": "application/json" }); return res.end(JSON.stringify({ code: "42501", message: "interdit" })); }
+    if (u.pathname === "/rest/v1/menus_semaine") return tableCommu(req, res, u, menusSemaine, {
+      visibles: coach ? menusSemaine : estAbonneeActive(uid) ? menusSemaine.filter((m) => m.publie) : [],
+      enrichir: (m) => ({ ...m, menus_repas: [{ count: menusRepas.filter((r) => r.menu_id === m.id).length }] }),
+      creer: (b) => (menusSemaine.some((m) => m.lundi === b.lundi) ? { erreur: "doublon" } : { id: "3e000000-0000-4000-8000-" + String(menusSemaine.length + 10).padStart(12, "0"), mot: null, batch: null, publie: false, annonce_le: null, created_at: new Date().toISOString(), maj_le: new Date().toISOString(), ...b }),
+    });
+    return tableCommu(req, res, u, menusRepas, {
+      visibles: coach ? menusRepas : estAbonneeActive(uid) ? menusRepas.filter((r) => menusSemaine.some((m) => m.id === r.menu_id && m.publie)) : [],
+      enrichir: (r) => ({ ...r, menus_semaine: { lundi: menusSemaine.find((m) => m.id === r.menu_id)?.lundi } }),
+      creer: (b) => { const ex = menusRepas.find((x) => x.menu_id === b.menu_id && x.jour === b.jour && x.repas === b.repas); if (ex) { Object.assign(ex, b); return { remplace: true }; } return { ...b }; },
+    });
+  }
   if (u.pathname === "/rest/v1/metabolisme") return tableCommu(req, res, u, metabolismes, {
     visibles: metabolismes.filter((x) => x.cliente_id === uid),
     creer: (b) => {

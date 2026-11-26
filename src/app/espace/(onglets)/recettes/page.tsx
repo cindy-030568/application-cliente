@@ -46,6 +46,20 @@ export default async function RecettesAbonnee({ searchParams }: { searchParams: 
     <>
       <EnTete titre="Mes recettes" sousTitre="Gourmandes, simples, et faites pour toute la famille 💛" profil="/espace/profil" />
       <div className="flex flex-col gap-4 px-5 pb-6 pt-3">
+        <nav aria-label="Ma cuisine" className="grid grid-cols-3 gap-2">
+          {[
+            { href: "/espace/recettes/menu", emoji: "📅", label: "Mon menu" },
+            { href: "/espace/recettes/frigo", emoji: "🧺", label: "Avec ce que j’ai" },
+            { href: "/espace/recettes/courses", emoji: "🛒", label: "Mes courses" },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className="flex flex-col items-center gap-1 rounded-carte bg-blanc-casse px-2 py-3 text-center text-[13px] font-medium leading-tight shadow-douce">
+              <span className="text-2xl" aria-hidden>
+                {l.emoji}
+              </span>
+              {l.label}
+            </Link>
+          ))}
+        </nav>
         <form action="/espace/recettes" role="search" className="flex items-center gap-2 rounded-full bg-blanc-casse py-1 pl-4 pr-1 shadow-douce">
           <IconeRecherche className="size-5 shrink-0 text-texte-2" />
           <input key={q} type="search" name="q" defaultValue={q} placeholder="Un plat, un ingrédient…" aria-label="Chercher une recette" className="min-h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none" />

@@ -1644,3 +1644,47 @@ Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** →
 10. Dashboard → **Communauté** → onglet « Espace commun » : le message y est ; dans **Clientes**, l'abonnée n'apparaît toujours pas.
 
 Quand tout te convient, tu peux ouvrir les inscriptions (en réel : voir « Plus tard : passer en réel » ci-dessus).
+
+## Étape 4 : la cuisine des abonnées (menu de la semaine, batch cooking, « Avec ce que j'ai »)
+
+Ce qui est en place :
+
+- **Dashboard → Menus abonnées** : la liste des semaines (les 2 d'avant, celle en cours et les 4 suivantes), avec leur état : « À préparer », « Brouillon » ou « Publié ».
+- Dans une semaine :
+  - **✨ Proposer le menu** : l'appli remplit les 7 jours × 4 repas (petit-déjeuner, déjeuner, goûter, dîner) avec tes recettes publiées. Elle évite les répétitions, ne met jamais la même recette deux jours de suite et laisse pour la fin les recettes des deux semaines d'avant ;
+  - tu **retouches** chaque case (liste déroulante, ou « — » pour la laisser vide). C'est enregistré tout de suite ;
+  - « Compléter les cases vides » ne touche pas à tes choix ; « Tout reproposer » refait tout le menu ;
+  - **ton mot de la semaine** (facultatif) ;
+  - **le batch cooking du dimanche** : « ✨ Proposer les étapes » prépare une liste d'après les déjeuners et dîners du menu (légumes à couper, féculents et légumineuses à cuire, protéines à cuire, œufs durs…). Tu la relis et tu l'écris à ta façon, une étape par ligne, puis **Enregistrer le mot et le batch** ;
+  - **Publier le menu** (ou le repasser en brouillon).
+- Côté abonnée, dans l'onglet **Recettes**, trois raccourcis en haut :
+  - **📅 Mon menu** : ton mot, la liste de courses, le batch cooking du dimanche (des étapes à cocher), puis les 7 jours en commençant par aujourd'hui. Le dimanche, elle voit déjà le menu de la semaine suivante s'il est publié ;
+  - **🛒 Mes courses** : « Ajouter le menu à ma liste de courses » pour 1 à 6 personnes. Tout est additionné et rangé par rayon ; elle coche au fur et à mesure, peut ajouter un article ou partager la liste. Sa liste est **privée** ;
+  - **🧺 Avec ce que j'ai** : elle coche ce qu'elle a chez elle, l'appli lui montre tes recettes faisables, puis celles où il ne manque qu'un ou deux ingrédients. Le sel, l'huile et les épices sont toujours comptés comme présents.
+- **Accueil** de l'abonnée : « Au menu aujourd'hui » (sinon, l'idée recette du jour).
+- **Notification** : le dimanche (entre 10 h et 20 h), les abonnées reçoivent « Ton menu de la semaine 🍽️ », une seule fois par menu. Si tu publies en cours de semaine, elle part au passage suivant.
+- Tes clientes coachées ne voient pas ces menus : elles gardent leur plan à elles.
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0047_menus_semaine.sql`](../supabase/migrations/0047_menus_semaine.sql)
+
+### 2. Préparer ton premier menu
+
+1. Dashboard → **Menus abonnées** → choisis la semaine.
+2. **✨ Proposer le menu** → regarde les 28 cases et change ce que tu veux.
+3. **✨ Proposer les étapes** (batch cooking) → réécris-les à ta façon. Écris aussi ton mot de la semaine → **Enregistrer le mot et le batch**.
+4. **Publier le menu**.
+
+> Conseil : vérifie que tes recettes ont bien leurs repas cochés (petit-déjeuner, déjeuner, dîner, goûter) dans **Recettes** : l'appli ne propose une recette que pour les repas cochés.
+
+### 3. Tester
+
+1. Prépare et publie le menu de **la semaine en cours** (pour le voir tout de suite).
+2. Connecte-toi avec ton **abonnée de test** → **Accueil** : « Au menu aujourd'hui ».
+3. **Recettes** → **📅 Mon menu** : ton mot, le batch cooking (coche une étape), et les jours de la semaine.
+4. Mets **2 personnes** → **Ajouter le menu à ma liste de courses** → **Voir ma liste** : les articles sont rangés par rayon.
+5. **Recettes** → **🧺 Avec ce que j'ai** : coche quelques ingrédients, puis regarde « Je peux cuisiner ».
+6. Avec ta **cliente test coachée** : rien ne change pour elle.

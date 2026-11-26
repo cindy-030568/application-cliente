@@ -10,6 +10,8 @@ import { lireEtatCommunaute } from "@/lib/communaute-serveur";
 import { defisDeLaCliente } from "@/lib/defis-serveur";
 import { encouragementDuJour } from "@/lib/encouragements";
 import { besoinsQuotidiens, formaterKcal, metabolismeDeBase, type DonneesMetabolisme } from "@/lib/metabolisme";
+import { LIBELLES_REPAS_MENU, REPAS_MENU, jourDuMenu } from "@/lib/menus";
+import { lireMenuPublie } from "@/lib/menus-serveur";
 import { urlPhotoRecette } from "@/lib/recettes";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -26,14 +28,23 @@ function indiceDuJour(jour: string, n: number) {
 export default async function AccueilAbonnee() {
   const { supabase, profil, fiche } = await exigerAbonnee();
   const auj = aujourdhuiParis();
-  const [defis, communaute, { data: journee }, { data: meta }, { data: recettes }, offre] = await Promise.all([
+  const [defis, communaute, { data: journee }, { data: meta }, { data: recettes }, offre, menu] = await Promise.all([
     defisDeLaCliente(supabase, profil.id, auj),
     lireEtatCommunaute(supabase),
     supabase.from("journal_quotidien").select("jour").eq("cliente_id", profil.id).eq("jour", auj).maybeSingle(),
     supabase.from("metabolisme").select("annee_naissance, taille_cm, poids_kg, activite").eq("cliente_id", profil.id).maybeSingle<DonneesMetabolisme>(),
     supabase.from("recettes").select("id, titre, photo_path").order("titre").returns<{ id: string; titre: string; photo_path: string | null }[]>(),
     lireReglagesAbonnement(createAdminClient()).catch(() => null),
+    lireMenuPublie(supabase, auj).catch(() => null),
   ]);
+  // Le menu du jour, s'il y en a un (sinon l'idée recette du jour).
+  const jourMenu = menu ? jourDuMenu(menu.lundi, auj) : null;
+  const titres = new Map((recettes ?? []).map((r) => [r.id, r.titre]));
+  const auMenu = REPAS_MENU.flatMap((r) => {
+    const c = menu?.cases.find((x) => x.jour === jourMenu && x.repas === r);
+    const t = c ? titres.get(c.recette_id) : undefined;
+    return t ? [{ repas: r, titre: t }] : [];
+  });
   const recette = recettes?.length ? recettes[indiceDuJour(auj, recettes.length)] : null;
   const photo = recette ? urlPhotoRecette(recette.photo_path) : null;
   const annee = new Date().getFullYear();
@@ -73,7 +84,22 @@ export default async function AccueilAbonnee() {
         <CarteDefiCliente key={d.id} d={d} auj={auj} sansChiffres={fiche.mode_sans_chiffres} communaute={Boolean(communaute?.ouverte)} />
       ))}
 
-      {recette && (
+      {auMenu.length > 0 ? (
+        <Link href="/espace/recettes/menu" className="flex flex-col gap-2 rounded-carte bg-blanc-casse p-4 shadow-douce">
+          <span className="flex items-center justify-between">
+            <span className="text-[12px] font-medium uppercase tracking-[0.14em] text-caramel-texte">Au menu aujourd’hui</span>
+            <IconeFleche className="size-5 text-texte-2" />
+          </span>
+          <ul className="flex flex-col gap-1">
+            {auMenu.map((m) => (
+              <li key={m.repas} className="text-[14.5px] leading-snug">
+                <span className="text-texte-2">{LIBELLES_REPAS_MENU[m.repas]} · </span>
+                {m.titre}
+              </li>
+            ))}
+          </ul>
+        </Link>
+      ) : recette && (
         <Link href={`/espace/recettes/${recette.id}`} className="flex items-center gap-4 overflow-hidden rounded-carte bg-blanc-casse shadow-douce">
           {photo ? (
             // eslint-disable-next-line @next/next/no-img-element

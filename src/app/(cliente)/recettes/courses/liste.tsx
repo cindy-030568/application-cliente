@@ -9,7 +9,19 @@ import { ajouterArticle, cocherArticles, retirerCoches, retirerRecetteDesCourses
 
 type RecetteListe = { lot: string; titre: string; portions: number };
 
-export function ListeCourses({ sections, recettes }: { sections: SectionCourses[]; recettes: RecetteListe[] }) {
+export function ListeCourses({
+  sections,
+  recettes,
+  retour = "/recettes",
+  vide = "Sur une recette, touche « Ajouter à ma liste de courses » : les ingrédients arrivent ici avec tes quantités.",
+  libelleRetour = "Voir les recettes",
+}: {
+  sections: SectionCourses[];
+  recettes: RecetteListe[];
+  retour?: string;
+  vide?: string;
+  libelleRetour?: string;
+}) {
   const [affichees, cocherAffiche] = useOptimistic(sections, (etat, { cle, coche }: { cle: string; coche: boolean }) =>
     etat.map((s) => ({ ...s, articles: s.articles.map((a) => (a.cle === cle ? { ...a, coche } : a)) })),
   );
@@ -47,11 +59,9 @@ export function ListeCourses({ sections, recettes }: { sections: SectionCourses[
       {total === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-bloc border border-dashed border-caramel-clair bg-blanc-casse/60 px-6 py-10 text-center">
           <p className="font-titre text-lg font-bold">Ta liste est vide</p>
-          <p className="max-w-xs text-[14.5px] text-texte-2">
-            Sur une recette, touche « Ajouter à ma liste de courses » : les ingrédients arrivent ici avec tes quantités.
-          </p>
-          <Link href="/recettes" className={cx(classesBouton("contour"), "mt-2")}>
-            Voir les recettes
+          <p className="max-w-xs text-[14.5px] text-texte-2">{vide}</p>
+          <Link href={retour} className={cx(classesBouton("contour"), "mt-2")}>
+            {libelleRetour}
           </Link>
         </div>
       ) : (
