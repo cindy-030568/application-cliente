@@ -32,6 +32,8 @@ export type Defi = {
   fin: string;
   audience: AudienceDefi;
   publie: boolean;
+  /** Aussi visible par les abonnées (sans coaching), depuis la mise à jour 0046. */
+  pour_abonnees?: boolean;
 };
 
 export const dureeJours = (d: Pick<Defi, "debut" | "fin">) => joursEntre(d.debut, d.fin) + 1;
@@ -111,6 +113,7 @@ export function lireFormulaireDefi(f: {
   debut?: string;
   fin?: string;
   audience?: string;
+  pour_abonnees?: string | null;
 }): { valeurs: Omit<Defi, "id" | "publie">; erreur?: undefined } | { valeurs?: undefined; erreur: string } {
   const titre = (f.titre ?? "").trim().slice(0, 100);
   const description = (f.description ?? "").trim().slice(0, 500) || null;
@@ -135,7 +138,7 @@ export function lireFormulaireDefi(f: {
   if (!Number.isInteger(objectif) || objectif < 1) return { erreur: `Choisis le nombre de ${unite(type.code, 2)} à réussir.` };
   if (objectif > max) return { erreur: `Ce défi compte ${max} ${unite(type.code, max)} : l’objectif ne peut pas être plus grand.` };
   const audience: AudienceDefi = f.audience === "communaute" ? "communaute" : "toutes";
-  return { valeurs: { titre, description, type: type.code, seuil, objectif, debut, fin, audience } };
+  return { valeurs: { titre, description, type: type.code, seuil, objectif, debut, fin, audience, pour_abonnees: f.pour_abonnees === "on" } };
 }
 
 export type Progression = { reussites: number | null; objectif: number; reussi: boolean; groupe: number | null; participantes: number };

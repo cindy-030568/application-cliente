@@ -37,20 +37,22 @@ test("abonnée : inscription, paiement Stripe, compte créé, son espace (rien d
   // Connexion : son espace, jamais les pages du coaching.
   await seConnecter(page, "lea@exemple.fr");
   await page.waitForURL(/\/espace$/);
+  await fermerMotDuJour(page);
   await expect(page.getByRole("heading", { name: /Bonjour/ })).toContainText("Léa");
-  await expect(page.getByText(/Abonnement à l’année, prochain renouvellement le/)).toBeVisible();
   await expect(page.getByRole("link", { name: /Passer au coaching/ })).toBeVisible();
   await page.screenshot({ path: "test-results/abonnee-espace.png", fullPage: true });
   for (const chemin of ["/", "/ressources", "/suivi", "/seances-express"]) {
     await page.goto(chemin);
     await expect(page).toHaveURL(/\/espace$/);
   }
+  await page.goto("/espace/profil");
+  await expect(page.getByText(/Abonnement à l’année, prochain renouvellement le/)).toBeVisible();
 
   // Elle arrête son abonnement (espace de gestion Stripe) : accès gardé jusqu'à la fin de la période.
   await page.getByRole("button", { name: "Gérer mon abonnement" }).click();
   await page.waitForURL(/\/stripe\/portail\//);
   await page.getByRole("button", { name: "Annuler l'abonnement" }).click();
-  await page.waitForURL(/\/espace$/);
+  await page.waitForURL(/\/espace\/profil$/);
   await expect(page.getByText(/Abonnement à l’année arrêté : tu gardes ton accès jusqu’au/)).toBeVisible();
 
   // L'abonnement se termine : espace fermé, données gardées 6 mois, reprise possible.

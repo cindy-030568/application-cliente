@@ -3,13 +3,13 @@ import type { ReactNode } from "react";
 import { IconeProfil } from "@/components/icones";
 import { Logo } from "@/components/ui";
 
-export function EnTete({ titre, sousTitre }: { titre: ReactNode; sousTitre?: ReactNode }) {
+export function EnTete({ titre, sousTitre, profil = "/profil" }: { titre: ReactNode; sousTitre?: ReactNode; profil?: string }) {
   return (
     <header className="pt-encoche flex flex-col gap-5 px-5 pb-2">
       <div className="flex items-center justify-between">
         <Logo className="text-lg" />
         <Link
-          href="/profil"
+          href={profil}
           aria-label="Mon profil"
           className="flex size-10 items-center justify-center rounded-full bg-blanc-casse text-chocolat shadow-douce"
         >

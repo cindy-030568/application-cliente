@@ -20,7 +20,7 @@ test("la sauvegarde contient toutes les tables prévues", async ({ page }) => {
   for (const table of ["plans_alimentaires", "programmes_sportifs", "seances_faites", "messages_communaute", "revenus_divers"]) {
     expect(Object.keys(fichier.donnees)).toContain(table);
   }
-  expect(Object.keys(fichier.tables_exclues)).toEqual(["courses", "abonnements_push", "abonnements_coach"]);
+  expect(Object.keys(fichier.tables_exclues)).toEqual(["courses", "metabolisme", "abonnements_push", "abonnements_coach"]);
   expect(Object.keys(fichier.donnees)).not.toContain("courses");
 });
 

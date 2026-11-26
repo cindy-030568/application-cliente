@@ -50,7 +50,8 @@ describe("défis du mois", () => {
 
   it("vérifie le formulaire", () => {
     const base = { titre: "Décembre en mouvement", type: "pas", seuil: "8 000", objectif: "20", debut: "2026-12-01", fin: "2026-12-31" };
-    expect(lireFormulaireDefi(base).valeurs).toMatchObject({ type: "pas", seuil: 8000, objectif: 20, audience: "toutes" });
+    expect(lireFormulaireDefi(base).valeurs).toMatchObject({ type: "pas", seuil: 8000, objectif: 20, audience: "toutes", pour_abonnees: false });
+    expect(lireFormulaireDefi({ ...base, pour_abonnees: "on" }).valeurs?.pour_abonnees).toBe(true);
     expect(lireFormulaireDefi({ ...base, type: "hydratation", seuil: "1,5" }).valeurs?.seuil).toBe(1.5);
     expect(lireFormulaireDefi({ ...base, type: "journal", seuil: "" }).valeurs?.seuil).toBeNull();
     expect(lireFormulaireDefi({ ...base, objectif: "40" }).erreur).toMatch(/31 jours/);

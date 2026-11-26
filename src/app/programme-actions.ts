@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { lireSession } from "@/lib/auth";
+import { lireFormule } from "@/lib/abonnees-serveur";
 import { enregistrerCharges, enregistrerSeance, enregistrerSeanceExpress, notifierSeanceFaite, type ChargeNotee, type InfosSeance } from "@/lib/seances-enregistrement";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -45,6 +46,9 @@ export async function validerSeanceExpress(seanceExpressId: string, infos: Infos
   const r = await enregistrerSeanceExpress(session.supabase, session.profil.id, { seanceExpressId, infos, ref });
   if ("erreur" in r) return { erreur: r.erreur };
   revalidatePath("/seances-express");
+  revalidatePath("/espace/bouger");
+  // Une abonnée (sans coaching) : rien n'est envoyé à la coach, sa séance reste à elle.
+  if ((await lireFormule(session.supabase, session.profil.id)) === "abonnement") return { succes: "Séance express enregistrée. Bravo d’avoir bougé ! 💪" };
   if (r.nouveau) notifierSeanceFaite(session.profil.id, `${r.nom} (séance express)`, infos.commentaire);
   return { succes: "Séance express enregistrée : je la verrai. Bravo d’avoir bougé quand même ! 💪" };
 }

@@ -19,6 +19,7 @@ export async function basculerFavoriRessource(id: string, favori: boolean): Prom
     ? await s.supabase.from("ressources_favoris").upsert({ cliente_id: s.profil.id, ressource_id: id }, { onConflict: "cliente_id,ressource_id", ignoreDuplicates: true })
     : await s.supabase.from("ressources_favoris").delete().eq("cliente_id", s.profil.id).eq("ressource_id", id);
   revalidatePath("/ressources");
+  revalidatePath("/espace/ressources");
   return !error;
 }
 

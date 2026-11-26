@@ -57,7 +57,13 @@ export function FormulaireJournee({
   sansChiffres,
   suivant,
   symptomes,
+  simple = false,
+  base = "/suivi/journal",
 }: {
+  /** Adresse de la page du journal (pour « jour oublié suivant »). */
+  base?: string;
+  /** Journal simple (abonnées) : poids facultatif, eau, sommeil, pas, énergie, stress, digestion. */
+  simple?: boolean;
   jour: string;
   entree: EntreeJournal | null;
   sansChiffres: boolean;
@@ -70,26 +76,41 @@ export function FormulaireJournee({
   return (
     <form action={envoyer} className="flex flex-col gap-5">
       <input type="hidden" name="jour" value={jour} />
-      {!sansChiffres && (
+      {!sansChiffres && !simple && (
         <div className="grid grid-cols-2 gap-3">
           <Saisie label="Poids" name="poids" inputMode="decimal" unite="kg" defaultValue={fr(entree?.poids)} placeholder="ex. 61,4" aide="À jeun, après passage aux toilettes" />
           <Saisie label="Tour de taille" name="tour_taille" inputMode="decimal" unite="cm" defaultValue={fr(entree?.tour_taille)} placeholder="ex. 77" />
         </div>
       )}
+      {simple && (
+        <>
+          <input type="hidden" name="energie_proposee" value="1" />
+          <Notes nom="energie" label="Mon énergie" legende="1 = à plat · 5 = en pleine forme" valeurs={[1, 2, 3, 4, 5]} initiale={entree?.energie ?? null} />
+        </>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <Saisie label="Sommeil" name="sommeil" inputMode="text" defaultValue={heures(entree?.sommeil)} placeholder="ex. 7h30" aide="Nombre d’heures" />
         <Saisie label="Hydratation" name="hydratation" inputMode="decimal" unite="L" defaultValue={fr(entree?.hydratation)} placeholder="ex. 1,8" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Saisie label="Pas (NEAT)" name="pas" inputMode="numeric" defaultValue={entree?.pas ?? ""} placeholder="ex. 8500" />
-        <Notes nom="trainings" label="Trainings" legende="Séances du jour" valeurs={[0, 1, 2]} initiale={entree?.trainings ?? null} />
-      </div>
+      {simple ? (
+        <Saisie label="Pas" name="pas" inputMode="numeric" defaultValue={entree?.pas ?? ""} placeholder="ex. 8500" />
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <Saisie label="Pas (NEAT)" name="pas" inputMode="numeric" defaultValue={entree?.pas ?? ""} placeholder="ex. 8500" />
+          <Notes nom="trainings" label="Trainings" legende="Séances du jour" valeurs={[0, 1, 2]} initiale={entree?.trainings ?? null} />
+        </div>
+      )}
       <Notes nom="stress" label="Stress" legende="1 = pas de stress · 5 = stress +++" valeurs={[1, 2, 3, 4, 5]} initiale={entree?.stress ?? null} />
       <Notes nom="digestion" label="Digestion" legende="1 = mauvaise digestion · 5 = digestion ok" valeurs={[1, 2, 3, 4, 5]} initiale={entree?.digestion ?? null} />
-      <label className="flex cursor-pointer items-center gap-3">
-        <input type="checkbox" name="regles" defaultChecked={entree?.regles ?? false} className="size-5 accent-[var(--accent)]" />
-        <span className="text-[15px]">J’ai mes règles aujourd’hui</span>
-      </label>
+      {!simple && (
+        <label className="flex cursor-pointer items-center gap-3">
+          <input type="checkbox" name="regles" defaultChecked={entree?.regles ?? false} className="size-5 accent-[var(--accent)]" />
+          <span className="text-[15px]">J’ai mes règles aujourd’hui</span>
+        </label>
+      )}
+      {simple && !sansChiffres && (
+        <Saisie label="Poids (facultatif)" name="poids" inputMode="decimal" unite="kg" defaultValue={fr(entree?.poids)} placeholder="ex. 61,4" aide="Seulement si tu en as envie. Tu peux masquer les chiffres dans ton profil." />
+      )}
       {symptomes && (
         <fieldset className="flex flex-col gap-2">
           <input type="hidden" name="symptomes_proposes" value="1" />
@@ -114,7 +135,7 @@ export function FormulaireJournee({
           rows={3}
           maxLength={1000}
           defaultValue={entree?.observations ?? ""}
-          placeholder="Énergie, faim, moral, événement particulier…"
+          placeholder={simple ? "Faim, moral, un petit mot pour toi…" : "Énergie, faim, moral, événement particulier…"}
           className="rounded-xl border border-ligne bg-white px-4 py-3 text-[16px] text-chocolat focus:border-chocolat focus:outline-none focus:ring-2 focus:ring-accent-pale"
         />
       </label>
@@ -122,7 +143,7 @@ export function FormulaireJournee({
       {etat.succes && <Message ton="succes">{etat.succes}</Message>}
       {etat.doux && <Message ton="info">{etat.doux}</Message>}
       {etat.succes && suivant && (
-        <Link href={`/suivi/journal?jour=${suivant.jour}`} className="self-center text-[14.5px] font-medium underline underline-offset-4">
+        <Link href={`${base}?jour=${suivant.jour}`} className="self-center text-[14.5px] font-medium underline underline-offset-4">
           Remplir le jour oublié suivant : {suivant.libelle} →
         </Link>
       )}

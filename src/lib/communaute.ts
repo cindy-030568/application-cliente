@@ -10,6 +10,10 @@ export type Reaction = keyof typeof REACTIONS;
 export const LISTE_REACTIONS = Object.keys(REACTIONS) as Reaction[];
 export const estReaction = (x: unknown): x is Reaction => typeof x === "string" && x in REACTIONS;
 
+/** Deux salons : l'espace commun (abonnées + coachées) et le salon réservé aux coachées. */
+export type Salon = "commun" | "coachees";
+export const estSalon = (x: unknown): x is Salon => x === "commun" || x === "coachees";
+
 export const TEXTE_MAX = 2000;
 export const PAR_PAGE = 30;
 /** Au plus une notification « nouveau message » par heure et par membre. */

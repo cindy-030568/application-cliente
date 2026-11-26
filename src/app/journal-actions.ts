@@ -2,6 +2,7 @@
 
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { lireFormule } from "@/lib/abonnees-serveur";
 import { lireSession } from "@/lib/auth";
 import { aujourdhuiParis } from "@/lib/bilan";
 import { lireHeures, lireNombre } from "@/lib/journal";
@@ -39,7 +40,9 @@ export async function enregistrerJournee(_e: EtatJournal, formData: FormData): P
     }
     ligne[cle] = v === null ? null : cle === "pas" ? Math.round(v) : Math.round(v * 100) / 100;
   }
-  for (const cle of ["trainings", "stress", "digestion"]) {
+  for (const cle of ["trainings", "stress", "digestion", "energie"]) {
+    // L'énergie (0046) n'est proposée que dans le journal simple des abonnées.
+    if (cle === "energie" && !formData.has("energie_proposee")) continue;
     const v = texte(cle);
     const n = v === "" ? null : Number(v);
     const [min, max] = cle === "trainings" ? [0, 5] : [1, 5];
@@ -61,6 +64,12 @@ export async function enregistrerJournee(_e: EtatJournal, formData: FormData): P
   const { error } = await session.supabase.from("journal_quotidien").upsert(ligne, { onConflict: "cliente_id,jour" });
   if (error) return { erreur: "Ta journée n’a pas pu être enregistrée. Réessaie dans un instant." };
   const clienteId = session.profil.id;
+  // Une abonnée (sans coaching) : son journal est à elle, la coach n'est jamais prévenue.
+  if ((await lireFormule(session.supabase, clienteId)) === "abonnement") {
+    revalidatePath("/espace/journal");
+    revalidatePath("/espace");
+    return { succes: "Journée enregistrée ✓" };
+  }
   const note = ligne.observations as string | null;
   const motif = note && note !== avant?.observations ? detecterAlerte(note) : null;
   const nouvelle = !avant;

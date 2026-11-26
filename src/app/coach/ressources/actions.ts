@@ -10,6 +10,7 @@ export type EtatRessource = { erreur?: string; succes?: string };
 function rafraichir() {
   revalidatePath("/coach/ressources");
   revalidatePath("/ressources");
+  revalidatePath("/espace/ressources");
 }
 
 /** Étape 1 du dépôt d'un audio : autorisation d'envoi direct vers le stockage privé « audios ». */
@@ -41,6 +42,7 @@ export async function enregistrerRessource(
   // Fiches écrites dans l'appli et brouillons : seulement après la mise à jour 0037 ; audios après 0043.
   const avecFiches = formData.get("avec_fiches") === "1";
   const avecAudio = formData.get("avec_audio") === "1";
+  const avecAbonnees = formData.get("avec_abonnees") === "1";
   const type = String(formData.get("type") ?? "lien");
   const fiche = avecFiches && type === "fiche";
   const audioSeul = avecAudio && type === "audio";
@@ -84,6 +86,7 @@ export async function enregistrerRessource(
     visibilite,
     categorie_id: UUID.test(categorie) ? categorie : null,
     ...(avecFiches ? { contenu, publiee: formData.get("publiee") === "on" } : {}),
+    ...(avecAbonnees ? { pour_abonnees: formData.get("pour_abonnees") === "on" } : {}),
     ...(avecAudio
       ? {
           audio_path: audioFinal,

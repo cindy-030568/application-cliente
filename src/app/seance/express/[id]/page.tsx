@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { BandeauHorsConnexion, PreparerHorsConnexion } from "@/components/hors-connexion";
 import { LecteurSeance } from "@/components/programme/lecteur-seance";
-import { exigerCliente } from "@/lib/auth";
+import { exigerAbonnee, exigerCliente, lireSession } from "@/lib/auth";
+import { lireFormule } from "@/lib/abonnees-serveur";
 import { cleExercice } from "@/lib/programme-sportif";
 import { videosParExercice } from "@/lib/programme-sportif-serveur";
 import { regrouperCharges } from "@/lib/seance-guidee";
@@ -19,8 +20,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export default async function PageSeanceExpress({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
-  const { supabase, profil, fiche } = await exigerCliente();
-  if (!accesExpress(fiche)) redirect("/seances-express");
+  // Cliente coachée ou abonnée (son espace à elle : retour vers « Bouger », pas de vidéos du coaching).
+  const session = await lireSession();
+  const abonnee = session ? (await lireFormule(session.supabase, session.profil.id)) === "abonnement" : false;
+  const { supabase, profil, fiche } = abonnee ? await exigerAbonnee() : await exigerCliente();
+  const liste = abonnee ? "/espace/bouger" : "/seances-express";
+  if (!accesExpress(fiche)) redirect(liste);
   // La RLS ne renvoie qu'une séance publiée et destinée à cette cliente.
   const s = await lireSeanceExpress(supabase, id);
   if (!s || !s.publiee) notFound();
@@ -30,14 +35,14 @@ export default async function PageSeanceExpress({ params }: { params: Promise<{ 
     <main className="mx-auto w-full max-w-lg px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
       <BandeauHorsConnexion />
       {/* Gardée sur le téléphone : elle marchera ensuite sans réseau. */}
-      <PreparerHorsConnexion proprietaire={profil.id} pages={["/seances-express", `/seance/express/${id}`]} />
+      <PreparerHorsConnexion proprietaire={profil.id} pages={[liste, `/seance/express/${id}`]} />
       <LecteurSeance
         seance={s.contenu}
         cle={`express:${id}`}
-        retour="/seances-express"
+        retour={liste}
         videos={videos}
         // Les vidéos d'exercices sont dans l'onglet Sport (réservé au suivi sportif).
-        lienVideo={sport ? "/sport/videos/" : null}
+        lienVideo={sport && !abonnee ? "/sport/videos/" : null}
         valider={validerSeanceExpress.bind(null, id)}
         historique={regrouperCharges(charges ?? [])}
         noterCharges={noterChargesExpress}

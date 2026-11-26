@@ -570,13 +570,17 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
   };
 
   // 1. Lancement : défis publiés qui commencent (ou ont commencé) et pas encore annoncés.
-  const { data: aAnnoncer, error } = await admin
-    .from("defis")
-    .select("id, titre, audience")
-    .eq("publie", true)
-    .is("annonce_le", null)
-    .lte("debut", aujourdhui)
-    .gte("fin", aujourdhui);
+  const aLancer = (colonnes: string) =>
+    admin
+      .from("defis")
+      .select(colonnes)
+      .eq("publie", true)
+      .is("annonce_le", null)
+      .lte("debut", aujourdhui)
+      .gte("fin", aujourdhui)
+      .returns<{ id: string; titre: string; audience: string; pour_abonnees?: boolean }[]>();
+  let { data: aAnnoncer, error } = await aLancer("id, titre, audience, pour_abonnees");
+  if (error) ({ data: aAnnoncer, error } = await aLancer("id, titre, audience")); // avant la mise à jour 0046
   if (error) return bilan; // mise à jour 0042 pas encore faite
   for (const d of aAnnoncer ?? []) {
     // Réservation avant l'envoi : jamais deux annonces du même défi.
@@ -595,6 +599,15 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
       ids = (data ?? []).map((c) => c.id as string).filter((id) => !abonneesD.has(id));
     }
     for (const id of ids) if (await envoyer(id, { titre: "Défi du mois 🎯", texte: texteAnnonceDefi(d), url: "/defis" })) bilan.annonces++;
+    // Coché « aussi pour les abonnées » : les abonnées actives qui ont gardé les notifications.
+    if (d.pour_abonnees) {
+      const { data: abonnees } = await admin.from("clientes").select("id").eq("formule", "abonnement").eq("statut", "active").eq("defis_notif", true);
+      const dejaPrevenues = new Set(ids);
+      for (const a of abonnees ?? []) {
+        if (dejaPrevenues.has(a.id as string)) continue;
+        if (await envoyer(a.id as string, { titre: "Défi du mois 🎯", texte: texteAnnonceDefi(d), url: "/espace/bouger" })) bilan.annonces++;
+      }
+    }
   }
 
   // 2. Réussites repérées par la base (et pas encore vues dans l'app).
@@ -606,11 +619,12 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
       .eq("defi_id", r.defi_id)
       .eq("cliente_id", r.cliente_id)
       .is("notifie_le", null)
-      .select("defis(titre), clientes(defis_notif, mode_sans_chiffres)")
-      .maybeSingle<{ defis: { titre: string } | null; clientes: { defis_notif: boolean; mode_sans_chiffres: boolean } | null }>();
+      .select("defis(titre), clientes(defis_notif, mode_sans_chiffres, formule)")
+      .maybeSingle<{ defis: { titre: string } | null; clientes: { defis_notif: boolean; mode_sans_chiffres: boolean; formule?: string } | null }>();
     if (!reserve?.clientes?.defis_notif) continue;
     const texte = texteReussiteDefi({ titre: reserve.defis?.titre ?? "" }, reserve.clientes.mode_sans_chiffres);
-    if (await envoyer(r.cliente_id, { titre: "Défi relevé 🏆", texte, url: "/defis" })) bilan.reussites++;
+    const url = reserve.clientes.formule === "abonnement" ? "/espace/bouger" : "/defis";
+    if (await envoyer(r.cliente_id, { titre: "Défi relevé 🏆", texte, url })) bilan.reussites++;
   }
   return bilan;
 }

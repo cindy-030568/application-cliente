@@ -46,6 +46,8 @@ export const TABLES_SAUVEGARDEES = [
 export const EXCLUSIONS: Record<string, string> = {
   // Listes de courses : privées, la coach n'y a pas accès (RLS) et elles n'ont pas de valeur de suivi.
   courses: "listes de courses privées des clientes",
+  // Métabolisme des abonnées : privé, la coach n'y a pas accès (RLS, 0046) ; l'abonnée le refait en un instant.
+  metabolisme: "métabolisme privé des abonnées",
   // Adresses techniques des téléphones et ordinateurs abonnés aux notifications : inutiles hors de l'appareil, et sensibles.
   abonnements_push: "abonnements aux notifications des clientes",
   abonnements_coach: "abonnements aux notifications de la coach",

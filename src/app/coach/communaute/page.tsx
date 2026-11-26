@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OngletsSalons, salonDepuis } from "@/components/communaute/espace-communaute";
 import { FilCommunaute } from "@/components/communaute/fil";
 import { Carte, Message, Surtitre } from "@/components/ui";
 import { exigerCoach } from "@/lib/auth";
@@ -10,8 +11,9 @@ export const metadata: Metadata = { title: "Communauté" };
 type Profil = { prenom: string; nom: string };
 const un = <T,>(x: T | T[] | null | undefined): T | undefined => (Array.isArray(x) ? x[0] : (x ?? undefined));
 
-export default async function PageCommunauteCoach() {
+export default async function PageCommunauteCoach({ searchParams }: { searchParams: Promise<{ salon?: string }> }) {
   const { supabase, profil } = await exigerCoach();
+  const salon = salonDepuis((await searchParams).salon);
   const etat = await lireEtatCommunaute(supabase);
   if (!etat) {
     return (
@@ -24,8 +26,8 @@ export default async function PageCommunauteCoach() {
     );
   }
 
-  const [{ messages, encore }, { data: signalements }, { data: membres }] = await Promise.all([
-    chargerMessages(supabase, profil.id),
+  const [{ messages, encore }, { data: signalements }, { data: membres }, { data: abonnees }] = await Promise.all([
+    chargerMessages(supabase, profil.id, { salon }),
     supabase
       .from("signalements_communaute")
       .select("message_id, motif, created_at, profils(prenom), messages_communaute(texte, auteur_prenom, photo_path, created_at)")
@@ -36,7 +38,11 @@ export default async function PageCommunauteCoach() {
       .from("membres_communaute")
       .select("cliente_id, statut, notifications, charte_acceptee_le, clientes(statut, profils(prenom, nom))")
       .order("charte_acceptee_le", { ascending: false }),
+    // Les abonnées ne sont pas dans « clientes » pour la coach : leur prénom vient de la liste dédiée (0045).
+    supabase.rpc("liste_abonnees"),
   ]);
+  type Abonnee = { id: string; prenom: string; nom: string; statut: string };
+  const parAbonnee = new Map(((abonnees ?? []) as Abonnee[]).map((a) => [a.id, a]));
 
   const groupes = new Map<string, SignalementGroupe>();
   for (const s of signalements ?? []) {
@@ -57,11 +63,13 @@ export default async function PageCommunauteCoach() {
   const liste: MembreCoach[] = (membres ?? []).map((m) => {
     const c = un(m.clientes as unknown as { statut: string; profils: Profil | Profil[] });
     const p = un(c?.profils);
+    const a = parAbonnee.get(m.cliente_id);
     return {
       clienteId: m.cliente_id,
-      nom: `${p?.prenom ?? ""} ${p?.nom ?? ""}`.trim() || "Cliente",
+      nom: `${p?.prenom ?? a?.prenom ?? ""} ${p?.nom ?? a?.nom ?? ""}`.trim() || "Membre",
       statut: m.statut as "membre" | "exclue",
-      accompagnementTermine: c?.statut === "fermee",
+      accompagnementTermine: (c?.statut ?? a?.statut) === "fermee",
+      abonnee: Boolean(a),
       notifications: m.notifications,
       depuis: m.charte_acceptee_le,
     };
@@ -83,11 +91,15 @@ export default async function PageCommunauteCoach() {
 
       <section className="flex flex-col gap-3">
         <h2 className="font-titre text-xl font-bold">Le fil</h2>
+        <OngletsSalons salon={salon} base="/coach/communaute" coach />
         <p className="text-[14px] text-texte-2">
+          {salon === "coachees"
+            ? "Le salon des coachées : seules tes clientes coachées le voient."
+            : "L’espace commun : tes clientes coachées et les abonnées de l’appli le voient."}{" "}
           Tes messages apparaissent avec le badge « Coach ». Tu peux épingler un message (il reste en haut) ou supprimer
           n’importe quel message.
         </p>
-        <FilCommunaute moi={profil.id} coach initial={{ messages, encore, maintenant: new Date().toISOString() }} />
+        <FilCommunaute key={salon} moi={profil.id} coach salon={salon} initial={{ messages, encore, maintenant: new Date().toISOString() }} />
       </section>
 
       <Carte className="flex flex-col gap-4">
@@ -108,7 +120,7 @@ function Entete() {
   return (
     <div>
       <Surtitre>Communauté</Surtitre>
-      <h1 className="font-titre text-[34px] font-bold leading-tight">Le groupe des clientes</h1>
+      <h1 className="font-titre text-[34px] font-bold leading-tight">La communauté</h1>
     </div>
   );
 }

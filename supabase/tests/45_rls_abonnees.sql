@@ -28,14 +28,8 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 select test.verifier((select count(*) from public.clientes) = 1, 'l''abonnée voit sa propre fiche');
 select test.verifier(not public.acces_ouvert(), 'l''abonnée n''a pas l''accès du coaching');
 select test.verifier((select count(*) from public.ressources) = 0, 'l''abonnée ne voit pas les ressources du coaching');
-select test.verifier((select count(*) from public.seances_express) = 0, 'l''abonnée ne voit pas les séances express (pas encore ouvertes)');
-select test.verifier((select count(*) from public.defis) = 0, 'l''abonnée ne voit pas les défis du coaching');
-select test.verifier((select count(*) from public.messages_communaute) = 0, 'l''abonnée ne voit pas la communauté des coachées');
-select test.verifier((select count(*) from public.recettes) = 0, 'l''abonnée ne voit pas encore les recettes');
-do $$ begin
-  insert into public.journal_quotidien (cliente_id, jour, pas) values ('00000000-0000-0000-0000-00000000e450', current_date, 5000);
-  raise exception 'ÉCHEC : journal ouvert à l''abonnée';
-exception when insufficient_privilege then perform test.verifier(true, 'l''abonnée n''a pas encore de journal'); end $$;
+-- (0046) Ce qui lui est ouvert est testé dans 46_rls_espace_abonnees.sql ; ici, ce qui reste au coaching.
+select test.verifier((select count(*) from public.defis) = 0, 'l''abonnée ne voit pas les défis du coaching (non cochés « pour les abonnées »)');
 -- Elle ne peut pas modifier son abonnement ni devenir « coaching ».
 update public.clientes set formule = 'coaching', abonnement_fin_periode = current_date + 3650, statut = 'active';
 reset role;

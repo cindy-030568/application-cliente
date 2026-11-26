@@ -22,6 +22,7 @@ export type MembreCoach = {
   nom: string;
   statut: "membre" | "exclue";
   accompagnementTermine: boolean;
+  abonnee?: boolean;
   notifications: boolean;
   depuis: string;
 };
@@ -120,7 +121,8 @@ export function ListeMembres({ membres }: { membres: MembreCoach[] }) {
               </span>
             </span>
             {m.statut === "exclue" && <Etiquette ton="sombre">Retirée</Etiquette>}
-            {m.accompagnementTermine && <Etiquette ton="sable">Accompagnement terminé</Etiquette>}
+            {m.abonnee && <Etiquette ton="sable">Abonnée</Etiquette>}
+            {m.accompagnementTermine && <Etiquette ton="sable">{m.abonnee ? "Abonnement terminé" : "Accompagnement terminé"}</Etiquette>}
             {m.statut === "membre" ? (
               <button
                 type="button"

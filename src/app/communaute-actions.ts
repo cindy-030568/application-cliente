@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { lireSession } from "@/lib/auth";
-import { estReaction, nettoyerTexte, photoDe, type MessageCommunaute } from "@/lib/communaute";
+import { estReaction, estSalon, nettoyerTexte, photoDe, type MessageCommunaute, type Salon } from "@/lib/communaute";
 import { chargerMessages, lireEtatCommunaute, notifierMembres } from "@/lib/communaute-serveur";
 import { notifierCoach } from "@/lib/notifications-coach";
 
@@ -16,6 +16,8 @@ function rafraichir() {
   revalidatePath("/communaute");
   revalidatePath("/");
   revalidatePath("/coach/communaute");
+  revalidatePath("/espace/communaute");
+  revalidatePath("/espace");
 }
 
 async function session() {
@@ -60,11 +62,13 @@ export async function definirNotificationsCommunaute(actif: boolean): Promise<Et
 export async function chargerFil(
   avant: string | null,
   limite?: number,
+  salon?: Salon,
 ): Promise<{ erreur?: string; messages?: MessageCommunaute[]; encore?: boolean; maintenant?: string }> {
   const s = await session();
   if (!s) return { erreur: SESSION_EXPIREE };
   if (avant !== null && (typeof avant !== "string" || Number.isNaN(Date.parse(avant)))) return { erreur: "Page introuvable." };
-  const r = await chargerMessages(s.supabase, s.profil.id, { avant, limite: Number(limite) || undefined });
+  if (salon !== undefined && !estSalon(salon)) return { erreur: "Salon introuvable." };
+  const r = await chargerMessages(s.supabase, s.profil.id, { avant, limite: Number(limite) || undefined, salon });
   if (!avant && !s.coach) await s.supabase.rpc("reglages_membre", { p_vu: true });
   return { ...r, maintenant: new Date().toISOString() };
 }
@@ -78,14 +82,18 @@ export async function preparerPhotoCommunaute(): Promise<{ erreur?: string; chem
   return { chemin: data.path, jeton: data.token };
 }
 
-export async function publierMessage(texteBrut: string, chemin: string | null): Promise<EtatCommunauteAction> {
+export async function publierMessage(texteBrut: string, chemin: string | null, salonBrut: Salon = "commun"): Promise<EtatCommunauteAction> {
   const s = await session();
   if (!s) return { erreur: SESSION_EXPIREE };
+  if (!estSalon(salonBrut)) return { erreur: "Salon introuvable." };
+  const salon = salonBrut;
   const texte = nettoyerTexte(String(texteBrut ?? ""));
   const photo = chemin ? String(chemin) : null;
   if (photo && !photoDe(photo, s.profil.id)) return { erreur: "Photo introuvable." };
   if (!texte && !photo) return { erreur: "Écris un message ou ajoute une photo." };
-  const { error } = await s.supabase.from("messages_communaute").insert({ texte, photo_path: photo });
+  let { error } = await s.supabase.from("messages_communaute").insert({ texte, photo_path: photo, salon });
+  // Avant la mise à jour 0046 (pas encore de salons) : le fil unique.
+  if (error && (error.code === "PGRST204" || error.code === "42703")) ({ error } = await s.supabase.from("messages_communaute").insert({ texte, photo_path: photo }));
   if (error) {
     if (photo) await s.supabase.storage.from("communaute").remove([photo]);
     return {
@@ -95,7 +103,7 @@ export async function publierMessage(texteBrut: string, chemin: string | null): 
     };
   }
   const auteur = s.profil.id;
-  after(() => notifierMembres(auteur));
+  after(() => notifierMembres(auteur, salon));
   if (!s.coach) after(() => notifierCoach({ type: "message", clienteId: auteur }));
   rafraichir();
   return {};

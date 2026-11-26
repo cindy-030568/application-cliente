@@ -17,7 +17,7 @@ import {
   type EtatRessource,
 } from "./actions";
 
-export type RessourceAvecClientes = Ressource & { clientes: string[]; audio_path?: string | null; audio_duree?: number | null };
+export type RessourceAvecClientes = Ressource & { clientes: string[]; audio_path?: string | null; audio_duree?: number | null; pour_abonnees?: boolean };
 export type ClienteChoix = { id: string; nom: string };
 
 export function GestionRessources({
@@ -26,6 +26,7 @@ export function GestionRessources({
   clientes,
   avecFiches = false,
   avecAudio = false,
+  avecAbonnees = false,
 }: {
   categories: CategorieRessource[];
   ressources: RessourceAvecClientes[];
@@ -34,6 +35,7 @@ export function GestionRessources({
   avecFiches?: boolean;
   /** Audios (après la mise à jour 0043). */
   avecAudio?: boolean;
+  avecAbonnees?: boolean;
 }) {
   const [edition, setEdition] = useState<string | "nouvelle" | null>(ressources.length ? null : "nouvelle");
   const [etat, setEtat] = useState<EtatRessource>({});
@@ -55,6 +57,7 @@ export function GestionRessources({
           clientes={clientes}
           avecFiches={avecFiches}
           avecAudio={avecAudio}
+          avecAbonnees={avecAbonnees}
           onFin={(r) => {
             setEtat(r);
             setEdition(null);
@@ -84,6 +87,7 @@ export function GestionRessources({
                     clientes={clientes}
                     avecFiches={avecFiches}
                     avecAudio={avecAudio}
+                    avecAbonnees={avecAbonnees}
                     initiale={r}
                     onFin={(res) => {
                       setEtat(res);
@@ -118,6 +122,7 @@ export function GestionRessources({
                     {r.description && <p className="text-[14px] text-texte-2">{r.description}</p>}
                     <div className="mt-1 flex flex-wrap gap-2">
                       {r.publiee === false && <Etiquette ton="rose">Brouillon : invisible pour tes clientes</Etiquette>}
+                      {r.pour_abonnees && <Etiquette ton="sable">+ abonnées</Etiquette>}
                       {r.visibilite === "toutes" ? (
                         <Etiquette ton="vert">Toutes les clientes</Etiquette>
                       ) : (
@@ -162,6 +167,7 @@ function FormulaireRessource({
   clientes,
   avecFiches,
   avecAudio,
+  avecAbonnees,
   initiale,
   onFin,
   onAnnuler,
@@ -170,6 +176,7 @@ function FormulaireRessource({
   clientes: ClienteChoix[];
   avecFiches: boolean;
   avecAudio: boolean;
+  avecAbonnees: boolean;
   initiale?: RessourceAvecClientes;
   onFin: (etat: EtatRessource) => void;
   onAnnuler?: () => void;
@@ -201,6 +208,7 @@ function FormulaireRessource({
       {initiale && <input type="hidden" name="id" value={initiale.id} />}
       {avecFiches && <input type="hidden" name="avec_fiches" value="1" />}
       {avecAudio && <input type="hidden" name="avec_audio" value="1" />}
+      {avecAbonnees && <input type="hidden" name="avec_abonnees" value="1" />}
       <Champ label="Titre" name="titre" required maxLength={120} defaultValue={initiale?.titre} />
       {avecFiches && (
         <fieldset className="flex flex-wrap gap-2">
@@ -317,6 +325,14 @@ function FormulaireRessource({
               />
             ))}
           </div>
+        )}
+        {avecAbonnees && (
+          <CaseACocher
+            name="pour_abonnees"
+            label="Aussi pour les abonnées de l’appli"
+            defaultChecked={Boolean(initiale?.pour_abonnees)}
+            aide="Les femmes abonnées (sans coaching) la voient aussi dans leur espace."
+          />
         )}
       </fieldset>
       {avecFiches && (

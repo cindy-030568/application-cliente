@@ -7,6 +7,7 @@ import {
   notificationPermise,
   regrouperReactions,
   type MessageCommunaute,
+  type Salon,
 } from "@/lib/communaute";
 
 export type EtatCommunaute = { ouverte: boolean; charte: string };
@@ -66,17 +67,29 @@ const COLONNES = "id, auteur_id, auteur_prenom, auteur_coach, texte, photo_path,
 export async function chargerMessages(
   supabase: SupabaseClient,
   moi: string,
-  o: { avant?: string | null; limite?: number } = {},
+  o: { avant?: string | null; limite?: number; salon?: Salon } = {},
 ): Promise<{ messages: MessageCommunaute[]; encore: boolean }> {
   const limite = Math.min(Math.max(o.limite ?? PAR_PAGE, 1), 120);
-  let requete = supabase.from("messages_communaute").select(COLONNES).order("created_at", { ascending: false }).limit(limite + 1);
-  if (o.avant) requete = requete.lt("created_at", o.avant);
-  const [{ data: page }, { data: epingles }] = await Promise.all([
-    requete.returns<LigneMessage[]>(),
-    o.avant
-      ? Promise.resolve({ data: [] as LigneMessage[] })
-      : supabase.from("messages_communaute").select(COLONNES).eq("epingle", true).order("created_at", { ascending: false }).limit(10).returns<LigneMessage[]>(),
-  ]);
+  const lire = (salon: Salon | undefined) => {
+    let requete = supabase.from("messages_communaute").select(COLONNES).order("created_at", { ascending: false }).limit(limite + 1);
+    if (o.avant) requete = requete.lt("created_at", o.avant);
+    let epingles = supabase.from("messages_communaute").select(COLONNES).eq("epingle", true).order("created_at", { ascending: false }).limit(10);
+    if (salon) {
+      requete = requete.eq("salon", salon);
+      epingles = epingles.eq("salon", salon);
+    }
+    return Promise.all([
+      requete.returns<LigneMessage[]>(),
+      o.avant ? Promise.resolve({ data: [] as LigneMessage[], error: null }) : epingles.returns<LigneMessage[]>(),
+    ]);
+  };
+  const premier = await lire(o.salon);
+  let [{ data: page }, { data: epingles }] = premier;
+  // Avant la mise à jour 0046 (pas encore de salons) : un seul fil, celui des coachées.
+  if (premier[0].error && o.salon) {
+    if (o.salon === "commun") return { messages: [], encore: false };
+    [{ data: page }, { data: epingles }] = await lire(undefined);
+  }
   const encore = (page?.length ?? 0) > limite;
   const lignes = new Map<string, LigneMessage>();
   for (const l of [...(epingles ?? []), ...(page ?? []).slice(0, limite)]) lignes.set(l.id, l);
@@ -113,7 +126,7 @@ export async function chargerMessages(
  * Le contenu du message n'apparaît jamais dans la notification.
  * Utilise la clé secrète : la liste des membres n'est pas lisible par les clientes.
  */
-export async function notifierMembres(auteurId: string) {
+export async function notifierMembres(auteurId: string, salon: Salon = "commun") {
   if (!configurationRappels().push || !process.env.SUPABASE_SECRET_KEY) return;
   try {
     const admin = createAdminClient();
@@ -121,13 +134,20 @@ export async function notifierMembres(auteurId: string) {
     if (!etat?.ouverte) return;
     const { data: membres } = await admin
       .from("membres_communaute")
-      .select("cliente_id, notifications, derniere_notif, dernier_vu, clientes!inner(statut)")
+      .select("cliente_id, notifications, derniere_notif, dernier_vu, clientes!inner(statut, formule)")
       .eq("statut", "membre")
       .eq("notifications", true)
       .neq("clientes.statut", "fermee")
       .neq("cliente_id", auteurId);
     const maintenant = new Date();
-    const cibles = (membres ?? []).filter((m) => notificationPermise(m, maintenant)).map((m) => m.cliente_id as string);
+    const formuleDe = (m: { clientes: unknown }) => {
+      const c = (Array.isArray(m.clientes) ? m.clientes[0] : m.clientes) as { formule?: string } | null;
+      return c?.formule === "abonnement" ? "abonnement" : "coaching";
+    };
+    // Le salon des coachées ne prévient que les coachées ; l'espace commun prévient tout le monde.
+    const permises = (membres ?? []).filter((m) => notificationPermise(m, maintenant) && (salon === "commun" || formuleDe(m) === "coaching"));
+    const abonnees = new Set(permises.filter((m) => formuleDe(m) === "abonnement").map((m) => m.cliente_id as string));
+    const cibles = permises.map((m) => m.cliente_id as string);
     if (!cibles.length) return;
     const { data: appareils } = await admin
       .from("abonnements_push")
@@ -139,7 +159,7 @@ export async function notifierMembres(auteurId: string) {
       const r = await envoyerPush(a, {
         titre: "Communauté fitw_cindy",
         texte: "Il y a du nouveau dans la communauté 💬",
-        url: "/communaute",
+        url: abonnees.has(a.cliente_id) ? "/espace/communaute" : salon === "commun" ? "/communaute?salon=commun" : "/communaute",
       });
       if (r === "ok") prevenues.add(a.cliente_id);
       else if (r === "expire") await admin.from("abonnements_push").delete().eq("id", a.id);

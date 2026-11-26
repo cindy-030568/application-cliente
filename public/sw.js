@@ -18,6 +18,8 @@ const pageSport = (chemin) =>
   /^\/seance\/\d{1,2}$/.test(chemin) ||
   // Séances express : la liste et chaque séance ouverte une fois avec du réseau.
   chemin === "/seances-express" ||
+  // Espace abonnées : la page « Bouger » (séances express et défis).
+  chemin === "/espace/bouger" ||
   /^\/seance\/express\/[0-9a-f-]{36}$/.test(chemin);
 
 const effacer = () => Promise.all([caches.delete(CACHE_SPORT), caches.delete(CACHE_STATIQUE)]);

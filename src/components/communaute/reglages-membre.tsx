@@ -10,15 +10,16 @@ import {
   rejoindreCommunaute,
 } from "@/app/communaute-actions";
 
-export function Adhesion({ charte, lienPolitique }: { charte: string; lienPolitique: string | null }) {
+export function Adhesion({ charte, lienPolitique, abonnee = false }: { charte: string; lienPolitique: string | null; abonnee?: boolean }) {
   const [etat, action] = useActionState(rejoindreCommunaute, {});
   return (
     <form action={action} className="flex flex-col gap-5 rounded-carte bg-blanc-casse p-5 shadow-douce apparition">
       <div className="flex flex-col gap-2">
         <h2 className="font-titre text-xl font-bold">Rejoindre la communauté</h2>
         <p className="text-[15px] text-texte-2">
-          Un espace pour échanger entre mes clientes : partager tes victoires, tes questions, tes recettes, et
-          t’encourager mutuellement. C’est facultatif, et tu peux partir quand tu veux.
+          {abonnee
+            ? "Un espace pour échanger avec les autres membres de l’appli et mes clientes : partager tes victoires, tes questions, tes recettes, et vous encourager. C’est facultatif, et tu peux partir quand tu veux."
+            : "Un espace pour échanger entre mes clientes : partager tes victoires, tes questions, tes recettes, et t’encourager mutuellement. C’est facultatif, et tu peux partir quand tu veux."}
         </p>
       </div>
       <div className="flex flex-col gap-2 rounded-xl bg-sable/50 p-4">
@@ -27,7 +28,10 @@ export function Adhesion({ charte, lienPolitique }: { charte: string; lienPoliti
       </div>
       <ul className="flex flex-col gap-1.5 text-[14px] text-texte-2">
         <li>• Les autres membres voient ton <strong className="text-chocolat">prénom</strong>, tes messages et tes photos.</li>
-        <li>• Ton suivi (poids, mesures, bilans, plans) reste <strong className="text-chocolat">strictement privé</strong> : rien n’est visible ici.</li>
+        <li>
+          • {abonnee ? "Ton journal et ton métabolisme restent" : "Ton suivi (poids, mesures, bilans, plans) reste"}{" "}
+          <strong className="text-chocolat">strictement privé{abonnee ? "s" : ""}</strong> : rien n’est visible ici.
+        </li>
         <li>• Tu peux supprimer tes messages à tout moment.</li>
       </ul>
       <CaseACocher name="charte" label="J’ai lu la charte et je m’engage à la respecter" required />

@@ -34,9 +34,9 @@ Deux publics dans la même application :
 
 ## Étapes (une à la fois, démo puis feu vert)
 
-1. Accès à vie des coachées (suivi terminé = tout, sans date).
-2. Socle abonnées : statut « abonnée », inscription seule + Stripe (mensuel / annuel), accès selon l'abonnement, gérer / pause / résilier, données gardées 6 mois, liste des abonnées côté coach, bouton « Passer au coaching ».
-3. Espace abonnées : métabolisme, recettes sans macros, ressources « pour les abonnées », journal simple, séances express, défis, communauté commune + salon coachées.
+1. ✅ Accès à vie des coachées (suivi terminé = tout, sans date).
+2. ✅ Socle abonnées : statut « abonnée », inscription seule + Stripe (mensuel / annuel), accès selon l'abonnement, gérer / pause / résilier, données gardées 6 mois, liste des abonnées côté coach, bouton « Passer au coaching ».
+3. ✅ Espace abonnées : métabolisme, recettes sans macros, ressources « pour les abonnées », journal simple, séances express, défis, communauté commune + salon coachées.
 4. Cuisine : menu de la semaine, batch cooking du dimanche, « Avec ce que j'ai ».
 5. Lien avec la coach : thème du mois, visio mensuelle + replays, « Ma question à Cindy ».
 6. Fidélité : « Mon bilan du mois », pause proposée avant de résilier.

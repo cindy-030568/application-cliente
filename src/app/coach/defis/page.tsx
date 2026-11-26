@@ -70,7 +70,7 @@ function CarteDefi({ d, auj, compteur }: { d: Defi; auj: string; compteur?: { pa
         {texteObjectif(d)}, {textePeriode(d)}
       </span>
       <span className="text-[13px] text-texte-2">
-        {d.audience === "toutes" ? "Toutes les clientes en suivi" : "Membres de la communauté"} · {compteur?.participantes ?? 0} participante
+        {d.audience === "toutes" ? "Toutes les clientes en suivi" : "Membres de la communauté"}{d.pour_abonnees ? " + abonnées" : ""} · {compteur?.participantes ?? 0} participante
         {(compteur?.participantes ?? 0) > 1 ? "s" : ""} · {compteur?.reussites ?? 0} réussite{(compteur?.reussites ?? 0) > 1 ? "s" : ""}
       </span>
     </Link>

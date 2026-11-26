@@ -62,8 +62,9 @@ export type FicheAbonnee = {
   abonnement_formule: string | null;
   abonnement_fin_periode: string | null;
   abonnement_resilie: boolean;
+  mode_sans_chiffres: boolean;
 };
-export const COLONNES_ABONNEE = "id, statut, formule, stripe_customer_id, abonnement_statut, abonnement_formule, abonnement_fin_periode, abonnement_resilie";
+export const COLONNES_ABONNEE = "id, statut, formule, stripe_customer_id, abonnement_statut, abonnement_formule, abonnement_fin_periode, abonnement_resilie, mode_sans_chiffres";
 
 /** Applique l'état d'un abonnement Stripe à la fiche de l'abonnée (accès ouvert ou fermé). */
 export async function appliquerEtat(admin: SupabaseClient, clienteId: string, e: EtatAbonnement, ids: { client?: string; abonnement?: string }) {

@@ -1531,7 +1531,7 @@ Ce qui est en place :
 - une **page publique** d'inscription (`/abonnement`) : ton titre, ton texte, ce qu'elles trouvent, tes deux formules (au mois, à l'année), et le lien « Découvrir mon coaching » ;
 - le **paiement par Stripe** (elle ne donne jamais sa carte à l'appli) ;
 - à la fin du paiement, son **compte est créé tout seul** et elle reçoit un email pour se connecter ;
-- son **espace** (`/espace`) : son abonnement, « Gérer mon abonnement » (carte, factures, formule, arrêt, dans l'espace sécurisé de Stripe), « Passer au coaching ». Le contenu (recettes, séances, défis…) arrive à l'étape 3 ;
+- son **espace** (`/espace`) : son abonnement, « Gérer mon abonnement » (carte, factures, formule, arrêt, dans l'espace sécurisé de Stripe, depuis son **profil**), « Passer au coaching ». Le contenu (recettes, séances, défis…) : voir l'étape 3 ;
 - **par défaut, une abonnée ne voit rien de ton coaching**, et tu ne vois pas ses données personnelles : seulement la liste de tes abonnées et leur abonnement (menu **Abonnées**) ;
 - quand elle arrête : accès jusqu'à la fin de la période payée, puis espace fermé ; elle peut **reprendre** son abonnement ; ses données sont **effacées 6 mois** après l'arrêt (automatiquement, avec la tâche du matin) ;
 - les rappels du coaching (bilans, récap, annonces) ne partent jamais aux abonnées.
@@ -1593,3 +1593,54 @@ Le bouton « Passer au coaching » utilise ton lien d'inscription (Réglages →
 ### 6. Plus tard : passer en réel
 
 Quand l'étape 3 sera faite : refais les points 1 à 4 de Stripe **en mode réel** (produit et prix, clé `sk_live_…` ou `rk_live_…`, webhook et son nouveau `whsec_…`, portail client), remplace les deux clés dans Vercel (Redeploy) et les deux identifiants de prix dans **Mon offre**, puis ouvre les inscriptions.
+
+## Étape 3 : l'espace des abonnées
+
+Ce qui est en place pour une abonnée (sur son téléphone, onglets en bas : **Accueil, Recettes, Bouger, Journal, Communauté**) :
+
+- **Accueil** : « Bonjour », le mot du jour, son **journal du jour**, le défi du mois (s'il est pour elle), une **idée recette du jour**, son métabolisme, les raccourcis vers les séances express et les fiches, et « Passer au coaching » ;
+- **Mon métabolisme** (depuis l'accueil ou le profil) : son **métabolisme de base** et ses **besoins du quotidien** selon son activité, expliqués simplement, sans objectif de perte de poids. Ses données restent **privées** : tu ne les vois pas ;
+- **Recettes** : toutes tes recettes publiées, **telles que tu les as écrites (1 portion)**, sans calcul, avec une section « **Ton assiette** » (la méthode de l'assiette : légumes, protéines, féculents, bonnes graisses) ; recherche, filtres et favoris ;
+- **Bouger** : les **défis** que tu as cochés « aussi pour les abonnées », puis toutes tes **séances express** publiées pour toutes (mode guidé compris, sans tes vidéos du coaching) ;
+- **Journal** (privé, tu ne le vois pas) : eau, sommeil, pas, **énergie**, stress, digestion, et le **poids facultatif** en bas (masqué si elle active le **mode sans chiffres** dans son profil) ;
+- **Fiches & audios** : seulement les ressources que tu as cochées « aussi pour les abonnées » ;
+- **Communauté** : il y a maintenant **deux salons** :
+  - l'**espace commun** (« Tout le monde ») : tes clientes coachées **et** les abonnées ;
+  - le **salon des coachées** (« Entre coachées ») : réservé à tes clientes coachées. Tous les anciens messages y sont rangés : rien de ce qui a été écrit avant n'est visible par une abonnée.
+  
+  Une abonnée ne voit que l'espace commun. Tes coachées ont deux onglets en haut de la communauté. Les notifications respectent les salons.
+- **Profil** : son abonnement, « Gérer mon abonnement », son métabolisme, le mode sans chiffres, l'installation de l'appli, « Passer au coaching ».
+
+Côté dashboard :
+
+- **Ressources** : nouvelle case « **Aussi pour les abonnées de l'appli** » ; l'étiquette « + abonnées » s'affiche dans la liste ;
+- **Défis** : la même case dans le formulaire ; « + abonnées » dans la liste. Quand le défi commence, les abonnées qui ont les notifications reçoivent l'annonce ;
+- **Communauté** : deux onglets, « Salon des coachées » et « Espace commun ». Tu publies, épingles et modères dans les deux. Dans la liste des membres, les abonnées ont l'étiquette « Abonnée » ;
+- tu ne vois **jamais** le journal, le métabolisme, les séances ni les favoris d'une abonnée.
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0046_espace_abonnees.sql`](../supabase/migrations/0046_espace_abonnees.sql)
+
+### 2. Choisir ce que tu ouvres aux abonnées
+
+1. Dashboard → **Ressources** : ouvre les fiches ou audios que tu veux leur offrir → coche « Aussi pour les abonnées de l'appli » → **Enregistrer**.
+2. Dashboard → **Défis** : pour le défi du mois, coche la même case → **Enregistrer**.
+3. Les recettes publiées et les séances express publiées « pour toutes » leur sont ouvertes automatiquement.
+
+### 3. Tester
+
+1. Avec l'abonnée de test de l'étape 2 (ou une nouvelle, en **mode test** de Stripe, dans une fenêtre de navigation privée), connecte-toi.
+2. **Accueil** : tu vois « Mon journal du jour », l'idée recette du jour, « Mon métabolisme ».
+3. **Mon métabolisme** : année de naissance, taille, poids, ton quotidien → **Voir mes repères**.
+4. **Recettes** : ouvre une recette → la section « Ton assiette » est en bas.
+5. **Bouger** : le défi coché apparaît → **Je relève le défi 💪** ; les séances express sont en dessous.
+6. **Journal** : remplis ton énergie, ton sommeil, tes pas → **Enregistrer ma journée** → « Journée enregistrée ✓ ». Retour à l'accueil : « Mon journal du jour ✓ ».
+7. **Profil** → active **Mode sans chiffres** → dans le journal, le poids disparaît.
+8. **Communauté** → accepte la charte → écris un message.
+9. Connecte-toi ensuite avec ta **cliente test** coachée → **Communauté** : deux onglets. Le message de l'abonnée est dans « Tout le monde », pas dans « Entre coachées ».
+10. Dashboard → **Communauté** → onglet « Espace commun » : le message y est ; dans **Clientes**, l'abonnée n'apparaît toujours pas.
+
+Quand tout te convient, tu peux ouvrir les inscriptions (en réel : voir « Plus tard : passer en réel » ci-dessus).

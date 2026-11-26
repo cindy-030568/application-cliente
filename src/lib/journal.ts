@@ -15,6 +15,8 @@ export type EntreeJournal = {
   trainings: number | null;
   stress: number | null;
   digestion: number | null;
+  /** Énergie 1 à 5 (journal simple des abonnées, 0046). */
+  energie?: number | null;
   regles: boolean;
   observations: string | null;
 };

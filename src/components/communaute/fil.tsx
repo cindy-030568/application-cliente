@@ -12,6 +12,7 @@ import {
   ordonner,
   type MessageCommunaute,
   type Reaction,
+  type Salon,
 } from "@/lib/communaute";
 import { compresserPhoto } from "@/lib/image";
 import { clientDepot } from "@/lib/supabase/navigateur";
@@ -28,13 +29,14 @@ import { epinglerMessage } from "@/app/coach/communaute/actions";
 type Props = {
   moi: string;
   coach?: boolean;
+  salon?: Salon;
   initial: { messages: MessageCommunaute[]; encore: boolean; maintenant: string };
 };
 
 const RAFRAICHISSEMENT_MS = 30_000;
 
 /** Fil de la communauté : écrire, réagir, supprimer ses messages, signaler (clientes) ou modérer (coach). */
-export function FilCommunaute({ moi, coach = false, initial }: Props) {
+export function FilCommunaute({ moi, coach = false, salon = "commun", initial }: Props) {
   const [messages, setMessages] = useState(initial.messages);
   const [encore, setEncore] = useState(initial.encore);
   const [maintenant, setMaintenant] = useState(initial.maintenant);
@@ -52,7 +54,7 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
   }, [messages.length]);
 
   const recharger = useCallback(async () => {
-    const r = await chargerFil(null, Math.min(Math.max(nbRef.current, 30), 120));
+    const r = await chargerFil(null, Math.min(Math.max(nbRef.current, 30), 120), salon);
     if (r.messages) {
       setMessages((anciens) => {
         // Garde les pages plus anciennes déjà chargées.
@@ -63,7 +65,7 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
       });
       if (r.maintenant) setMaintenant(r.maintenant);
     }
-  }, []);
+  }, [salon]);
 
   // Nouveaux messages : toutes les 30 s quand l'écran est visible, et au retour sur l'app.
   useEffect(() => {
@@ -84,7 +86,7 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
     demarrer(async () => {
       const dernier = messages.filter((m) => !m.epingle).at(-1)?.creeLe ?? messages.at(-1)?.creeLe;
       if (!dernier) return;
-      const r = await chargerFil(dernier);
+      const r = await chargerFil(dernier, undefined, salon);
       if (r.erreur) return setErreur(r.erreur);
       const ids = new Set(messages.map((m) => m.id));
       setMessages([...messages, ...(r.messages ?? []).filter((m) => !ids.has(m.id))]);
@@ -139,7 +141,7 @@ export function FilCommunaute({ moi, coach = false, initial }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Redaction coach={coach} apresEnvoi={recharger} />
+      <Redaction coach={coach} salon={salon} apresEnvoi={recharger} />
       {erreur && (
         <div onClick={() => setErreur(undefined)}>
           <Message ton="erreur">{erreur}</Message>
@@ -310,7 +312,7 @@ function CarteMessage({
   );
 }
 
-function Redaction({ coach, apresEnvoi }: { coach: boolean; apresEnvoi: () => Promise<void> }) {
+function Redaction({ coach, salon, apresEnvoi }: { coach: boolean; salon: Salon; apresEnvoi: () => Promise<void> }) {
   const [texte, setTexte] = useState("");
   const [photo, setPhoto] = useState<{ blob: Blob; apercu: string } | null>(null);
   const [etape, setEtape] = useState<string>();
@@ -352,7 +354,7 @@ function Redaction({ coach, apresEnvoi }: { coach: boolean; apresEnvoi: () => Pr
         chemin = prep.chemin;
       }
       setEtape("Publication…");
-      const r = await publierMessage(texte, chemin);
+      const r = await publierMessage(texte, chemin, salon);
       if (r.erreur) throw new Error(r.erreur);
       setTexte("");
       setPhoto(null);
@@ -382,7 +384,7 @@ function Redaction({ coach, apresEnvoi }: { coach: boolean; apresEnvoi: () => Pr
         onChange={(e) => setTexte(e.target.value.slice(0, TEXTE_MAX))}
         rows={texte ? 4 : 2}
         maxLength={TEXTE_MAX}
-        placeholder={coach ? "Un mot pour tes clientes…" : "Partage une victoire, une question, une recette…"}
+        placeholder={coach ? (salon === "coachees" ? "Un mot pour tes clientes coachées…" : "Un mot pour tout le monde…") : "Partage une victoire, une question, une recette…"}
         className="min-h-16 resize-y rounded-xl border border-ligne bg-white px-4 py-3 text-[16px] text-chocolat focus:border-chocolat focus:outline-none focus:ring-2 focus:ring-accent-pale"
       />
       {photo && (

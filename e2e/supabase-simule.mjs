@@ -144,7 +144,7 @@ const ressources = [
 }
 // Audios (0043) : un audio seul (relaxation) et la fiche « Je mange dehors » reste en brouillon.
 ressources.push({ id: "eeeeeeee-0000-0000-0000-000000000005", titre: "Respirer avant de manger", categorie_id: categories[3].id, description: "3 minutes pour te poser avant le repas, et manger en pleine conscience.", url: null, contenu: null, publiee: true, visibilite: "toutes", created_at: "2026-11-05T09:00:00Z", audio_path: "aaaaaaaa-0000-4000-8000-000000000005.mp3", audio_duree: 20 });
-for (const r of ressources) { r.audio_path ??= null; r.audio_duree ??= null; r.contenu ??= null; r.publiee ??= true; }
+for (const r of ressources) { r.audio_path ??= null; r.audio_duree ??= null; r.contenu ??= null; r.publiee ??= true; r.pour_abonnees ??= r.id.endsWith("05"); }
 const ressourcesFavoris = [];
 const ressourcesEcoutes = [];
 const fichiersAudio = new Map();
@@ -244,6 +244,8 @@ const messages = [
   { id: idMsg(), auteur_id: ALICE, auteur_prenom: "Sophie", auteur_coach: false, texte: "Trop bien ! Je le note pour la semaine prochaine.", photo_path: null, epingle: false, created_at: ilYa(200) },
   { id: idMsg(), auteur_id: "00000000-0000-0000-0000-0000000000b2", auteur_prenom: "Nathalie", auteur_coach: false, texte: "Quelqu'un a une idée de collation salée pour le soir ?", photo_path: null, epingle: false, created_at: ilYa(30) },
 ];
+// 0046 : les messages d'avant vont dans le salon des coachées.
+for (const m of messages) m.salon = "coachees";
 const reactions = [
   { message_id: messages[0].id, auteur_id: ALICE, emoji: "coeur" }, { message_id: messages[0].id, auteur_id: "00000000-0000-0000-0000-0000000000b2", emoji: "coeur" },
   { message_id: messages[1].id, auteur_id: ALICE, emoji: "bravo" }, { message_id: messages[1].id, auteur_id: COACH, emoji: "force" },
@@ -327,7 +329,7 @@ const seancesExpress = [
 // ---- Défis du mois (0042) : un défi pas en cours pour toutes, un brouillon.
 const defis = [
   { id: "d3f10000-0000-4000-8000-000000000001", titre: "Bouger un peu plus chaque jour", description: "Une marche après le déjeuner, les escaliers plutôt que l’ascenseur : on bouge ensemble ce mois-ci !", type: "pas", seuil: 8000, objectif: 15, debut: jour(-10), fin: jour(20), audience: "toutes", publie: true, annonce_le: null },
-  { id: "d3f10000-0000-4000-8000-000000000003", titre: "Mon journal, mon rituel", description: null, type: "journal", seuil: null, objectif: 3, debut: jour(-5), fin: jour(20), audience: "toutes", publie: true, annonce_le: null },
+  { id: "d3f10000-0000-4000-8000-000000000003", titre: "Mon journal, mon rituel", description: null, type: "journal", seuil: null, objectif: 3, debut: jour(-5), fin: jour(20), audience: "toutes", publie: true, annonce_le: null, pour_abonnees: true },
   { id: "d3f10000-0000-4000-8000-000000000002", titre: "Brouillon sommeil", description: null, type: "sommeil", seuil: 7, objectif: 10, debut: jour(0), fin: jour(20), audience: "toutes", publie: false, annonce_le: null },
 ];
 const defisParticipations = [];
@@ -336,16 +338,27 @@ const reussitesDefi = (d, cid) => {
   if (d.type === "seances") return 0;
   return journal.filter((j) => j.cliente_id === cid && j.jour >= d.debut && j.jour <= fin && (d.type === "journal" || (j[d.type] ?? 0) >= d.seuil)).length;
 };
-const defiPourMoi = (d, uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (d.audience === "toutes" ? c.statut === "active" || c.statut === "terminee" : membres.some((m) => m.cliente_id === uid && m.statut === "membre")); };
+// Espace abonnées (0046) : une abonnée active voit ce qui est coché « pour les abonnées » ; le coaching reste aux coachées.
+const estAbonneeActive = (uid) => clientes.some((c) => c.id === uid && c.formule === "abonnement" && c.statut === "active");
+const estCoachee = (uid) => clientes.some((c) => c.id === uid && c.formule !== "abonnement" && c.statut !== "fermee");
+const defiPourMoi = (d, uid) => {
+  const c = clientes.find((x) => x.id === uid);
+  if (!c) return false;
+  if (d.pour_abonnees && estAbonneeActive(uid)) return true;
+  if (c.formule === "abonnement") return false;
+  return d.audience === "toutes" ? c.statut === "active" || c.statut === "terminee" : membres.some((m) => m.cliente_id === uid && m.statut === "membre");
+};
 const celebrerDefi = (d, p) => {
   if (!p.afficher_prenom || !p.reussi_le || p.celebre_le || !reglages.communaute_ouverte) return;
   p.celebre_le = new Date().toISOString();
-  messages.push({ id: idMsg(), auteur_id: COACH, auteur_prenom: "Cindy", auteur_coach: true, texte: `🎉 Bravo ${profils[p.cliente_id]?.prenom ?? clientes.find((c) => c.id === p.cliente_id)?.profils.prenom} : défi « ${d.titre} » relevé ! Je suis tellement fière de toi 💛`, photo_path: null, epingle: false, created_at: new Date().toISOString() });
+  messages.push({ id: idMsg(), salon: estAbonneeActive(p.cliente_id) ? "commun" : "coachees", auteur_id: COACH, auteur_prenom: "Cindy", auteur_coach: true, texte: `🎉 Bravo ${profils[p.cliente_id]?.prenom ?? clientes.find((c) => c.id === p.cliente_id)?.profils.prenom} : défi « ${d.titre} » relevé ! Je suis tellement fière de toi 💛`, photo_path: null, epingle: false, created_at: new Date().toISOString() });
 };
 const seancesExpressClientes = [];
 const seancesExpressFavoris = [];
 // Accès à vie après le suivi (0044).
-const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.statut === "active" || c.statut === "terminee"); };
+const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.formule === "abonnement" ? c.statut === "active" : c.statut === "active" || c.statut === "terminee"); };
+// Métabolisme (0046) : privé, à l'abonnée seulement.
+const metabolismes = [];
 
 // ---- Avis (0039)
 const avisListe = [];
@@ -426,18 +439,20 @@ function routePaiements(req, res, u, uid, coach) {
   return null;
 }
 function routeCommunaute(req, res, u, uid, coach) {
-  const membre = coach || membres.some((m) => m.cliente_id === uid && m.statut === "membre");
+  const membre = coach || membres.some((m) => m.cliente_id === uid && m.statut === "membre" && clientes.some((c) => c.id === uid && c.statut !== "fermee"));
+  const salonOk = (salon) => salon === "commun" || coach || estCoachee(uid);
+  const msgVisibles = membre ? messages.filter((m) => salonOk(m.salon)) : [];
   if (u.pathname === "/rest/v1/membres_communaute") return tableCommu(req, res, u, membres, {
     visibles: coach ? membres : membres.filter((m) => m.cliente_id === uid),
-    enrichir: (m) => { const c = clientes.find((x) => x.id === m.cliente_id); return { ...m, clientes: c ? { statut: c.statut, profils: { prenom: c.profils.prenom, nom: c.profils.nom } } : null }; },
+    enrichir: (m) => { const c = clientes.find((x) => x.id === m.cliente_id && x.formule !== "abonnement"); return { ...m, clientes: c ? { statut: c.statut, profils: { prenom: c.profils.prenom, nom: c.profils.nom } } : null }; },
     creer: () => ({ cliente_id: uid, statut: "membre", notifications: false, dernier_vu: new Date().toISOString(), derniere_notif: null, charte_acceptee_le: new Date().toISOString() }),
   });
   if (u.pathname === "/rest/v1/messages_communaute") return tableCommu(req, res, u, messages, {
-    visibles: membre ? messages : [],
-    creer: (b) => ({ id: idMsg(), auteur_id: uid, auteur_prenom: profils[uid]?.prenom || clientes.find((c) => c.id === uid)?.profils.prenom || "Membre", auteur_coach: coach, texte: b.texte ?? "", photo_path: b.photo_path ?? null, epingle: false, created_at: new Date().toISOString() }),
+    visibles: msgVisibles,
+    creer: (b) => (!membre || !salonOk(b.salon ?? "commun") ? { erreur: "interdit" } : { id: idMsg(), salon: b.salon ?? "commun", auteur_id: uid, auteur_prenom: profils[uid]?.prenom || clientes.find((c) => c.id === uid)?.profils.prenom || "Membre", auteur_coach: coach, texte: b.texte ?? "", photo_path: b.photo_path ?? null, epingle: false, created_at: new Date().toISOString() }),
   });
   if (u.pathname === "/rest/v1/reactions_communaute") return tableCommu(req, res, u, reactions, {
-    visibles: membre ? (req.method === "DELETE" ? reactions.filter((r) => r.auteur_id === uid) : reactions) : [],
+    visibles: membre ? (req.method === "DELETE" ? reactions.filter((r) => r.auteur_id === uid) : reactions.filter((r) => msgVisibles.some((m) => m.id === r.message_id))) : [],
     creer: (b) => reactions.some((r) => r.message_id === b.message_id && r.auteur_id === uid && r.emoji === b.emoji) ? { erreur: "duplicate" } : { message_id: b.message_id, auteur_id: uid, emoji: b.emoji },
   });
   if (u.pathname === "/rest/v1/signalements_communaute") return tableCommu(req, res, u, signalements, {
@@ -460,6 +475,7 @@ async function routeTest(req, res, u) {
   if (u.pathname === "/__test/claude") return json(derniereRequeteClaude);
   if (u.pathname === "/__test/demandes") return json(demandes);
   if (u.pathname === "/__test/seances") return json(seancesFaites);
+  if (u.pathname === "/__test/espace") return json({ metabolismes, messages, defis, journal });
   if (u.pathname === "/__test/abonnees") return json({ abonnees: clientes.filter((c) => c.formule === "abonnement").map((c) => ({ ...c, email: profils[c.id]?.email, prenom: profils[c.id]?.prenom })), abonnements: [...stripe.abonnements.values()] });
   if (u.pathname === "/__test/stripe-webhook") { const b = await corpsJson(req); return json({ statut: await envoyerWebhook(b.type, b.objet) }); }
   if (u.pathname === "/__test/ressources") return json({ ressources, favoris: ressourcesFavoris, ecoutes: ressourcesEcoutes, audios: [...fichiersAudio.keys()] });
@@ -823,6 +839,7 @@ http.createServer((req, res) => {
     if (profils[uid]?.role !== "coach") return send([]);
     return send(clientes.filter((c) => c.formule === "abonnement").map((c) => ({ id: c.id, prenom: profils[c.id]?.prenom ?? "", nom: profils[c.id]?.nom ?? "", email: profils[c.id]?.email ?? "", statut: c.statut, depuis: c.date_debut, ferme_le: c.ferme_le, abonnement_statut: c.abonnement_statut ?? null, abonnement_formule: c.abonnement_formule ?? null, abonnement_fin_periode: c.abonnement_fin_periode ?? null, abonnement_resilie: Boolean(c.abonnement_resilie) })));
   }
+  if (u.pathname === "/rest/v1/rpc/definir_sans_chiffres_abonnee") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid && x.formule === "abonnement"); if (c) c.mode_sans_chiffres = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname === "/rest/v1/rpc/definir_defis_notif") return corpsJson(req).then((b) => { const c = clientes.find((x) => x.id === uid); if (c) c.defis_notif = Boolean(b?.p_actif); res.writeHead(204); res.end(); });
   if (u.pathname.startsWith("/rest/v1/rpc/")) { res.writeHead(204); return res.end(); }
   if (u.pathname === "/auth/v1/user") return send({ id: uid, aud: "authenticated", role: "authenticated", email: profils[uid]?.email, user_metadata: { mot_de_passe_defini: true } });
@@ -874,8 +891,8 @@ http.createServer((req, res) => {
   if (u.pathname === "/rest/v1/ressources") {
     if (!coach && req.method !== "GET") { res.writeHead(403); return res.end(); }
     return tableCommu(req, res, u, ressources, {
-      visibles: coach ? ressources : ressources.filter((r) => r.publiee !== false && (r.visibilite === "toutes" || ressourcesClientes.some((l) => l.ressource_id === r.id && l.cliente_id === uid))),
-      creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, ...b }),
+      visibles: coach ? ressources : ressources.filter((r) => r.publiee !== false && (estAbonneeActive(uid) ? r.pour_abonnees : estCoachee(uid) && (r.visibilite === "toutes" || ressourcesClientes.some((l) => l.ressource_id === r.id && l.cliente_id === uid)))),
+      creer: (b) => ({ id: "eeeeeeee-0000-0000-0000-0000000000" + String(ressources.length + 10), created_at: new Date().toISOString(), contenu: null, publiee: true, url: null, pour_abonnees: false, ...b }),
     });
   }
   if (u.pathname === "/rest/v1/ressources_favoris") return tableCommu(req, res, u, ressourcesFavoris, {
@@ -908,7 +925,7 @@ http.createServer((req, res) => {
     if (!coach && req.method !== "GET" && req.method !== "HEAD") { res.writeHead(403); return res.end(); }
     return tableCommu(req, res, u, defis, {
       visibles: coach ? defis : defis.filter((d) => d.publie && defiPourMoi(d, uid)),
-      creer: (b) => ({ id: "d3f10000-0000-4000-8000-" + String(defis.length + 10).padStart(12, "0"), description: null, audience: "toutes", publie: false, annonce_le: null, ...b }),
+      creer: (b) => ({ id: "d3f10000-0000-4000-8000-" + String(defis.length + 10).padStart(12, "0"), description: null, audience: "toutes", publie: false, annonce_le: null, pour_abonnees: false, ...b }),
     });
   }
   if (u.pathname === "/rest/v1/defis_participations") return tableCommu(req, res, u, defisParticipations, {
@@ -943,8 +960,17 @@ http.createServer((req, res) => {
     visibles: coach ? complementsPris : complementsPris.filter((x) => x.cliente_id === uid),
     creer: (b) => (complementsPris.some((x) => x.complement_id === b.complement_id && x.jour === b.jour) ? { remplace: true } : { pris_le: new Date().toISOString(), ...b, cliente_id: uid }),
   });
+  if (u.pathname === "/rest/v1/metabolisme") return tableCommu(req, res, u, metabolismes, {
+    visibles: metabolismes.filter((x) => x.cliente_id === uid),
+    creer: (b) => {
+      if (!estAbonneeActive(uid) || b.cliente_id !== uid) return { erreur: "interdit" };
+      const ex = metabolismes.find((x) => x.cliente_id === uid);
+      if (ex) { Object.assign(ex, b); return { remplace: true }; }
+      return { ...b };
+    },
+  });
   if (u.pathname === "/rest/v1/journal_quotidien") return tableCommu(req, res, u, journal, {
-    visibles: coach ? journal : journal.filter((j) => j.cliente_id === uid),
+    visibles: coach ? journal.filter((j) => !clientes.some((c) => c.id === j.cliente_id && c.formule === "abonnement")) : journal.filter((j) => j.cliente_id === uid),
     creer: (b) => { const ex = journal.find((x) => x.cliente_id === b.cliente_id && x.jour === b.jour); if (ex) { Object.assign(ex, b); return { remplace: true }; } return { regles: false, ...b }; },
   });
   if (u.pathname === "/rest/v1/revenus_divers") return tableCommu(req, res, u, revenusDivers, {

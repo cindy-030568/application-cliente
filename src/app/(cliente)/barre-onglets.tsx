@@ -12,17 +12,26 @@ import {
 } from "@/components/icones";
 import { cx } from "@/components/ui";
 
-const ONGLETS = [
+type Onglet = { href: string; label: string; Icone: (p: React.SVGProps<SVGSVGElement>) => React.ReactNode };
+const ONGLETS: Onglet[] = [
   { href: "/", label: "Accueil", Icone: IconeAccueil },
   { href: "/nutrition", label: "Nutrition", Icone: IconeNutrition },
   { href: "/recettes", label: "Recettes", Icone: IconeRecettes },
   { href: "/sport", label: "Sport", Icone: IconeSport },
   { href: "/suivi", label: "Suivi", Icone: IconeSuivi },
 ];
-const COMMUNAUTE = { href: "/communaute", label: "Communauté", Icone: IconeCommunaute };
+const COMMUNAUTE: Onglet = { href: "/communaute", label: "Communauté", Icone: IconeCommunaute };
+/** Espace abonnées : ses propres onglets. */
+export const ONGLETS_ESPACE: Onglet[] = [
+  { href: "/espace", label: "Accueil", Icone: IconeAccueil },
+  { href: "/espace/recettes", label: "Recettes", Icone: IconeRecettes },
+  { href: "/espace/bouger", label: "Bouger", Icone: IconeSport },
+  { href: "/espace/journal", label: "Journal", Icone: IconeSuivi },
+];
+const COMMUNAUTE_ESPACE: Onglet = { href: "/espace/communaute", label: "Communauté", Icone: IconeCommunaute };
 /** Sur les petits écrans (iPhone SE), « Communauté » ne tient pas sous l'icône. */
 const libelle = (label: string) =>
-  label === COMMUNAUTE.label ? (
+  label === "Communauté" ? (
     <>
       <span className="min-[360px]:hidden">Groupe</span>
       <span className="hidden min-[360px]:inline">{label}</span>
@@ -32,10 +41,12 @@ const libelle = (label: string) =>
   );
 
 /** Barre du bas. L'onglet Communauté n'apparaît que si elle est ouverte (et la cliente pas retirée). */
-export function BarreOnglets({ communaute, sport = true }: { communaute?: { nonLus: number } | null; sport?: boolean }) {
+export function BarreOnglets({ communaute, sport = true, espace = false }: { communaute?: { nonLus: number } | null; sport?: boolean; espace?: boolean }) {
   const chemin = usePathname();
-  const base = sport ? ONGLETS : ONGLETS.filter((o) => o.href !== "/sport");
-  const onglets = communaute ? [...base, COMMUNAUTE] : base;
+  const racine = espace ? "/espace" : "/";
+  const base = espace ? ONGLETS_ESPACE : sport ? ONGLETS : ONGLETS.filter((o) => o.href !== "/sport");
+  const groupe = espace ? COMMUNAUTE_ESPACE : COMMUNAUTE;
+  const onglets = communaute ? [...base, groupe] : base;
   // L'onglet Communauté, au libellé plus long, est un peu plus large.
   const colonnes = `repeat(${onglets.length - 1}, minmax(0, 1fr)) minmax(0, ${communaute ? 1.35 : 1}fr)`;
   return (
@@ -45,8 +56,8 @@ export function BarreOnglets({ communaute, sport = true }: { communaute?: { nonL
     >
       <ul className={cx("mx-auto grid max-w-lg pt-2", onglets.length > 5 ? "px-1.5" : "px-2")} style={{ gridTemplateColumns: colonnes }}>
         {onglets.map(({ href, label, Icone }) => {
-          const actif = href === "/" ? chemin === "/" : chemin.startsWith(href);
-          const pastille = href === COMMUNAUTE.href && !actif ? (communaute?.nonLus ?? 0) : 0;
+          const actif = href === racine ? chemin === racine : chemin.startsWith(href);
+          const pastille = href === groupe.href && !actif ? (communaute?.nonLus ?? 0) : 0;
           return (
             <li key={href}>
               <Link

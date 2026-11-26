@@ -128,6 +128,12 @@ export function FormulaireDefi({
           ))}
         </div>
         {!communauteOuverte && <span className="text-[12.5px] text-texte-2">La communauté est fermée : un défi « communauté » ne sera vu par personne, et aucun prénom ne sera fêté.</span>}
+        <CaseACocher
+          name="pour_abonnees"
+          label="Aussi pour les abonnées de l’appli"
+          defaultChecked={Boolean(initial?.pour_abonnees)}
+          aide="Les femmes abonnées (sans coaching) le voient aussi dans « Bouger », et peuvent le relever."
+        />
       </fieldset>
       {datesOk && debut > aujourdhui && (
         <Message ton="info">

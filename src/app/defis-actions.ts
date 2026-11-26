@@ -14,6 +14,8 @@ async function session() {
 function rafraichir() {
   revalidatePath("/defis");
   revalidatePath("/");
+  revalidatePath("/espace/bouger");
+  revalidatePath("/espace");
 }
 
 /** « Je relève le défi » (avec ou sans prénom affiché en cas de réussite). */

@@ -14,6 +14,8 @@ function rafraichir(id?: string | null) {
   if (id) revalidatePath(`/coach/defis/${id}`);
   revalidatePath("/defis");
   revalidatePath("/");
+  revalidatePath("/espace/bouger");
+  revalidatePath("/espace");
 }
 
 /** Crée ou modifie un défi. */
@@ -31,17 +33,24 @@ export async function enregistrerDefi(id: string | null, _e: EtatDefi, formData:
     debut: champ("debut"),
     fin: champ("fin"),
     audience: champ("audience"),
+    pour_abonnees: formData.get("pour_abonnees") as string | null,
   });
   if (!r.valeurs) return { erreur: r.erreur };
   const valeurs = { ...r.valeurs, ...(id ? {} : { publie: formData.get("publie") === "on" }) };
   const { supabase } = session;
+  // Avant la mise à jour 0046, la colonne « pour_abonnees » n'existe pas encore.
+  const sansAbonnees = (e: { code?: string } | null) => e?.code === "PGRST204" || e?.code === "42703";
+  const valeurs0042 = { ...valeurs };
+  delete valeurs0042.pour_abonnees;
   if (id) {
-    const { error } = await supabase.from("defis").update(valeurs).eq("id", id);
+    let { error } = await supabase.from("defis").update(valeurs).eq("id", id);
+    if (sansAbonnees(error)) ({ error } = await supabase.from("defis").update(valeurs0042).eq("id", id));
     if (error) return { erreur: erreurBase(error.code) };
     rafraichir(id);
     return { succes: "Défi enregistré ✓", id };
   }
-  const { data, error } = await supabase.from("defis").insert(valeurs).select("id").single();
+  let { data, error } = await supabase.from("defis").insert(valeurs).select("id").single();
+  if (sansAbonnees(error)) ({ data, error } = await supabase.from("defis").insert(valeurs0042).select("id").single());
   if (error || !data) return { erreur: erreurBase(error?.code) };
   rafraichir(data.id as string);
   return { succes: "Défi créé ✓", id: data.id as string };

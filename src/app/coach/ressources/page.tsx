@@ -32,12 +32,19 @@ export default async function PageRessourcesCoach() {
     .select("id, audio_path, audio_duree")
     .returns<{ id: string; audio_path: string | null; audio_duree: number | null }[]>();
   const audio = new Map((audios ?? []).map((a) => [a.id, a]));
+  // « Aussi pour les abonnées » (0046) : lu à part, rien avant la mise à jour.
+  const { data: abonnees, error: sansAbonnees } = await supabase
+    .from("ressources")
+    .select("id, pour_abonnees")
+    .returns<{ id: string; pour_abonnees: boolean }[]>();
+  const pourAbonnees = new Set((abonnees ?? []).filter((a) => a.pour_abonnees).map((a) => a.id));
   const avecClientes = (ressources ?? []).map((r) => ({
     ...r,
     contenu: fiche.get(r.id)?.contenu ?? null,
     publiee: fiche.get(r.id)?.publiee ?? true,
     audio_path: audio.get(r.id)?.audio_path ?? null,
     audio_duree: audio.get(r.id)?.audio_duree ?? null,
+    pour_abonnees: pourAbonnees.has(r.id),
     clientes: (liens ?? []).filter((l) => l.ressource_id === r.id).map((l) => l.cliente_id as string),
   }));
   const choix = (clientes ?? [])
@@ -55,7 +62,7 @@ export default async function PageRessourcesCoach() {
         </p>
       </div>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} avecFiches={!sansFiches} avecAudio={!sansAudio} />
+        <GestionRessources categories={categories ?? []} ressources={avecClientes} clientes={choix} avecFiches={!sansFiches} avecAudio={!sansAudio} avecAbonnees={!sansAbonnees} />
         <Carte className="flex h-fit flex-col gap-4">
           <h2 className="font-titre text-lg font-bold">Catégories</h2>
           <GestionCategories categories={categories ?? []} />
