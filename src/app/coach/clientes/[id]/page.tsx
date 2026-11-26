@@ -20,7 +20,6 @@ import { BlocPaiement } from "./bloc-paiement";
 import { BlocComplements } from "./bloc-complements";
 import { BoutonTraiterSuite } from "../../reglages/fin";
 import { CaseRecompense } from "../../avis/boutons";
-import { FormulaireAccesExpress } from "../../seances-express/reglages";
 import { bilanFinVisible } from "@/lib/bilan-fin";
 import type { Complement } from "@/lib/complements";
 import { formulesUtilisees, lirePaiement } from "@/lib/paiements-serveur";
@@ -124,7 +123,7 @@ export default async function PageFicheCliente({
     supabase.from("avis").select("id", { count: "exact", head: true }).eq("cliente_id", id),
   ]);
   // Séances express (0040) : accès après le suivi, et séances libres faites. Lus à part.
-  const [{ data: express, error: sansExpress }, { count: nbExpress }] = await Promise.all([
+  const [{ error: sansExpress }, { count: nbExpress }] = await Promise.all([
     supabase.from("clientes").select("express_jusqu_au").eq("id", id).maybeSingle<{ express_jusqu_au: string | null }>(),
     supabase.from("seances_faites").select("id", { count: "exact", head: true }).eq("cliente_id", id).not("seance_express_id", "is", null),
   ]);
@@ -533,19 +532,14 @@ export default async function PageFicheCliente({
             titre="Séances express"
             resume={[
               nbExpress ? `${nbExpress} séance${nbExpress > 1 ? "s" : ""} express faite${nbExpress > 1 ? "s" : ""}` : "Aucune séance express faite",
-              c.statut === "terminee"
-                ? express?.express_jusqu_au && express.express_jusqu_au >= aujourdhuiParis()
-                  ? `accès jusqu’au ${formaterDate(express.express_jusqu_au)}`
-                  : "pas d’accès (suivi terminé)"
-                : null,
+              c.statut === "terminee" ? "accès à vie" : null,
             ]
               .filter(Boolean)
               .join(" · ")}
           >
             <p className="text-[13.5px] text-texte-2">
-              En cours de suivi, elle a accès à toutes les séances express publiées pour elle. Quand son suivi est terminé, elle les garde seulement jusqu’à la date ci-dessous (par exemple avec un petit abonnement). Laisse vide pour couper l’accès.
+              Elle a accès à toutes les séances express publiées pour elle, pendant son suivi et à vie ensuite. Seul un accès fermé les coupe.
             </p>
-            <FormulaireAccesExpress clienteId={c.id} jusquAu={express?.express_jusqu_au ?? null} />
           </Repliable>
         )}
         {!sansFin && (

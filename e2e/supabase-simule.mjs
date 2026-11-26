@@ -336,7 +336,7 @@ const reussitesDefi = (d, cid) => {
   if (d.type === "seances") return 0;
   return journal.filter((j) => j.cliente_id === cid && j.jour >= d.debut && j.jour <= fin && (d.type === "journal" || (j[d.type] ?? 0) >= d.seuil)).length;
 };
-const defiPourMoi = (d, uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (d.audience === "toutes" ? c.statut === "active" : membres.some((m) => m.cliente_id === uid && m.statut === "membre")); };
+const defiPourMoi = (d, uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (d.audience === "toutes" ? c.statut === "active" || c.statut === "terminee" : membres.some((m) => m.cliente_id === uid && m.statut === "membre")); };
 const celebrerDefi = (d, p) => {
   if (!p.afficher_prenom || !p.reussi_le || p.celebre_le || !reglages.communaute_ouverte) return;
   p.celebre_le = new Date().toISOString();
@@ -344,7 +344,8 @@ const celebrerDefi = (d, p) => {
 };
 const seancesExpressClientes = [];
 const seancesExpressFavoris = [];
-const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.statut === "active" || (c.statut === "terminee" && c.express_jusqu_au && c.express_jusqu_au >= new Date().toISOString().slice(0, 10))); };
+// Accès à vie après le suivi (0044).
+const accesExpress = (uid) => { const c = clientes.find((x) => x.id === uid); return Boolean(c) && (c.statut === "active" || c.statut === "terminee"); };
 
 // ---- Avis (0039)
 const avisListe = [];

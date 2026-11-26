@@ -42,7 +42,7 @@ test("séances express : la coach colle une séance de Claude, la règle, la tes
   await expect(page.getByText("Aperçu : ta cliente voit exactement cet écran")).toBeVisible();
 });
 
-test("séances express : listes de matériel dans Réglages, et accès après le suivi sur la fiche", async ({ page }) => {
+test("séances express : listes de matériel dans Réglages, et accès à vie après le suivi sur la fiche", async ({ page }) => {
   await seConnecter(page, "coach@exemple.fr");
   await page.goto("/coach/reglages#seances-express");
   const carte = page.locator("#seances-express");
@@ -50,10 +50,10 @@ test("séances express : listes de matériel dans Réglages, et accès après le
   await carte.getByLabel("Matériel (un par ligne)").fill("Aucun\nTapis\nÉlastique\nBouteilles d’eau");
   await carte.getByRole("button", { name: "Enregistrer les listes" }).click();
   await expect(carte.getByText("Listes enregistrées ✓")).toBeVisible();
-  // Isabelle a terminé son suivi : accès jusqu'à une date.
+  // Isabelle a terminé son suivi : accès à vie, sans date à remplir.
   await page.goto("/coach/clientes/00000000-0000-0000-0000-0000000000b4");
+  await expect(page.getByRole("main").getByText(/accès à vie/)).toBeVisible();
   await page.getByRole("main").getByText("Séances express", { exact: true }).click();
-  await page.getByLabel(/Accès après la fin de son suivi/).fill("2099-12-31");
-  await page.getByLabel(/Accès après la fin de son suivi/).locator("xpath=ancestor::form").getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByText("Accès enregistré ✓")).toBeVisible();
+  await expect(page.getByText(/pendant son suivi et à vie ensuite/)).toBeVisible();
+  await expect(page.getByLabel(/Accès après la fin de son suivi/)).toHaveCount(0);
 });

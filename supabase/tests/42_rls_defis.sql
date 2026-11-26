@@ -129,7 +129,7 @@ reset role;
 -- D (suivi terminé, membre de la communauté) : voit seulement le défi communauté ; séances comptées par semaine.
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000d420"}', false);
-select test.verifier((select array_agg(titre) from public.defis) = array['Défi communauté'], 'membre de la communauté : le défi communauté seulement');
+select test.verifier((select array_agg(titre order by titre) from public.defis) = array['Défi communauté', 'Défi pas'], 'suivi terminé (accès à vie) et membre de la communauté : les défis pour toutes et celui de la communauté');
 reset role;
 insert into public.defis (id, titre, type, seuil, objectif, debut, fin, audience, publie) values
   ('42000000-0000-4000-8000-000000000004', 'Défi séances', 'seances', 2, 1, current_date - 6, current_date + 7, 'toutes', true);

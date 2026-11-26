@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import { BandeauHorsConnexion, PreparerHorsConnexion } from "@/components/hors-connexion";
 import { LecteurSeance } from "@/components/programme/lecteur-seance";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis } from "@/lib/bilan";
 import { cleExercice } from "@/lib/programme-sportif";
 import { videosParExercice } from "@/lib/programme-sportif-serveur";
 import { regrouperCharges } from "@/lib/seance-guidee";
@@ -21,8 +20,7 @@ export default async function PageSeanceExpress({ params }: { params: Promise<{ 
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const { supabase, profil, fiche } = await exigerCliente();
-  const express = await supabase.from("clientes").select("express_jusqu_au").eq("id", profil.id).maybeSingle<{ express_jusqu_au: string | null }>();
-  if (!accesExpress({ statut: fiche.statut, express_jusqu_au: express.data?.express_jusqu_au ?? null }, aujourdhuiParis())) redirect("/seances-express");
+  if (!accesExpress(fiche)) redirect("/seances-express");
   // La RLS ne renvoie qu'une séance publiée et destinée à cette cliente.
   const s = await lireSeanceExpress(supabase, id);
   if (!s || !s.publiee) notFound();

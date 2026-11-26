@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cx } from "@/components/ui";
 import { exigerCliente } from "@/lib/auth";
-import { aujourdhuiParis } from "@/lib/bilan";
 import { DUREES_EXPRESS, accesExpress, filtrerExpress, libelleNiveau, lireFiltres } from "@/lib/seances-express";
 import { lireSeancesExpress } from "@/lib/seances-express-serveur";
 import { BientotDisponible, EnTete } from "../composants";
@@ -16,8 +15,7 @@ type Params = { duree?: string; materiel?: string; type?: string; favoris?: stri
 export default async function PageSeancesExpressCliente({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, profil, fiche } = await exigerCliente();
   const params = await searchParams;
-  const { data: acces } = await supabase.from("clientes").select("express_jusqu_au").eq("id", profil.id).maybeSingle<{ express_jusqu_au: string | null }>();
-  const ouvert = accesExpress({ statut: fiche.statut, express_jusqu_au: acces?.express_jusqu_au ?? null }, aujourdhuiParis());
+  const ouvert = accesExpress(fiche);
   const [seances, { data: favorisLus }] = ouvert
     ? await Promise.all([lireSeancesExpress(supabase, { publiees: true }), supabase.from("seances_express_favoris").select("seance_id").eq("cliente_id", profil.id)])
     : [null, { data: [] }];
@@ -43,11 +41,7 @@ export default async function PageSeancesExpressCliente({ searchParams }: { sear
         <BientotDisponible
           icone={<IconeSport className="size-6" />}
           titre="Pas disponible pour le moment"
-          texte={
-            fiche.statut === "terminee"
-              ? "Ton accès aux séances express est terminé. Écris-moi si tu veux continuer à en profiter 💛"
-              : "Les séances express ne sont pas disponibles sur ton compte."
-          }
+          texte="Les séances express ne sont pas disponibles sur ton compte. Écris-moi si tu penses que c’est une erreur 💛"
         />
       ) : seances === null || seances.length === 0 ? (
         <BientotDisponible icone={<IconeSport className="size-6" />} titre="Bientôt ici" texte="Je prépare tes premières séances express : reviens très vite !" />

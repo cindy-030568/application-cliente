@@ -64,10 +64,12 @@ export function extraireSeance(colle: string): { seance: Seance; erreur?: undefi
   return { seance: r.programme.seances[0] };
 }
 
-/** La cliente a-t-elle accès aux séances express ? (même règle que la base : acces_seances_express) */
-export function accesExpress(f: { statut: string; express_jusqu_au?: string | null }, aujourdhui: string): boolean {
-  if (f.statut === "active") return true;
-  return f.statut === "terminee" && Boolean(f.express_jusqu_au) && f.express_jusqu_au! >= aujourdhui;
+/**
+ * La cliente a-t-elle accès aux séances express ? (même règle que la base : acces_seances_express, 0044)
+ * En cours de suivi, et à vie après son suivi ; seul un accès fermé coupe.
+ */
+export function accesExpress(f: { statut: string }): boolean {
+  return f.statut === "active" || f.statut === "terminee";
 }
 
 export type FiltresExpress = { duree: number | null; materiel: string | null; type: string | null; favoris: boolean };

@@ -105,15 +105,3 @@ export async function enregistrerListesExpress(_e: EtatExpress, formData: FormDa
   return { succes: "Listes enregistrées ✓" };
 }
 
-/** Fiche cliente : accès aux séances express après le suivi (jusqu'à une date ; vide = pas d'accès). */
-export async function definirAccesExpress(clienteId: string, _e: EtatExpress, formData: FormData): Promise<EtatExpress> {
-  const session = await sessionCoach();
-  if (!session) return { erreur: SESSION_PERDUE };
-  if (!UUID.test(clienteId)) return { erreur: "Cliente introuvable." };
-  const brut = String(formData.get("express_jusqu_au") ?? "");
-  if (brut && !/^\d{4}-\d{2}-\d{2}$/.test(brut)) return { erreur: "La date n’est pas valide." };
-  const { error } = await session.supabase.from("clientes").update({ express_jusqu_au: brut || null }).eq("id", clienteId);
-  if (error) return { erreur: erreurBase(error.code) };
-  revalidatePath(`/coach/clientes/${clienteId}`);
-  return { succes: brut ? "Accès enregistré ✓" : "Accès retiré." };
-}

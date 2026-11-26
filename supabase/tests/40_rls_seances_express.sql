@@ -61,23 +61,18 @@ delete from public.seances_express_favoris;
 reset role;
 select test.verifier((select count(*) from public.seances_express_favoris) = 1, 'B ne peut pas effacer les favoris de A');
 
--- D (suivi terminé) : rien sans date d'accès, tout avec une date à venir, plus rien une fois la date passée.
+-- D (suivi terminé) : accès à vie, sans date (0044), même si une ancienne date est passée.
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000d400"}', false);
-select test.verifier((select count(*) from public.seances_express) = 0, 'suivi terminé sans abonnement : aucune séance express');
+select test.verifier((select count(*) from public.seances_express) = 1, 'suivi terminé : accès à vie aux séances express, sans date');
 reset role;
-update public.clientes set express_jusqu_au = current_date + 30 where id = '00000000-0000-0000-0000-00000000d400';
-set role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000d400"}', false);
-select test.verifier((select count(*) from public.seances_express) = 1, 'suivi terminé avec accès jusqu''à une date : elle les voit');
-update public.clientes set express_jusqu_au = current_date + 365 where id = '00000000-0000-0000-0000-00000000d400';
-reset role;
-select test.verifier((select express_jusqu_au from public.clientes where id = '00000000-0000-0000-0000-00000000d400') = current_date + 30, 'une cliente ne peut pas prolonger son accès elle-même');
 update public.clientes set express_jusqu_au = current_date - 1 where id = '00000000-0000-0000-0000-00000000d400';
 set role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000d400"}', false);
-select test.verifier((select count(*) from public.seances_express) = 0, 'date d''accès passée : plus rien');
+select test.verifier((select count(*) from public.seances_express) = 1, 'une ancienne date d''accès passée ne coupe rien');
+update public.clientes set statut = 'active' where id = '00000000-0000-0000-0000-00000000d400';
 reset role;
+select test.verifier((select statut from public.clientes where id = '00000000-0000-0000-0000-00000000d400') = 'terminee', 'une cliente ne peut pas changer son statut elle-même');
 
 -- Accès fermé : plus rien.
 update public.clientes set statut = 'fermee' where id = '00000000-0000-0000-0000-00000000a400';

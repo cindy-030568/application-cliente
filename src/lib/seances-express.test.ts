@@ -19,12 +19,11 @@ describe("séances express", () => {
     expect(extraireSeance(JSON.stringify({ nom: "Vide", blocs: [] })).erreur).toMatch(/aucun bloc/);
   });
 
-  it("accès : en cours de suivi, ou suivi terminé jusqu'à la date choisie", () => {
-    expect(accesExpress({ statut: "active" }, "2026-11-24")).toBe(true);
-    expect(accesExpress({ statut: "terminee", express_jusqu_au: null }, "2026-11-24")).toBe(false);
-    expect(accesExpress({ statut: "terminee", express_jusqu_au: "2026-11-24" }, "2026-11-24")).toBe(true);
-    expect(accesExpress({ statut: "terminee", express_jusqu_au: "2026-11-23" }, "2026-11-24")).toBe(false);
-    expect(accesExpress({ statut: "fermee", express_jusqu_au: "2027-01-01" }, "2026-11-24")).toBe(false);
+  it("accès : en cours de suivi, et à vie après le suivi", () => {
+    expect(accesExpress({ statut: "active" })).toBe(true);
+    // Accès à vie après le suivi (0044).
+    expect(accesExpress({ statut: "terminee" })).toBe(true);
+    expect(accesExpress({ statut: "fermee" })).toBe(false);
   });
 
   it("filtres : durée, type, matériel, favoris", () => {

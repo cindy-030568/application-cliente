@@ -1368,7 +1368,7 @@ La **liste du matériel** et la **liste des types** se modifient dans **Réglage
 
 ### 3. Pour tes clientes
 
-- **Qui y a accès** : toutes tes clientes en cours de suivi, même sans suivi sportif. Pour une cliente au **suivi terminé** : seulement jusqu'à la date que tu choisis sur sa fiche (rubrique **Séances express** → « Accès après la fin de son suivi, jusqu'au »). Laisse vide pour couper l'accès. Plus tard, l'abonnement Stripe remplira cette date tout seul après chaque paiement.
+- **Qui y a accès** : toutes tes clientes en cours de suivi, même sans suivi sportif, et **à vie** après leur suivi (voir « Accès à vie des clientes coachées » plus bas). Seul un accès fermé les coupe.
 - Elles les trouvent :
   - avec le lien « **Pas le temps aujourd'hui ?** » sur leur accueil et dans l'onglet Sport ;
   - ou directement à l'adresse /seances-express.
@@ -1502,3 +1502,20 @@ Clique sur le titre de la ressource pour l'**écouter en aperçu** et voir combi
    - reviens en arrière et rouvre-le : « Tu reprends où tu t'étais arrêtée ».
 3. **Sur ton iPhone** (app installée) : lance un audio, **verrouille l'écran** : le son continue, et les commandes (pause, ±15 s) sont sur l'écran verrouillé.
 4. Côté coach : la fiche de ta cliente test → **Audios écoutés**.
+
+## Accès à vie des clientes coachées
+
+Tes clientes coachées (nutrition, ou nutrition + sport) gardent **tout** après leur suivi, à vie : ressources, audios, communauté, séances express et défis du mois « pour toutes ». Il n'y a plus de date d'accès à remplir sur leur fiche. Seul un accès fermé coupe l'application.
+
+### 1. Mettre à jour la base de données (une seule fois)
+
+Lien → **Copy raw file** → Supabase → **SQL Editor** → **New query** → efface tout → colle → **Run** → « Success » :
+
+1. [`0044_acces_a_vie_coachees.sql`](../supabase/migrations/0044_acces_a_vie_coachees.sql)
+
+### 2. Tester
+
+1. Avec une cliente test au statut « Suivi terminé » : elle voit les séances express et peut relever un défi « Toutes mes clientes ».
+2. Sur sa fiche (dashboard), la rubrique **Séances express** indique « accès à vie ».
+
+La future offre par abonnement (pour des femmes qui ne suivent pas ton coaching) est décrite dans [`ESPACE-ABONNEES.md`](./ESPACE-ABONNEES.md).

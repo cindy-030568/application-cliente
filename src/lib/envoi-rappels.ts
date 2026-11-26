@@ -560,7 +560,8 @@ export async function executerDefis(admin: SupabaseClient, maintenant = new Date
       const { data } = await admin.from("membres_communaute").select("cliente_id, clientes!inner(statut, defis_notif)").eq("statut", "membre").neq("clientes.statut", "fermee").eq("clientes.defis_notif", true);
       ids = (data ?? []).map((m) => m.cliente_id as string);
     } else {
-      const { data } = await admin.from("clientes").select("id").eq("statut", "active").eq("defis_notif", true);
+      // Clientes en suivi, et clientes coachées après leur suivi (accès à vie).
+      const { data } = await admin.from("clientes").select("id").in("statut", ["active", "terminee"]).eq("defis_notif", true);
       ids = (data ?? []).map((c) => c.id as string);
     }
     for (const id of ids) if (await envoyer(id, { titre: "Défi du mois 🎯", texte: texteAnnonceDefi(d), url: "/defis" })) bilan.annonces++;
